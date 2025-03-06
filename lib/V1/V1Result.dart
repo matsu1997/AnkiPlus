@@ -9,6 +9,8 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../AdManager.dart';
+
 class V1Result extends StatefulWidget {
   @override
   V1Result(this.item1,this.item2,this.item3,this.item4,this.name,this.name2,this.itemAll);
@@ -25,19 +27,19 @@ class _V1ResultState extends State<V1Result> {
   var Ei = [];var Ka = [];var Ko = [];var Se = [];var Ni = [];var Ti = [];var SeI = [];var Bu = [];var KaG = [];var All = [];
   var ite1 = false;var ite2 = false;var ite3 = false;var ite4 = false;
 
-
   void initState() {
-    super.initState();AllItem = widget.itemAll;review(); FlutterAppBadger.removeBadge();notify1();notify2();notify3();notify4();
+    super.initState();
+    AllItem = widget.itemAll;review(); FlutterAppBadger.removeBadge();
     setState(() { if(widget.item1.length != 0){te = "☆☆☆";ite1 = true;} if(widget.item2.length  != 0){te1 = "★☆☆";ite2 = true;} if(widget.item3.length  != 0){te2 = "★★☆";ite3 = true;} if(widget.item4.length  != 0){te3 = "★★★";ite4 = true;}});
     set();judge();//Future.delayed(Duration(seconds: 2)).then((_) {add();});
-      }
+     }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(onWillPop: () async => false,
     child: Scaffold(backgroundColor: Colors.white,
       appBar: AppBar(backgroundColor: Colors.white,
-        title: FittedBox(fit: BoxFit.fitWidth, child: Text("", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,), textAlign: TextAlign.center,),),
+       // title: FittedBox(fit: BoxFit.fitWidth, child: Text("", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,), textAlign: TextAlign.center,),),
         iconTheme: IconThemeData(color: Colors.black), centerTitle: true,elevation: 0,
         automaticallyImplyLeading: false,
         actions: [IconButton(icon: const Icon(Icons.highlight_off,color: Colors.blueGrey,size: 30,), onPressed: () {int count = 0;Navigator.popUntil(context, (_) => count++ >= 2);},)],
@@ -85,7 +87,8 @@ class _V1ResultState extends State<V1Result> {
     SharedPreferences prefs = await SharedPreferences.getInstance();ID =  prefs.getString("ID")!;ankert();
     DocumentReference ref = FirebaseFirestore.instance.collection('users').doc(ID).collection("ミス").doc("ミス");
     ref.update({"All": FieldValue.arrayUnion(widget.itemAll),"ミス1": FieldValue.arrayUnion(widget.item2),"ミス2": FieldValue.arrayUnion(widget.item3),"ミス3": FieldValue.arrayUnion(widget.item4),widget.name: FieldValue.arrayUnion(widget.itemAll)});
-  }
+    report(widget.name,ID); }
+
   Future<void> judge () async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (widget.item1.length < 5){prefs.setInt(widget.name2, 1);//0,1,2,3,4
@@ -121,37 +124,42 @@ class _V1ResultState extends State<V1Result> {
       },);return new String.fromCharCodes(codeUnits);
   }
 
-  Future<void> notify1() async {
-    return flnp.initialize(InitializationSettings(iOS: DarwinInitializationSettings(),),
-    ).then((_) => flnp.zonedSchedule(1, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
-      tz.TZDateTime.now(tz.UTC).add(Duration(seconds:(86000))),
-      NotificationDetails(iOS:  DarwinNotificationDetails(badgeNumber: 1,),),
-      androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-    ));
-  }
-  Future<void> notify2() async {
-    return flnp.initialize(InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'),),).then((_) => flnp.zonedSchedule(2, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
-      tz.TZDateTime.now(tz.UTC).add(Duration(seconds: (86000))),
-      NotificationDetails(android:  AndroidNotificationDetails("AnkiPlus" ,"ちょこっと解いてみてはいかが？", importance: Importance.high, priority: Priority.high,),),
-      androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,));
-  }
-  Future<void> notify3() async {
-    return flnp.initialize(InitializationSettings(iOS: DarwinInitializationSettings(),),
-    ).then((_) => flnp.zonedSchedule(3, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
-      tz.TZDateTime.now(tz.UTC).add(Duration(seconds:(172000))),
-      NotificationDetails(iOS:  DarwinNotificationDetails(badgeNumber: 1,),),
-      androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-    ));
-  }
-  Future<void> notify4() async {
-    return flnp.initialize(InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'),),).then((_) => flnp.zonedSchedule(4, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
-      tz.TZDateTime.now(tz.UTC).add(Duration(seconds: (172000))),
-      NotificationDetails(android:  AndroidNotificationDetails("AnkiPlus" ,"ちょこっと解いてみてはいかが？", importance: Importance.high, priority: Priority.high,),),
-      androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,));
-  }
+  // Future<void> notify1() async {
+  //   return flnp.initialize(InitializationSettings(iOS: DarwinInitializationSettings(),),
+  //   ).then((_) => flnp.zonedSchedule(1, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
+  //     tz.TZDateTime.now(tz.UTC).add(Duration(seconds:(86000))),
+  //     NotificationDetails(iOS:  DarwinNotificationDetails(badgeNumber: 1,),),
+  //     androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+  //   ));
+  // }
+  // Future<void> notify2() async {
+  //   return flnp.initialize(InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'),),).then((_) => flnp.zonedSchedule(2, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
+  //     tz.TZDateTime.now(tz.UTC).add(Duration(seconds: (86000))),
+  //     NotificationDetails(android:  AndroidNotificationDetails("AnkiPlus" ,"ちょこっと解いてみてはいかが？", importance: Importance.high, priority: Priority.high,),),
+  //     androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,));
+  // }
+  // Future<void> notify3() async {
+  //   return flnp.initialize(InitializationSettings(iOS: DarwinInitializationSettings(),),
+  //   ).then((_) => flnp.zonedSchedule(3, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
+  //     tz.TZDateTime.now(tz.UTC).add(Duration(seconds:(172000))),
+  //     NotificationDetails(iOS:  DarwinNotificationDetails(badgeNumber: 1,),),
+  //     androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+  //   ));
+  // }
+  // Future<void> notify4() async {
+  //   return flnp.initialize(InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'),),).then((_) => flnp.zonedSchedule(4, "AnkiPlus" ,"ちょこっと解いてみてはいかが？",
+  //     tz.TZDateTime.now(tz.UTC).add(Duration(seconds: (172000))),
+  //     NotificationDetails(android:  AndroidNotificationDetails("AnkiPlus" ,"ちょこっと解いてみてはいかが？", importance: Importance.high, priority: Priority.high,),),
+  //     androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,));
+  // }
 
 
-
+  Future<void> report(text,ID) async {
+    var ran = randomString(4);
+    DateTime now = DateTime.now();DateFormat outputFormat = DateFormat('yyyy年MM月dd日'); var date = outputFormat.format(now);
+    DocumentReference ref = FirebaseFirestore.instance.collection('レポート').doc(date);
+    ref.update({"Result" : FieldValue.arrayUnion([ran + ":V:" + text + ID.substring(0, 3)]),});
+  }
 
 }
 

@@ -45,8 +45,8 @@ class _V5RangeState extends State<V5Range> {
       body:  SingleChildScrollView(
         child: Column(children: <Widget>[
           Container(margin:EdgeInsets.only(top:20),child: Text("英単語",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 170,endIndent: 170,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text: A.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
@@ -60,8 +60,8 @@ class _V5RangeState extends State<V5Range> {
             Switch(value: isOnA2, onChanged: (bool? value) {if (value != null) {setState(() {isOnA2 = value;if(isOnA2 == true){itemA[1] = "1";}else{itemA[1] = "0";}});}},),
           ],),
           Container(margin:EdgeInsets.only(top:50),child: Text("漢字",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 180,endIndent: 180,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text: B.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
@@ -71,8 +71,8 @@ class _V5RangeState extends State<V5Range> {
             Switch(value: isOnB1, onChanged: (bool? value) {if (value != null) {setState(() {isOnB1 = value;if(isOnB1 == true){itemB[0] = "1";}else{itemB[0] = "0";}});}},),
           ],),
           Container(margin:EdgeInsets.only(top:50),child: Text("古文",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 180,endIndent: 180,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text:C.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
@@ -83,8 +83,8 @@ class _V5RangeState extends State<V5Range> {
           ],),
 
           Container(margin:EdgeInsets.only(top:50),child: Text("世界史",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 170,endIndent: 170,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text: D.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
@@ -103,8 +103,8 @@ class _V5RangeState extends State<V5Range> {
           ],),
 
           Container(margin:EdgeInsets.only(top:50),child: Text("日本史",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 170,endIndent: 170,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text: E.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
@@ -126,8 +126,8 @@ class _V5RangeState extends State<V5Range> {
             Switch(value: isOnE4, onChanged: (bool? value) {if (value != null) {setState(() {isOnE4 = value;if(isOnE4 == true){itemE[3] = "1";}else{itemE[3] = "0";}});}},),
           ],),
           Container(margin:EdgeInsets.only(top:50),child: Text("漢文単語",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 160,endIndent: 160,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text:F.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
@@ -137,8 +137,8 @@ class _V5RangeState extends State<V5Range> {
             Switch(value: isOnF1, onChanged: (bool? value) {if (value != null) {setState(() {isOnF1 = value;if(isOnF1 == true){itemF[0] = "1";}else{itemF[0] = "0";}});}},),
           ],),
           Container(margin:EdgeInsets.only(top:50),child: Text("生物",style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20),textAlign: TextAlign.center,),),
-          Divider(color: Colors.blueGrey,thickness: 5,indent: 120,endIndent: 120,),
-          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+          Divider(color: Colors.blueGrey,thickness: 3,indent: 180,endIndent: 180,),
+          TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
               children:  [
                 TextSpan(text:G.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.orange)),
                 TextSpan(text: " 秒後に答えを表示", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),

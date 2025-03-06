@@ -1,15 +1,17 @@
 
+import 'dart:ffi';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:anki/V1/V1Result.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:math';
@@ -17,62 +19,112 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart' as ja;
+import 'package:url_launcher/url_launcher.dart';
 import '../AdManager.dart';
 import '../その他/mail.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'dart:math' as math;
 
-class V1Q extends StatefulWidget {
-  V1Q(this.name,this.name2,this.co,this.shuffle);
+import 'V1All.dart';
+
+class V1Q4 extends StatefulWidget {
+  V1Q4(this.name,this.name2,this.co,this.shuffle);
   String name;String name2;int co;int shuffle;
   @override
-  State<V1Q> createState() => _V1QState();
+  State<V1Q4> createState() => _V1Q4State();
 }
 
-class _V1QState extends State<V1Q>with TickerProviderStateMixin , WidgetsBindingObserver {
-  final scheduleId = 0;
-  final scheduleAddSec = 3;
-  var item = [];var item1 = [];var item2 = [];var item3 = [];var item4 = [];var itemAll = [];
-   var text = "";var text2 = "";var ID = "";var date = "";
-  var map = {};
-  var count = 0;var itemco = 0;var time = 1;var startTime = "3";var co = 0;var CountTime = 0.0;var CountTime2 = 0.0;
-  var OK = false;var _visible = true;
-  late TextEditingController _bodyController;
-  Color color  = Colors.red;
-  FlutterTts flutterTts = FlutterTts();
-  final _player = ja.AudioPlayer(handleInterruptions: false, androidApplyAudioAttributes: false, handleAudioSessionActivation: false,);
-  AppOpenAdManager appOpenAdManager = AppOpenAdManager();
-  InterstitialAdManager interstitialAdManager = InterstitialAdManager();
-  var boo = true;
+class _V1Q4State extends State<V1Q4>with TickerProviderStateMixin , WidgetsBindingObserver {
 
+  var boo = true;
+  var item = [];
+  var item1 = [];
+  var uid = "";
+  var co = 0;
+  var reCo = 0;
+  var _counter = 15.0;
+  var textSize = 20.0;
+  int mistake = 0;int corect = 0;
+  var Id = "";var ID = "";
+  var answer = "";
+  var start = "スタート";
+  var barText = "";
+  var mailText = "";
+  var QALabel = "問題";
+  var color = Colors.blue;
+  var colorB1 = Colors.blue;
+  var colorB2 = Colors.blue;
+  var colorB3 = Colors.blue;
+  var colorB4 = Colors.blue;
+  var color1 = Colors.white;
+  var color2 = Colors.white;
+  var color3 = Colors.white;
+  var color4 = Colors.white;
+  bool KaisetuB = true;
+  bool reB = true;
+  bool EditB = true;
+  bool NextB = true;
+  bool AnswerL = true;
+  bool _A1B = true;
+  bool _A2B = true;
+  bool _A3B = true;
+  bool _A4B = true;
+  bool _NextB = true;
+
+  bool A1B = false;
+  bool A2B = false;
+  bool A3B = false;
+  bool A4B = false;
   void initState() {
     WidgetsBinding.instance?.addObserver(this);
     super.initState();
+    itemSet (); set4();
 
-    getID();main(); interstitialAd();
-    appOpenAdManager.loadAd();itemSet ();co = item.length;
-    Future.delayed(Duration(seconds: 3), () {setState(() {startTime = "";_visible = false;OK = true;set();});});
-    Future.delayed(Duration(seconds: 2), () {setState(() {startTime = "1";});});
-    Future.delayed(Duration(seconds: 1), () {setState(() {startTime = "2";});});
-    super.initState();_bodyController = TextEditingController();
-   initAudioService();
-    AudioSession.instance.then((audioSession) async {
-      await audioSession.configure(AudioSessionConfiguration.speech());
-      _handleInterruptions(audioSession);
-    });
-    if(widget.shuffle == 1){item.shuffle();}
   }
 
   @override
    void dispose() {
-     flutterTts.stop;_player.dispose();initAudioService11();
      super.dispose();
+  }
+
+  void set4 (){
+
+    var item4 = []; var random = math.Random();
+    for (int i = 0; i < item.length ; i++) {
+
+      var ran0 = random.nextInt(4);
+         var a1 = item[i];
+        item.removeAt(i);
+        var r1 = random.nextInt(item.length );
+
+        var a2 = item[r1];
+        item.removeAt(r1);
+        var r2 = random.nextInt(item.length );
+
+        var a3 = item[r2];
+        item.removeAt(r2);
+        var r3 = random.nextInt(item.length );
+
+        var a4 = item[r3];
+        item.removeAt(r3);
+        var r4 = random.nextInt(item.length );
+
+switch (ran0){
+          case 0: item4.add([a1[0],a1[1],a2[1],a3[1],a4[1],1]); break;
+        case 1: item4.add([a1[0],a2[1],a1[1],a3[1],a4[1],2]); break;
+        case 2: item4.add([a1[0],a2[1],a3[1],a1[1],a4[1],3]); break;
+        case 3: item4.add([a1[0],a2[1],a3[1],a4[1],a1[1],4]); break;
+      }
+
+      itemSet ();
+    } item4.shuffle();setState(() { item = item4;next();});
   }
 
   InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;
   void interstitialAd() {
     if (ID != "FAP3jZy3pSTEmqJQN1ow"){
-    InterstitialAd.load(adUnitId: Platform.isAndroid ? 'ca-app-pub-4716152724901069/2563672557' : 'ca-app-pub-4716152724901069/7560014210',
+    InterstitialAd.load(adUnitId: Platform.isAndroid ? 'ca-app-pub-4716152724901069/2563672557' : 'ca-app-pub-4716152724901069/1060944650',
       request: AdRequest(),//ca-app-pub-4716152724901069/7560014210
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {_interstitialAd = ad;_isAdLoaded = true;},
@@ -88,176 +140,117 @@ class _V1QState extends State<V1Q>with TickerProviderStateMixin , WidgetsBinding
   GenericAdEventCallback<InterstitialAd> get onAdLoaded => throw UnimplementedError();
 
 
+  @override
   Widget build(BuildContext context) {
-    return Scaffold( backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white,iconTheme: IconThemeData(color: Colors.black),
-       // leading: Container(alignment: Alignment.center,child:Text(startTime.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 30), textAlign: TextAlign.center,),),
-        title:Text(startTime.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 30), textAlign: TextAlign.center,),
-        //automaticallyImplyLeading: false,
-        centerTitle: true,elevation: 0,
-       // actions: [IconButton(icon: Icon(Icons.highlight_off,color: Colors.black45,size: 30,), onPressed: () {Navigator.pop(context);},)],
+    return Scaffold(
+      appBar: AppBar(title:  Text(barText, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: _counter,), textAlign: TextAlign.center,),
+        centerTitle: true, backgroundColor: color, actions: [],),
+      floatingActionButton: FloatingActionButton(child: Text("次"), onPressed: () {if(item.length == 0){}else{co += 1;start = "次";
+      if(co < item.length){next();
+      } else{  Navigator.of(context).push(MaterialPageRoute(builder: (context) => V1Q4Result(item1,corect,mistake,widget.name)),);
+      }}},
       ),
-      body: SingleChildScrollView(
-       child: Column(children: <Widget>[
-        // Container(child: Visibility(visible: _visible, child: Column(children: <Widget>[
-        //   Container(width: double.infinity,margin:EdgeInsets.only(top: 100),child:Text(startTime.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 50), textAlign: TextAlign.center,),)
-        // ]))),
-
-         Container(child: Column(children: <Widget>[
-           // Container(child: Visibility(visible: _visible, child: Column(children: <Widget>[
-           //   Container(width: double.infinity,margin:EdgeInsets.only(top: 20),child:Text(startTime.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 50), textAlign: TextAlign.center,),)
-           // ]))),
-           // Container(margin: EdgeInsets.only(top: 30,bottom: 5, left: 20, right: 20), child:Text('問題',style: TextStyle(color:Colors.blueGrey[500]),),),
-            Container(margin: EdgeInsets.only(top: 30, left: 20, right: 20), width: double.infinity,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: Colors.grey.shade50, spreadRadius: 5, blurRadius: 5, offset: Offset(1, 1),),], color: Colors.white,),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Container(height: 50,),
+            Container(height: 200, width: double.infinity,
                 child: Column(children: <Widget>[
-                  Container(margin: EdgeInsets.only(top: 30, left: 10, right: 10,bottom:30),width:double.infinity,alignment: Alignment.center, child: Text(text,style: TextStyle(fontWeight: FontWeight.bold,color:Colors.black,fontSize: 20), textAlign: TextAlign.center,),),
+                  Expanded(child: Stack(children: <Widget>[
+                    new Center(child: Container(margin: EdgeInsets.all(10), width: double.infinity,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: Colors.grey.shade300, spreadRadius: 5, blurRadius: 5, offset: Offset(1.5, 1.5),),], color: Colors.white,),
+                      alignment: Alignment.center,
+                      child:Text(item[co][0],style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: _counter), textAlign: TextAlign.center,),
+                    )),])),//https://line.me/ti/g2/tqfeu7x4tj8AovbYoFgse_qLhNt5aZKTxXEwOw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default
                 ])),
-          //  Container(margin: EdgeInsets.only(top:20,bottom: 5, left: 20, right: 20), child:Text('答え',style: TextStyle(color:Colors.blueGrey[500]),),),
-            Container(margin: EdgeInsets.only(top: 3, left: 20, right: 20), width: double.infinity,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: Colors.grey.shade50, spreadRadius: 5, blurRadius: 5, offset: Offset(1, 1),),], color: color,),
-                child: Column(children: <Widget>[
-                  Container(margin: EdgeInsets.only(top: 30, left: 10, right: 10,bottom:30),width:double.infinity,alignment: Alignment.center, child: Text(text2,style: TextStyle(fontWeight: FontWeight.bold,color:Colors.red,fontSize: 20), textAlign: TextAlign.center,),),
-                ])),
-             TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
-        children:  [
-          TextSpan(text: "答えまで", style: TextStyle(fontSize: 10,  color: Colors.grey)),
-          TextSpan(text: CountTime.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black)),
-          TextSpan(text: " 秒", style: TextStyle(fontSize: 10,  color: Colors.grey)),
-        ]),), onPressed: () {Edite();},
-             ),
-           Container(margin: EdgeInsets.only(top: 30, left: 10, right: 10),
-              child: Row(children: <Widget>[
-                Expanded(
-                    child: Container(height: 80, width: 80,
-                      child: Visibility(visible: OK,
-                        child:
-                        IconButton(onPressed:() {add();item.removeAt(itemco);set();}, icon: Icon(LineIcons.circle,size: 80,))
-                        // ElevatedButton(
-                        //   child: const Text('◯',style: TextStyle(fontWeight: FontWeight.bold),),
-                        //   style: ElevatedButton.styleFrom(backgroundColor: Colors.black,
-                        //     shape: const CircleBorder(side: BorderSide(color: Colors.black, width: 1, style: BorderStyle.solid,),),),
-                        //   onPressed: () {add();item.removeAt(itemco);set();},),
-                      ),)),
-                Container(width: 10,),
-                Expanded(child: Container(height: 80, width: 80, child: Visibility(visible: OK,
-                        child:   IconButton(onPressed:() {itemco = itemco + 1;set();}, icon: Icon(LineIcons.times,size: 80,))
-
-                  // ElevatedButton(
-                        //   child: const Text('×',style: TextStyle(fontWeight: FontWeight.bold),),
-                        //   style: ElevatedButton.styleFrom(backgroundColor: Colors.black,
-                        //     shape: const CircleBorder(side: BorderSide(color: Colors.black, width: 1, style: BorderStyle.solid,),),),
-                        //   onPressed: () {itemco = itemco + 1;set();},),
-
-                ),))])),
-           Container(margin:EdgeInsets.only(top:50,bottom: 5,left: 100,right: 100),child:
-           ClipRRect(borderRadius:  BorderRadius.all(Radius.circular(5)), child: LinearProgressIndicator(
-             value: item.length / co, valueColor: AlwaysStoppedAnimation(getCurrentHpColor(10)),
-             backgroundColor: Colors.black, minHeight: 10,),),),
-           Container(width:double.infinity,child:Text('${item.length.toString().padLeft(0, '  ')}/${co.toString()}',style: TextStyle(fontSize: 10,color:Colors.black45),textAlign: TextAlign.center,),),
-           Container(width:double.infinity,child:Text(time.toString() + "周目",style: TextStyle(fontSize: 10,color:Colors.black45),textAlign: TextAlign.center,),),
-           TextButton(
-             child: const Text('間違いを報告',style: TextStyle(fontSize: 10,color:Colors.black45),),
-              onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => mail(widget.name,widget.name2,text,text2)));},
-           ) ],)),])
-      ));}
-
-  Future<void> Edite() async {
-    showDialog(context: context, builder: (context) =>  AlertDialog(title: Text('時間の変更',style: TextStyle(color: Colors.blueGrey[900],fontWeight: FontWeight.bold,fontSize: 15), textAlign: TextAlign.center),
-      actions: <Widget>[
-        Column(mainAxisAlignment: MainAxisAlignment.center,children: [
-          Container(child:Text('長文問題以外はなるべく短い時間でお願いします\n(アプリのコンセプト『即答できなきゃ覚えてない』の範囲内)',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 10,color: Colors.grey,), textAlign: TextAlign.center,),),
-          Container(width: double.infinity,margin:EdgeInsets.all(5), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(5),),
-            child: TextField( keyboardType: TextInputType.numberWithOptions(decimal: true), inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp(r'^\d+(\.\d*)?')),],
-              maxLines: null,controller: _bodyController,decoration: InputDecoration(border: InputBorder.none, ),onChanged: (String value) {CountTime2 = double.parse(value);},),),
-          Container(margin :EdgeInsets.all(10),width:100,child: ElevatedButton(child: Text('今回のみ'), style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white, shape: const StadiumBorder(),),
-            onPressed: () {setState(() {CountTime = CountTime2;Navigator.pop(context);});})),
-          Container(margin :EdgeInsets.all(10),child: ElevatedButton(child: Text(widget.name + 'はこの時間'), style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white, shape: const StadiumBorder(),),
-            onPressed: () async {SharedPreferences prefs = await SharedPreferences.getInstance();prefs.setDouble("CountTime" + widget.name,CountTime2);setState(() {CountTime = CountTime2;getID();Navigator.pop(context);});
-            },)),
- ],)],));
+            Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Expanded(child: Visibility(visible: A1B,
+                            child: Container(width: double.infinity,
+                              margin: EdgeInsets.only(top:5,bottom: 5,left: 10,right: 10),
+                              child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: color, backgroundColor: color1,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),), side:  BorderSide(color: colorB1 ,width: 5 ),),
+                                onPressed: !_A1B ? null :() {setState(() {
+                                  if(item[co][1] == item[co][5]){color1 = Colors.blue;barText = "◯";corect = corect +1;}
+                                  else{barText = "✖︎";mistake = mistake + 1;color = Colors.red;}
+                                  answer = item[co][1];judge(item[co][5]);});},
+                                child:FittedBox(fit: BoxFit.fitWidth,
+                                  child: Text(item[co][1], style: TextStyle(fontSize: _counter,color: Colors.black,fontWeight: FontWeight.bold,),
+                                  ),),),),)),
+                      Expanded(child: Visibility(visible: A2B,
+                        child: Container(width: double.infinity,
+                              margin: EdgeInsets.only(top:5,bottom: 5,left: 10,right: 10),
+                              child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: color, backgroundColor: color2,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),), side: BorderSide(color: colorB2,width: 5),),
+                                onPressed:!_A2B ? null : () {
+                                  if(item[co][2] == item[co][5]){color2 = Colors.blue;barText = "◯";corect = corect +1;}
+                                  else{barText = "✖︎";mistake = mistake + 1;color = Colors.red;}
+                                  answer = item[co][2];judge(item[co][5]);},
+                                child:Container(child: Text(item[co][2], style: TextStyle(fontSize: _counter,color: Colors.black,fontWeight: FontWeight.bold,),),),),),)),
+                      Expanded(child: Visibility(visible: A3B,
+                            child: Container(width: double.infinity,
+                              margin: EdgeInsets.only(top:5,bottom: 5,left: 10,right: 10),
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(foregroundColor: color, backgroundColor: color3, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),), side:  BorderSide(color: colorB3,width: 5),),
+                                onPressed:!_A3B ? null : () {
+                                  if(item[co][3] == item[co][5]){color3 = Colors.blue;barText = "◯";corect = corect +1;}
+                                  else{barText = "✖︎";mistake = mistake + 1;color = Colors.red;}
+                                  answer = item[co][3];judge(item[co][5]);},
+                                child:Container(child: Text(item[co][3], style: TextStyle(fontSize: _counter,color: Colors.black,fontWeight: FontWeight.bold,),),),),),)),
+                      Expanded(
+                          child: Visibility(
+                            visible: A4B,
+                            child: Container(
+                              width: double.infinity,
+                              margin: EdgeInsets.only(top:5,bottom: 5,left: 10,right: 10),
+                              child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: color, backgroundColor: color4, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),), side:  BorderSide(color:colorB4,width: 5),),
+                                onPressed:!_A4B ? null : () {
+                                  if(item[co][4] == item[co][5]){color4 = Colors.blue;barText = "◯";corect = corect +1;}
+                                  else{barText = "✖︎";mistake = mistake + 1;color = Colors.red;}
+                                  answer = item[co][4];judge(item[co][5]);},
+                                child:Container(child: Text(item[co][4], style: TextStyle(fontSize: _counter,color: Colors.black,fontWeight: FontWeight.bold,),),),),),)),
+                      Container(height: 110,),
+                    ])),
+          ],
+        ),
+      ),
+    );
   }
 
 
 
-  Color getCurrentHpColor(int hp) {
-    if (hp > co / 2) {return Colors.black;}
-    if (hp > co / 5) {return const Color(0xFFFFC107);}
-    return const Color(0xFFFF0707);
-  }
+  void next() {
+    reCo = 0;textSize = 20;
+    setState(() {
+      AnswerL = false;reB = false;KaisetuB = false;EditB = false;NextB = false;
+      _A1B  = true;_A2B  = true;_A3B  = true;_A4B  = true;
+      A1B  = true;A2B  = true;A3B  = true;A4B  = true;
+      color = Colors.blue;color1 = Colors.white;color2 = Colors.white;color3 = Colors.white;color4 = Colors.white;
+      barText = widget.name;
+      QALabel = "問題";
+      if(item.length != 0){
+        if(co < item.length){
+          } else{  Navigator.of(context).push(MaterialPageRoute(builder: (context) => V1Q4Result(item1,corect,mistake,widget.name)),);
+        }
+      }else{
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //       builder: (context) => Result(item)),
+        // );
+      }});}
 
-  void set (){setState(()  {
-    if (item.length != 0){
-      if (itemco < item.length){
-        color = Colors.red;
-        if(widget.co == 0){ text = item[itemco][0];text2 = item[itemco][1];}else{text = item[itemco][1];text2 = item[itemco][0];}
-        _speak();Future.delayed(Duration(seconds:CountTime.toInt()), () {setState(() {color = Colors.white;});});
-      }else{itemco = 0;time = time + 1;
-      color = Colors.red;
-      if(widget.co ==0){ text = item[itemco][0];text2 = item[itemco][1];}else{text = item[itemco][1];text2 = item[itemco][0];}
-      _speak(); Future.delayed(Duration(seconds: CountTime.toInt()), () {setState(() {color = Colors.white;});});
+  void judge (index){
+    setState(() {
+      KaisetuB = true;NextB = true;AnswerL = true;
+      _A1B  = false;_A2B  = false;_A3B  = false;_A4B  = false;
+      if (item.length != 0){}else{}
+      switch(index){
+        case 1:color1 = Colors.blue;break;
+        case 2:color2 = Colors.blue;break;
+        case 3:color3 = Colors.blue;break;
+        case 4:color4 = Colors.blue;break;
       }
-    }else{
-
-      if (boo == true){}else{showInterstitialAd();}
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => V1Result(item1,item2,item3,item4,widget.name,widget.name2,itemAll)),);}
-   });}
-
-  void add (){
-   // map = {"Q":item[itemco][0],"A":item[itemco][1],"レベル":,};
-  // switch (time){
-  //   case 1 :item1.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":0,});itemAll.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":0,});break;
-  //   case 2 :item2.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":1,});itemAll.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":1,});break;
-  //   case 3 :item3.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":2,});itemAll.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":2,});break;
-  //   default:item4.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":3,});itemAll.add({"Q":item[itemco][0],"A":item[itemco][1],"レベル":3,});break;
-  // }
-    switch (time){
-      case 1 :item1.add({"Q":text,"A":text2,"レベル":0,"date":date,"科目":widget.name});break;
-      case 2 :item2.add({"Q":text,"A":text2,"レベル":1,"date":date,"科目":widget.name});itemAll.add({"Q":text,"A":text2,"レベル":1,"date":date,"dateC":0,"科目":widget.name});break;
-      case 3 :item3.add({"Q":text,"A":text2,"レベル":2,"date":date,"科目":widget.name});itemAll.add({"Q":text,"A":text2,"レベル":2,"date":date,"dateC":0,"科目":widget.name});break;
-      default:item4.add({"Q":text,"A":text2,"レベル":3,"date":date,"科目":widget.name});itemAll.add({"Q":text,"A":text2,"レベル":3,"date":date,"dateC":0,"科目":widget.name});break;
-    }
-  }
-
-  Future<void> getID () async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();ID =  prefs.getString("ID")!;
-
-   boo = prefs.getBool("有料判定1")?? true;
-    var date1 = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    var aa = prefs.getString(date1+"広告非表示チケット")??"";if(aa == "あり"){boo = true;}
-   CountTime =  prefs.getDouble("CountTime" + widget.name)?? 0;
-   if (CountTime == 0){
-    switch (widget.name) {
-    case "英単語":CountTime = 1.5; break;
-    case "英熟語":CountTime = 1.5; break;
-    case "漢字":CountTime = 1.5; break;
-    case "古文":CountTime = 1.5; break;
-    case "漢文単語":CountTime = 2.0; break;
-    case "世界史":CountTime = 2.0; break;
-    case "日本史":CountTime = 2.0; break;
-    case "地理":CountTime = 2.0; break;
-    case "生物":CountTime = 2.0; break;
-  }}
-
-  }
- // CountTime = prefs.getDouble("time") ?? 1.5;}
-
-  void main() {
-    DateTime now = DateTime.now();
-    DateFormat outputFormat = DateFormat('yyyy年MM月dd日');
-    date = outputFormat.format(now);
-  }
-  Future<void> _speak() async {
-    if (widget.name == "英単語" && widget.co ==0){await flutterTts.setLanguage("en-US");} else{
-      // flutterTts.setLanguage("ja-JP");
-      flutterTts.setLanguage("");
-    }
-    await flutterTts.setSpeechRate(0.5);
-    await flutterTts.setPitch(1.0);
-    await flutterTts.setVolume(1.0);
-    if (widget.name == "英単語" && widget.co ==0 ){ await flutterTts.speak(text);}
-
-    //if (widget.name == "漢字" && widget.co ==0 ){ await flutterTts.speak("");} else{ if (widget.name == "世界史" || widget.name == "日本史" || widget.name == "漢文単語"|| widget.name == "生物"){ await flutterTts.speak("");} else{await flutterTts.speak(text);}}
+    });
   }
 
   
@@ -1140,304 +1133,10 @@ void itemSet (){
   case "発芽3" :item = [["植物に人工的に照明して暗期を長くすることを何という?","短日処理"],["暗期の途中で赤色光を当てる処理を何という?","光中断"],["花芽の分化を誘発するホルモンを何という?","花成ホルモン"],["秋まき小麦を春に撒き、低温処理することを何という?","春化処理"],["発芽を促進するホルモンを答えよ(2つ)","オーキシン・ジベレリン"],["発芽を抑制するホルモンを答えよ","アブシジン酸"],["植物の発芽に必要な条件は?","温度・酸素・水"],["花が受粉すると何を形成する?","種子"],];break;
   case "植物ホルモン1" :item = [["分化を促進するホルモンを答えよ(2つ)","オーキシン・サイトカイニン"],["結実を促進するホルモンを答えよ(2つ)","オーキシン・ジベレリン"],["成長を促進するホルモンを答えよ","エチレン"],["開花を促進するホルモンを答えよ","フロリゲン"],["成熟を促進するホルモンを答えよ","エチレン"],["落葉を促進するホルモンを答えよ(2つ)","エチレン・アブシジン酸"],["落葉を抑制するホルモンを答えよ","オーキシン"],["休眠を促進するホルモンを答えよ","アブシジン酸"],["アブシジン酸の作用は?","発芽の促進と落葉の促進"],];break;
 
-    case "地球と地図" :item = [["地球の表面積における陸地と海洋の割合は？", "3:7"], ["北半球には陸地の何分のいくつが分布している？", "3分の2"], ["陸地が最大となる半球を何と呼ぶ？", "陸半球"], ["海洋が最大となる半球を何と呼ぶ？", "水半球"], ["陸半球の中心はどこ？", "パリ南西付近"], ["水半球の中心はどこ？", "ニュージーランド南東"], ["陸半球の中心の緯度経度は？", "北緯48度、東経0.5度"], ["水半球の中心の緯度経度は？", "南緯48度、西経179.5度"], ["地球の半径は約何km？", "約6400km"], ["地球の全周は約何km？", "約4万km"], ["プトレマイオスは何をした人？", "2世紀ごろのギリシャの地理学者"], ["TO図は何を中心とする世界地図？", "エルサレム"],];
-    case "地球と地図2" :item =[["TO図でOは何を表している？", "オケアノス(oceanの語源)"], ["TO図は何によって３つに分割されている？", "地中海など"], ["TO図で上は何を指している？", "東"], ["陸地の最高峰は？", "ヒマラヤ山脈のエヴェレスト山"], ["海洋の最深点は？", "マリアナ海溝のチャレンジャー海淵"], ["エベレスト山の標高は？", "8848m"], ["チャレンジャー海淵の深さは？", "10920m"], ["大陸別の高度別面積割合でヨーロッパは何m未満の割合が高い？", "200m"], ["アフリカは標高何m以下の割合が低い？", "低い"], ["南アメリカで標高が高いものが少ないのはなぜ？","南極氷河(氷床)に覆われているから"], ["緯度と経度は何を表すのに使われる？", "地球上の位置"], ["図で赤道はどれ？", "緯度0度の線"], ["本初子午線はどれ？", "経度0度の線"],["北極圏は何度?", "北緯66度33分"]];break;;
-    case "地球と地図3" :item =[["地球は1日に何度回転する？", "1回転"], ["経度何度で1時間の時差が生じる？", "15度"], ["日付変更線はどこにある？", "経度180度"], ["日本の標準時子午線は何度？", "東経135度"], ["日本の標準時子午線はどこを通る？", "兵庫県明石市"], ["世界標準時(GMT)の基準となる経度は？", "0度"], ["UTCとは何？", "協定世界時"], ["複数の標準時を採用している国は？(例示)", "ロシア、アメリカ合衆国、オーストラリアなど"], ["サマータイムとは何？", "標準時より1時間進んだ時刻"], ["4月1日午後2時に東京から電話を受けたロンドンの時刻は？", "4月1日午前5時"], ["8月2日午前10時に成田を出発しロサンゼルスに到着した時の現地時刻は？", "8月2日午前4時"], ["本初子午線はどこを通る？", "ロンドン"]];break;;
-    case "地球と地図4" :item =[["地図投影法とは？", "地球の表面を平面に写し取る方法"], ["正積図法とは？", "地球上での面積関係が正しく表されている図法"], ["正積図法の例は？", "サンソン図法、モルワイデ図法、ホモロサイン(グード)図法"], ["正角図法とは？", "地球上の任意の2点を結ぶ直線が最短コースを示す図法"], ["正角図法の代表例は？", "メルカトル図法"], ["メルカトル図法は何に利用される？", "航海図や航空図"], ["方位図法とは？", "中心からの距離と方位が正しい図法"], ["正距方位図法はどんな地図に使われる？", "航空図"], ["サンソン図法で緯線は何として描かれる？", "等間隔の平行線"], ["モルワイデ図法で経線は何として描かれる？", "楕円曲線"], ["高緯度地方のひずみが小さい図法は？", "モルワイデ図法"], ["高緯度地方のひずみが大きい図法は？", "サンソン図法"]];break;;
-    case "地球と地図5" :item =[["メルカトル図法は何図法？", "正角図法"], ["メルカトル図法で、任意の2点を結んだ直線は何になる？", "等角航路"], ["メルカトル図法は何に便利？", "航海図"], ["メルカトル図法の欠点は？", "高緯度ほど面積や距離が拡大される"], ["メルカトル図法で、赤道上の経度1度と他の緯度における経度1度の距離は？", "同じ長さで表される"], ["緯度1度分の距離は約何km？", "約111km"], ["赤道上での経度1度分の距離は約何km？", "約111km"], ["正距方位図法の中心から見た方位は？", "正しい"], ["大圏(大円)コースとは？", "地球の中心を通る平面で切った時の円周(最短経路)"], ["メルカトル図法やミラー図法で見慣れた東京から真東に進むと？", "アメリカ合衆国の西海岸"]];break;;
-    case "地球と地図6" :item =[["一般図の代表的なものは？", "地形図"], ["主題図の一つである統計地図とは？", "数値情報を地図化したもの"], ["絶対分布図とは？", "数値の絶対値を示した統計地図"], ["相対分布図とは？", "単位面積当たりや人口1人当たりの割合を示した統計地図"], ["ドットマップとは？", "点(ドット)で分布を表した統計地図"], ["等値線図とは？", "等しい値の地点を線で結んだ統計地図"], ["図形表現図とは？", "図形の大きさや形で数値の大小を表す統計地図"], ["流線図とは？", "移動の方向や量を線の太さで表す統計地図"], ["カルトグラムとは？", "本来の地形を歪めて統計量を示す統計地図"], ["東京からニューヨークへ最短コースで進むと？", "大圏(大円)航路"], ["正距方位図法で、中心から最も遠い外周点は？", "対蹠点"], ["地球全周は約何km？", "約4万km"], ["地図の4要素とは？", "距離、方位、面積、角度(形)"]];break;;
-    case "地球と地図7" :item = [["カルトグラムとは？", "地域の統計数値を比較するのに便利な、地形を変化させた地図"], ["階級区分図(コロプレスマップ)とは？", "統計調査地区ごとの比率や密度を色彩や模様で表現した地図"], ["階級区分図は何の割合を示すのに用いられることが多い？", "1人当たりのGNI(国民総所得)や人口密度"], ["GNSSとは？", "全地球測位衛星システム"], ["GNSSは何に利用される？", "カーナビゲーションシステム"], ["リモートセンシングとは？", "人工衛星などから発信する電磁波を地表に反射させて情報を得る技術"], ["GISとは？", "地理情報システム"], ["GISは何に利用される？", "ハザードマップの作成"], ["AMeDASとは？","地域気象観測システム"],];
-    case "大地形" :item =[["プレートテクトニクスとは？", "大陸が移動するなどのメカニズムを説明した地球科学の学説"], ["大陸移動説を提唱したのは？", "ウェゲナー"], ["地球の表面は何で覆われている？", "十数枚の固い岩盤(プレート)"], ["プレートの下には何がある？", "流動性のあるマントル"], ["プレートの境界は大きく何種類？", "3つ"], ["広がる境界とは？", "二つのプレートが互いに遠ざかる部分"], ["せばまる境界とは？", "プレートが互いに近づき合う部分"], ["ずれる境界とは？", "プレートが水平にすれ動く部分"], ["海嶺はどこにできる？", "広がる境界"]];break;;
-    case "大地形2" :item =[["海嶺とは？", "マントル物質が上昇し、マグマとなって海底から噴出するところ"], ["大西洋を二分している海嶺は？", "大西洋中央海嶺"], ["リフトバレー(大地溝帯)とは？", "大陸が引き裂かれる場所にできる"], ["重いプレートと軽いプレートは？", "重い海洋プレートと軽い大陸プレート"], ["沈み込み型境界で形成される地形は？", "海溝、弧状列島(島弧)、火山脈"], ["海溝の深さは？", "6000m以上の深さ"], ["海溝部分で注意すべきことは？", "地震が発生しやすい、火山が形成される"], ["ずれる境界の例は？", "サンアンドレアス断層"], ["海洋プレートと大陸プレートの衝突でできるものは？", "海溝や弧状列島"], ["大陸プレートどうしが衝突するとできるものは？", "大山脈"], ["地球の表面積の約70%を占めているのは？", "海洋"], ["深海平原とは？", "水深4000m前後の平坦な深海底"], ["大陸棚とは？", "大陸沿いの海底にある、傾斜が緩やかな浅海底"]];break;;
-    case "大地形3" :item =[["内的営力とは？", "地球内部の熱エネルギーによる力"], ["外的営力とは？", "太陽エネルギーによる力"], ["内的営力による現象は？", "火山活動、地殻変動(造陸運動、造山運動)"], ["外的営力による現象は？", "風化、侵食、運搬、堆積"], ["褶曲とは？", "地層が横からの圧力によって波状に折り曲げられること"], ["断層とは？", "地殻が断ち切られてその割れ目が生ずること"], ["活断層とは？", "断層のうち比較的最近活動したもので今後も活動が予想され、地震が発生する可能性があるもの"], ["プレートと地殻の関係は？", "プレートは地殻とマントル最上部を合わせた岩石層"], ["海洋プレートと大陸プレートの主な違いは？", "海洋プレートは玄武岩質、大陸プレートは花崗岩質"], ["リフトバレー(アフリカ大地溝帯)は何の境界？", "広がる境界"], ["プレートの中央部はどうなっている？", "安定している"], ["プレートの境界付近はどうなっている？", "地震や火山活動などが活発"]];break;;
-    case "大地形4" :item =[["火山地形とは？", "流出する溶岩の粘性、火山ガスの量、噴火の回数などによって決まる地形"], ["火山の例(傾斜が緩やか)？", "ハワイ島やアイスランドなどの盾状火山、インドのデカン高原(溶岩台地)"], ["火山の例(富士山型)？", "成層火山"], ["火山の分布は？", "プレートの「広がる境界」にあたる海嶺や「せばまる境界」の海洋プレートが沈み込む部分"], ["ホットスポットとは？", "プレートの中央部をマグマ(マントル物質)が上昇してくる場所"], ["火山噴火による良い影響は？", "肥沃な土壌、美しい景観、温泉、地熱発電"], ["火山噴火による災害は？", "火砕流、溶岩流、土石流、降灰"], ["侵食とは？", "雨や河川などの流水や氷河の流下によって岩石が削り取られること"], ["外的営力は最終的に何をする？", "地表を平坦化する"], ["侵食輪廻とは？", "河川の侵食作用によって地形が変化していく過程"]];break;;
-    case "大地形5" :item =[["侵食輪廻の最終段階は？", "準平原"], ["河川の侵食基準面は？", "海面"], ["V字谷ができるのは侵食輪廻のどの段階？", "幼年期"], ["老年期地形とは？", "侵食によりほとんど高低差がなくなった地形"], ["内的営力による現象の例は？", "造陸運動、造山運動(褶曲・断層)、火山活動"], ["外的営力による現象の例は？", "風化・侵食・運搬・堆積作用"], ["地震が多いプレート境界は？", "広がる境界、せばまる境界、ずれる境界"], ["沈み込み型境界の例は？", "太平洋プレートが北アメリカプレートに沈み込む日本海溝付近"], ["火山が多いプレート境界は？", "広がる境界、せばまる境界"], ["ハザードマップとは？", "災害が想定される地域を予測し地図化したもの"],];
-    case "大地形6" :item = [["世界の大地形は、何によって大きく3つに分けられる？", "造山運動を受けた時期"], ["安定陸塊とは？", "プレート境界から離れたところ(プレートの中央部)"], ["古期造山帯とは？", "古生代に造山運動を受け、侵食が進んで低くなだらかになった山脈"], ["古期造山帯の例は？", "アパラチア山脈、ウラル山脈"], ["新期造山帯とは？", "中生代以降に造山運動を受け、高くて険しい山脈"], ["新期造山帯の例は？", "アルプス・ヒマラヤ造山帯、環太平洋造山帯"], ["アルプス・ヒマラヤ造山帯に含まれる山脈は？", "アルプス山脈、ヒマラヤ山脈"], ["環太平洋造山帯に含まれる山脈は？", "ロッキー山脈、アンデス山脈"], ["パンゲアとは？", "かつて一つであった大陸"], ["ローレンシア大陸とは？", "パンゲアが分裂した、北半球の大陸"], ["ゴンドワナ大陸とは？", "パンゲアが分裂した、南半球の大陸"]];break;;
-    case "大地形7" :item =[["古期造山帯の山脈の高さは？", "1000~2000mくらいの低くなだらかな山脈"], ["古期造山帯の代表的な山脈は？", "アパラチア山脈、ウラル山脈、ドラケンスバーグ山脈、グレートディヴァイディング山脈"], ["テンシャン山脈やアルタイ山脈は何造山帯？", "例外的に高い古期造山帯"], ["日本はどの造山帯に属する？", "新期造山帯"], ["新期造山帯はプレートのどこに分布？", "「せばまる境界」付近"], ["安定陸塊に多く埋蔵されている資源は？", "鉄鉱石"], ["古期造山帯に多く埋蔵されている資源は？", "石炭"], ["新期造山帯に多く埋蔵されている資源は？", "銅鉱、銀鉱、石油、錫"], ["石油が多く埋蔵されている地域は？", "西アジア、北アフリカ"], ["楯状地とは？", "先カンブリア時代の岩石が地表に露出している安定陸塊"], ["卓状地とは？","先カンブリア時代の岩石の上に古い時代の地層がほぼ水平に堆積している安定陸塊"]];break;;
-    case "小地形" :item =[["平野とは？", "農業をはじめとする経済活動に適した平坦面の土地"], ["平野の種類は？", "侵食平野と堆積平野"], ["侵食平野とは？", "山地などの凸部分が削り取られてできた平野"], ["堆積平野とは？", "河川などの侵食により削り取られた岩石や土砂が海底や谷底を埋めてできた平野"], ["準平原とは？", "山地が長い間侵食されて平坦化したもの"], ["構造平野とは？", "古い岩石や地層がほぼ水平に堆積してできた地形"], ["準平原の例は？", "バルト海の沿岸(バルト楯状地)、カナダの北東部(カナダ楯状地)"], ["構造平野の例は？", "東ヨーロッパ平原、北アメリカの中央平原"], ["ケスタとは？", "硬い岩石や地層が侵食に取り残されてできた特殊な地形"], ["日本の平野の大部分は？", "堆積平野"], ["メサとは?", "メサが侵食されて塔状になったもの"]];break;;
-    case "小地形2" :item =[["堆積平野は主に何によって形成される？", "河川の侵食・運搬・堆積作用"], ["河川の上流部で働く力は？", "侵食力と運搬力"], ["河川の下流部や河口で働く力は？", "堆積力"], ["沖積平野とは？", "約1万年前から現在までの完新世に形成された平野"], ["沖積平野の種類は？", "扇状地、氾濫原、三角州(デルタ)"], ["山地を流れる河川が削り取るものは？", "岩石"], ["河川が山から平地に流れ出る山麓にできる地形は？", "扇状地"], ["扇状地は主に何で構成される？", "礫(砂より粒径が大きいもの)"], ["扇状地で、扇央では何になることが多い？", "水無川"], ["扇状地で、扇端では何がみられる?", "湧水"],["パリ盆地の地形は?", "ケスタ"]];break;;
-    case "小地形3" :item =[["自然堤防とは？", "河川の両側に形成された微高地"], ["後背湿地とは？", "自然堤防の外側の低地"], ["氾濫原とは？", "自然堤防や後背湿地を含む平野"], ["三角州(デルタ)とは？", "河口付近に土砂が堆積してできた地形"], ["三角州の土壌は？", "肥沃な沖積土"], ["三角州は何に適している？", "水田や牧草地"], ["三角州の形成が活発な河川の例は？", "ナイル川、ガンジス川、ミシシッピ川"], ["扇状地、氾濫原、三角州どこに位置してる?", "扇状地は山麓、氾濫原は河川の中下流、三角州は河口付近"],["日本の台地のほとんどは?", "洪積台地"]];break;;
-    case "小地形4" :item =[["海岸の地形は何によって分けられる？", "離水海岸と沈水海岸"], ["離水海岸とは？", "陸地の隆起または海面の低下によって形成された海岸"], ["離水海岸の地形の例は？", "海岸平野、海岸段丘"], ["沈水海岸とは？", "陸地の沈降または海面の上昇によって形成された海岸"], ["沈水海岸の地形の例は？", "リアス海岸、フィヨルド、エスチュアリー"], ["最終氷期には海面はどうなっていた？", "100m以上低下していた"], ["ベーリング海峡は最終氷期にどうなっていた？", "陸化していた"], ["河岸段丘とは？", "河川沿いに形成された階段状の地形"], ["台地とは？", "古い扇状地などが隆起してできた地形"], ["海岸段丘のでき方は?", "波の侵食作用によって作られた海食台や海食崖が離水したもの"]];break;;
-    case "小地形5" :item =[["沈水海岸の代表的な地形は？", "リアス海岸、フィヨルド、エスチュアリー"], ["リアス海岸とは？", "V字谷を持った険しい山地が沈水してできた地形"], ["リアス海岸の例は？", "スペイン北西部、三陸海岸、若狭湾沿岸"], ["フィヨルドとは？", "U字谷(氷食谷)に海水が浸入してできた地形"], ["フィヨルドの例は？", "ノルウェー西岸、アラスカ〜カナダ太平洋岸、チリ南西岸、ニュージーランド南島西岸"], ["エスチュアリー(三角江)とは？", "河口部が沈水してできた地形"], ["エスチュアリーの例は？", "テムズ川、セーヌ川、エルベ川、ラプラタ川"], ["エスチュアリーができやすい場所は？", "安定陸塊など大河の河口"], ["日本にエスチュアリーが発達しにくい理由は?", "山がちで、しかも河川による侵食も盛んで土砂の生産や運搬・堆積作用が活発な為"]];break;;
-    case "小地形6" :item =[["海岸の砂の堆積地形の例は？", "砂嘴、砂州、陸繋砂州(トンボロ)"], ["砂嘴とは？", "湾口を閉じるように伸びる砂州"], ["ラグーン(潟湖)とは？", "砂州によって外海と隔てられた湖"], ["陸繋島とは？", "砂州によって陸地とつながった島"], ["陸繋砂州(トンボロ)とは？", "陸繋島と陸地を結ぶ砂州"], ["サンゴ礁海岸はどこに分布？", "熱帯・亜熱帯の水温が高く、きれいな海"], ["サンゴ礁の種類は？", "裾礁、堡礁、環礁"], ["グレートバリアリーフは何の種類？", "堡礁"], ["エスチュアリーの代表的河川は？", "テムズ川、エルベ川、セーヌ川、ラプラタ川、セントローレンス川"], ["海岸平野と海岸段丘の例は？", "九十九里平野、室戸岬"], ["砂嘴と砂州の例は？","三保の松原、弓ヶ浜、天橋立"]];break;;
-    case "小地形7" :item =[["氷河とは？", "万年雪(年間を通じて融けない雪)が圧縮されて氷氷になったもの"], ["氷河の侵食力が大きい理由は？", "上層の雪の圧力によって圧縮されるため"], ["大陸氷河とは？", "広く覆う大陸氷河(氷床)"], ["大陸氷河はどこに分布？", "南極大陸とグリーンランド"], ["山岳氷河(谷氷河)とは？", "高山の山頂付近などで発達する氷河"], ["氷期の最盛期には地球の何分の1が氷河に覆われていた？", "3分の1"], ["氷河の侵食地形の例は？", "カール(圏谷)、ホルン(尖峰)、U字谷"], ["カール(圏谷)とは？", "半椀状の凹地"], ["ホルン(尖峰)とは？", "複数のカールによって削り残された尖った峰"], ["U字谷とは？", "氷河によって削られてU字型になった谷"], ["モレーンとは", "氷河によって削り取られた岩屑が運搬され、高度が低下し氷河が消失するところに岩屑が押し固められたもの"], ["氷河の堆積地形の例は？", "モレーン"]];break;;
-    case "小地形8" :item =[["砂漠(desert)とは？", "植物がほとんど生育していない土地"], ["ワジ(涸川)とは？", "降水時のみに流水がある河川"], ["砂漠で、ワジが利用される理由は？", "地下水面が浅く井戸も掘りやすいため、オアシス集落が立地しやすい"], ["カルスト地形とは？", "雨水に含まれる二酸化炭素が石灰岩を溶食してできた地形"], ["カルスト地形の例は？", "ドリーネ、ウバーレ、ポリエ、タワーカルスト、鍾乳洞"], ["ドリーネとは？", "石灰岩の溶食盆地"], ["ウバーレとは？", "複数のドリーネが結合したもの"], ["ポリエ(溶食盆地)とは？", "ドリーネやウバーレより大規模な溶食盆地"], ["タワーカルストとは？", "熱帯から亜熱帯の多雨地域で石灰岩が溶食されてできた塔状の地形"], ["テラロッサとは？", "石灰岩中の不純物が溶食から取り残されてできた赤い土"], ["風化とは?", "岩石が物理的、化学的に破壊されること"]];break;;
-    case "小地形9" :item =[["チェルノーゼムの母材は？", "レス(黄土)"], ["外来河川とは？", "湿潤気候地域から流出し乾燥地域を貫流する河川"], ["外来河川の例は？", "ナイル川、ティグリス・ユーフラテス川、インダス川、コロラド川"], ["溶食の化学反応式は？", "CaCO₃ + CO₂ + H₂O → Ca(HCO₃)₂"], ["タワーカルストはどこに分布？", "熱帯や亜熱帯の多雨地域"], ["タワーカルストで有名な場所は？", "中国・コワントンシー壮族自治区のコイリン(桂林)"],];
-    case "地形図" :item =[["地形図とは？", "等高線によって地形や水系を表現し、地図記号によって集落、道路、行政界、土地利用などの情報をくわしく記した地図"], ["国土地理院が発行している地形図の種類は？", "2万5千分の1と5万分の1の地形図"], ["2万5千分の1地形図は、何をもとにつくられた？", "実測図"], ["縮尺とは？", "地形図に描く範囲を実際の何分の一に縮めているか"], ["大縮尺の地図とは？", "分母が小さい地図(より詳細な情報)"], ["小縮尺の地図とは？", "分母が大きい地図(より広範囲の情報)"], ["2万5千分の1地形図と5万分の1地形図では、どちらが大縮尺？", "2万5千分の1地形図"], ["2万5千分の1地形図4枚分の範囲を描けるのは？", "5万分の1地形図1枚分"]];break;;
-    case "地形図2" :item =[["等高線とは？", "等しい地点を結んだ線"], ["等高線の基準(標高0m)は？", "東京湾の平均海面"], ["等高線の種類は？", "主曲線、計曲線、補助曲線"], ["主曲線とは？", "細実線"], ["計曲線とは？", "太実線"], ["補助曲線とは？", "破線"], ["2万5千分の1地形図で、主曲線は何m間隔？", "10m"], ["2万5千分の1地形図で、計曲線は何m間隔？", "50m"], ["5万分の1地形図で、主曲線は何m間隔？", "20m"], ["5万分の1地形図で、計曲線は何m間隔？", "100m"], ["2万5千分の1地形図で、実際の距離1kmは何cmで表される？", "4cm"], ["5万分の1地形図で、実際の距離1kmは何cmで表される？", "2cm"], ["等高線は〇〇線になる", "閉曲線"], ["閉曲線の内側は必ず外側より〇〇ことを忘れない", "高い"]];break;;
-    case "地形図3" :item =[["閉曲線の中に凹地を示す記号がある場合、内側はどうなっている？", "外側より低い"], ["等高線が交わらない例外は？", "土崖や岩崖の記号がある場合"], ["等高線が広く開いている場所の傾斜は？", "緩やか"], ["等高線が狭く閉じている場所の傾斜は？", "急"], ["尾根とは？", "等高線が標高の高いほうから低いほうへ出っ張っているところ"], ["谷とは？", "等高線が標高の高いほうへくい込んでいるところ"], ["実際の地形図で、道路や河川は何色で表されることが多い？", "道路は黒、河川は青"],];
-    case "地形図4" :item =[["2万5千分の1地形図で、4cmの実際の距離は？", "1km"], ["5万分の1地形図で、4cmの実際の距離は？", "2km"], ["5万分の1地形図で、2cm四方の水田の面積は？", "1km²"], ["A地点の標高が1,200m、B地点の標高が800mで、A〜B間の水平距離が5,000mの時の平均勾配は？", "2/25"], ["等高線が入っていない場所は何を表す？", "傾斜があまりなく平坦な地形"], ["三角点とは？", "位置(緯度や経度)の基準点"], ["水準点とは？", "海抜高度の基準点"], ["等高線の間隔が密な場所の傾斜は？", "急傾斜地"], ["等高線の間隔が疎である場所の傾斜は?", "緩傾斜地"]];break;;
-    case "地形図5" :item =[["河川の右岸と左岸は、どっちから見て判断する？", "河川の上流から下流方向を見て"], ["天井川とは？", "周囲よりも高くなった河川"],["天井川を横切る道路や鉄道はどうなっている？", "トンネルを通る"], ["自然堤防と後背湿地は、等高線の状態で判断できる？", "困難"], ["自然堤防はどこに分布していることが多い？", "河川沿い"], ["後背湿地はどこに利用されていることが多い？", "水田"], ["古い集落と新しい住宅地の違いは？(地形図上の特徴)", "古い集落は地形図上で道路幅が狭い、新しい住宅地は道路幅が広い"], ["扇状地はどんな形?", "緩やかに傾斜しているため等高線がほぼ等間隔の同心円状"], ["氾濫原はどんな地形?", "傾斜が少なく河川の両側に自然堤防がその外側に後背湿地が分布"], ["台地はどんな土地利用?", "乏水地であるため台地上には畑や果樹園、侵食谷では水田"]];break;;
-    case "気候要素と気候因子" :item =[["気候とは何か？", "長期間の大気の平均状態を示したもの"], ["気候は何に影響を与えるか？", "地形、動植物の分布、人々の衣食住、経済活動、人口分布など"], ["気候を構成する要素を何というか？", "気候要素"], ["気温や降水量と何がわかれば共通テストでの高得点は間違いないか", "風"], ["気候要素の地理的な分布に影響を与えるものは何か？", "気候因子"], ["気候因子には何があるか？", "緯度、海抜高度（標高）、隔海度（海岸からの距離）、海流、地形など"], ["緯度と気温の関係は？", "低緯度ほど気温は高くなり、高緯度ほど気温は低くなる"], ["海抜高度が100m上がると、気温は約何度低下するか？", "約0.6℃"], ["海に近いと、何が増加し多雨になるか？", "水蒸気の流入"], ["海から離れると、何が減少し少雨となるか？", "水蒸気の流入"], ["山地の何側は多雨になるか？", "風上側"], ["大陸は何より比熱が小さいか？", "海洋"], ["大陸内部は、気温の何が沿岸部より大きくなるか？", "年較差や日較差"], ["何の影響を受けると温暖湿潤になるか？", "暖流"], ["何の影響を受けると冷涼乾燥になるか？", "寒流"], ["低緯度ほど何が高いため、単位面積当たりの受熱量が大きいか？", "太陽高度"], ["気温の等しい地点を結んだ線を何と言うか？","等温線"]];break;;
-    case "気候要素と気候因子2" :item =[["海面更正気温度とは何か？", "海抜高度0mの気温に修正した気温"], ["等温線図は何を知ることができる便利な統計地図か？", "世界各地のおおよその気温"], ["海洋は何でできていて、何が大きいか？", "水、比熱"], ["大陸は何で、比熱が小さいか。", "岩石"], ["1月（北半球の冬）の等温線図だということが読み取れるのは、大陸部分と海洋部分のどちらが低温になっていることからか？", "大陸部分"], ["7月（北半球の夏）なら等温線は大陸部分で、どちら側に曲がるか？", "高緯度側"], ["海抜高度（標高）が上昇すると、気温はどうなるか？", "低下する"], ["海抜高度が100m上がるごとに気温は平均して約何度下がるんだ?", "約0.6℃"], ["南アメリカの低緯度地方では、快適な気候を求めて何が発達しているか？", "高山都市"], ["アフリカの低緯度地方でも標高が高い何山や何山では、山頂付近で氷雪や氷河がみられるか？", "キリマンジャロ山(5,895m)、ケニア山(5,199m)"], ["日本の1月の0℃、7月の20℃、そして年平均10℃の等温線はどこを通過しているか？", "日本を通過している"],["等温線に対して平行になるはずなのに大陸部分で低緯度側に曲がっている理由は何ですか？","寒流が流れていて、周囲より低温になるため"]];break;;
-    case "気候要素と気候因子3" :item =[["札幌の年平均気温は何度か？", "8.9℃"], ["東京の年平均気温は何度か？", "15.4℃"], ["那覇の年平均気温は何度か？", "23.1℃"], ["気温の日較差とは何か？", "1日の最高気温と最低気温の差"], ["年較差とは何か？", "1年の最暖月と最寒月の平均気温の差"], ["気温の日較差は、どんなところで大きくなったり、小さくなったりするのか？", "低緯度地方、特に砂漠気候(BW)地域"], ["世界最高気温を記録したとされていた場所は？", "イラクのバスラ、リビアのアジージーヤ"], ["2012年にWMOが世界最高気温を記録したと発表したのはどこか？", "アメリカ合衆国のデスヴァレーにあるグリーンランドランチ"], ["グリーンランドランチは、どんな気候か？", "砂漠気候(BW)"], ["世界最低気温を記録したのはどこか?", "南極のヴォストーク基地"], ["人間の常住地域（エクメーネ）として、世界最低気温を記録したのはどこか？", "シベリア北東部のオイミャコン"], ["「北の寒極」と呼ばれているのはどこか？", "オイミャコン"], ["気温は、単位面積当たりの何の違いによって、低緯度ほど高くなるか？", "受熱量"], ["気温は、海抜高度が100m上昇するごとに、約何度ずつ低下するか？", "約0.6℃"], ["気温の年較差は、何が大きい大陸内部で大きくなるか？", "高緯度"], ["気温の年較差は、同緯度の場合、沿岸部より何の方が大きいか？", "大陸内部（乾燥地域）"], ["比熱（熱容量）とは何か？", "ある物質1gの温度を1℃変化させるための熱量"], ["水は、ガス体を除く自然界の物質では何が大きいか？", "最も比熱が大きい"], ["主に岩石からなる大陸は、温度がどうなりやすいか？", "上昇しやすく、低下もしやすい"]];break;
-    case "気候要素と気候因子4" :item =[["世界の年平均降水量は約何mmか？", "約800mm"], ["日本の年平均降水量は約何mmか？", "約1,700mm"], ["水蒸気を含んだ空気が暖められて上昇すると、空気はどうなるか？", "膨張し、温度が下がる"], ["飽和水蒸気量は気温にほぼ比例するので、温度が低下すると空気に含まれていた水蒸気は何になるか？", "水滴"], ["水滴が雨になるメカニズムは、何が上昇することか？", "空気が上昇する（上昇気流）"], ["空気が上昇するところは、一般に気圧はどうなるか？", "低気圧"], ["天気予報で「低気圧の影響で雨が降ります」、「高気圧に覆われ晴天になります」というのは、何と何の関係について言っているか？", "気圧と天候"], ["降水のない形をいえ", "降雪"], ["降水の成因別分類で、強い日射で地表が急激に暖められ、積乱雲が発生し、熱帯地域のスコール、夏の夕立。これは何というか？", "対流性降雨"], ["降水の成因別分類で、気圧の低いところに空気が吹き込み、温帯低気圧や熱帯低気圧に伴う風が上昇気流が生じる。これは何というか？", "低気圧(収束)性降雨"], ["降水の成因別分類で、暖かい空気と冷たい空気がぶつかり、梅雨前線、秋雨前線など寒帯前線上の雨。これは何というか？", "前線性降雨"], ["降水の成因別分類で、貿易風、偏西風、季節風などの山地の風上側の雨(ノルウェー西岸、チリ南部、インド南西部など)。これは何というか？", "地形性降雨"], ["熱帯地域が分布する赤道付近は、受熱量がとても大きいので何が発生しやすいか？", "上昇気流"], ["赤道付近で上昇して雨を降らせたあとの空気が、緯度何度付近に下降していくか？", "緯度20～30度付近"], ["砂漠は、成因によって大きく何種類に分けられるか？", "4種類"], ["最も一般的に広くみられる砂漠は、年何の影響を受けてできる中緯度砂漠か？", "年中亜熱帯高圧帯の影響"], ["北アフリカのサハラ砂漠、アラビア半島の何砂漠が代表的な例か？", "ルブアルハリ砂漠"], ["緯度20~30度付近を見ると本当に何が多いか", "砂漠"]];break;;
-    case "気候要素と気候因子5" :item =[["水蒸気を含む空気が上昇すれば何ができる", "雲"], ["ゴビ砂漠やタクラマカン砂漠は、水分の供給源の海からめちゃめちゃ離れている。このような砂漠を何というか。", "内陸砂漠"], ["大陸内部のように何が大きいと、水蒸気が供給されにくくなって砂漠になってしまう", "隔海度"], ["南アメリカ南部のパタゴニアは、南緯何～何度付近に位置しているか。", "南緯40～60度"], ["パタゴニアに大量に水蒸気を運んでくるのは何か。", "偏西風"], ["偏西風が何にぶつかって上昇気流になるか。", "アンデス山脈"], ["アンデス山脈の風上側にあたるチリ南部は何気候(Cfb)で、世界的な多雨地域か。", "西岸海洋性気候"], ["多量の雨を降らせた大気は、乾燥大気となって風下側の何に吹き込むか。", "アンデス山脈東側"], ["パタゴニアは地形性何砂漠と呼ばれるか。", "（雨陰）砂漠"], ["寒流の影響を受けて海岸部が砂漠になってしまう海岸砂漠の例は。", "ペルー沿岸～チリ北部のアタカマ砂漠、ベンゲラ海流の影響によるアンゴラ海岸部～ナミブ砂漠"], ["中低緯度の温暖な地域の大陸西岸に優勢な何が流れていると、大気が安定し、降水量は少なくなる。", "寒流"], ["海岸を流れる冷たい寒流によって、地表近くの岩盤や大気が冷やされて何が起こってしまう。", "気温の逆転"], ["中低緯度の大陸西岸では、寒流によって大気が安定し、何が生じにくいか", "上昇気流"], ["海流の影響による砂漠の例として何砂漠があるか", "ペルー沿岸～チリ北部のアタカマ砂漠, ベンゲラ海流の影響によるアンゴラ海岸部～ナミブ砂漠"],["砂漠形成の主要因は何か", "亜熱帯高気圧の影響, 隔海度が大, 半球間の風下側, 寒流の影響"],["水蒸気を含んだ空気が上昇し何が起きると雨が降るか","冷却"],["砂漠はさまざまな要因がからみ合って形成されるが、何の影響などが重要な因子となるか","亜熱帯高気圧,隔海度,山地の風下,寒流"]];break;;
-    case "気候要素と気候因子6" :item =[["風は、何から何への空気の移動か？", "高圧部分から低圧部分"], ["年間を通じほぼ一定方向に吹くものを何というか？", "恒常風（惑星風）"], ["恒常風によって何と何の大気交換が行われるか？", "低緯度と高緯度"], ["赤道付近には、何が形成されるか？", "赤道低圧帯（熱帯収束帯）"], ["緯度20～30度付近に何が形成されるか。", "亜熱帯高圧帯（中緯度高圧帯）"], ["亜熱帯高圧帯から赤道低圧帯に向けて何が吹き込むことになるか。", "貿易風"], ["地球の自転の影響（転向力、コリオリの力）を受け、風の進行方向に対して北半球ではどちらに曲がるか。", "右（時計回り）"], ["地球の自転の影響（転向力、コリオリの力）を受け、風の進行方向に対して南半球ではどちらに曲がるか。", "左（反時計回り）"], ["赤道付近だとすると、その逆は極付近となる。極付近では受熱量が小さいため、空気は冷えて重くなる。そこで下降気流が生じ何が形成されることになるんだ。", "極高圧帯"], ["貿易風は、北半球では何風、南半球では何風になるか", "北東風、南東風"], ["恒常風には、貿易風のほかに何と何があるか", "偏西風と極偏東風（極東風）"], ["海洋と大陸の比熱差により、季節によって風向を変える風を何というか。", "季節風"], ["熱帯地域で発生し、高緯度側に移動する。暴風雨を伴う風は。", "熱帯低気圧に伴う風"], ["局地的に発生する風で、寒冷乾燥風や温暖湿潤風などさまざまな風があるのは何というか。", "地方風"], ["亜熱帯高圧帯から高緯度側に吹き出すのが何故か","偏西風"],["極高圧帯からの極東風と偏西風が衝突することによって何が生じるか","低圧帯"],["低圧帯をなんというか。","亜寒帯（高緯度）低圧帯"]];break;;
-    case "気候要素と気候因子7" :item =[["気圧帯は7月に何、1月に何するか", "北上, 南下"], ["季節風は、恒常風と違って何によって風向を変える風か", "季節"], ["夏季は比熱の小さい何が温まり、暖められた空気は膨張するため低圧部ができる", "大陸"], ["相対的に高圧な海洋から低圧な大陸に風が吹き込むことになる。これが何の季節風だ。", "夏季"], ["冬季は逆に低温・高圧の何から海洋に吹き出すことになる。", "大陸"], ["つまり夏季の季節風は海洋から吹くため、湿潤な空気を移動させて何の原因となることをしっかり理解しよう。", "降水"], ["季節風の顕著な地域は何アジア、何アジアで、これらの地域は季節風の影響が強いため、何アジアと呼ばれているんだ", "東アジア, 南アジア, モンスーンアジア"], ["次は台風に代表される何気圧の説明をしよう！", "熱帯低気圧"], ["熱帯低気圧は、熱帯地域の何上で発生するか", "海洋"], ["熱帯低気圧は地域によっていろいろな呼び名があるけど、日本や中国などを襲うものを何、ベンガル湾やインドを襲うものを何、カリブ海で発生してメキシコ湾岸など北アメリカを襲うものを何と呼ぶか", "台風, サイクロン, ハリケーン"], ["熱帯低気圧は暴風雨を伴うため、何や何などの気象災害が発生すると、空気が海面を押す力が弱くなるので、海面が上昇する）によって家屋の倒壊や人的被害を与えるんだ。", "洪水, 高潮"], ["世界各地にはいろいろな特徴をもつその地域特有の風があり、これを何と呼んでるよ。", "地方風（局地風）"], ["最も代表的な地方風には何があるね。", "フェーン"],["フェーは何から夏にかけて地中海から吹く風が、アルプス山脈を越える際に生じる高温乾燥風のことを指していたんだけど、現在では何各地で生じる同様の気象現象を何現象と呼ぶよ。", "世界,フェーン現象"],["まず湿潤な空気が山地の風上側で何と何上昇するとするね。飽和状態の空気は海抜高度が100m上昇すると何度ずつ低下（湿潤断熱減率）するのに対し、雨を降らせた後に山を越えた乾燥状態の空気は100m降下する際に何度ずつ上昇（乾燥断熱減率）し、高温乾燥風となるんだよ。果実などの火事を発生させる恐れもあるんだね。", "上昇気流,0.5℃,1℃"],["一方、秋冬から冬にかけてフランスの地中海沿岸に吹く何やアドリア海に吹く何は寒冷乾燥風で、日本の何や何も同様の風だよ。", "ミストラル,ボラ,颪,空っ風"]];break;;
-    case "気候要素と気候因子8" :item =[["風は気圧の何から何へ吹くか？", "高圧部から低圧部"], ["恒常風には何があるか、3つ答えよ。", "貿易風、偏西風、極東風"], ["季節風（モンスーン）は、何と何の何の違いによって生じるか？", "海陸の比熱差"], ["夏季に多い季節風は何をもたらすか？", "多くの降水"], ["地方風の例を2つ答えよ。", "フェーン、やませ"], ["温帯低気圧は、何と何の境界面で発生するか？", "温暖な空気塊と寒冷な空気塊"], ["温帯低気圧や温暖前線・寒冷前線は、何によってどちらからどちらへ移動するか？", "偏西風により西から東"], ["日本で冷涼湿潤な風で、冷害をもたらすものは何か？", "やませ（山背）"], ["やませはどこで発生するか？", "オホーツク海高気圧"], ["風は気圧の〇〇部から〇〇部へ吹く空気の移動である。", "高、低"]];break;;
-    case "気候区分" :item =[["ケッペンの気候区分は、主に何と何に着目して区分されたか？", "植生と気温"], ["ケッペンは、世界の気候を何と何に大別したか？", "樹林気候と無樹林気候"], ["樹林気候は何と何と何に区分されるか？", "熱帯、温帯、亜寒帯（冷帯）"], ["無樹林気候は何と何に区分されるか？", "乾燥帯、寒帯"], ["乾燥帯は、さらに何と何に区分されるか？", "ステップ気候(BS)と砂漠気候(BW)"], ["寒帯は、さらに何と何に区分されるか？", "ツンドラ気候(ET)と氷雪気候(EF)"], ["熱帯の気候区分の記号は何か？", "A"], ["温帯の気候区分の記号は何か？", "C"], ["亜寒帯(冷帯)の気候区分の記号は何か？", "D"], ["乾燥帯の気候区分の記号は何か？", "B"], ["寒帯の気候区分の記号は何か？", "E"],["熱帯雨林の気候区分の略号は何か？", "Af"]];break;
-    case "気候区分2" :item =[["熱帯(A)の、最寒月の平均気温は何度以上か？", "18℃以上"], ["熱帯雨林気候(Af)では、年降水量は多いか少ないか？", "多い"], ["熱帯モンスーン気候(Am)では、最少月降水量は何mm未満か？", "60mm"], ["サバナ気候(Aw)の特徴は何か？", "明瞭な乾季がある"], ["乾燥帯(B)は、降水量と何の関係で決まるか？", "蒸発量"], ["ステップ気候(BS)の年降水量は、およそ何mm程度か？", "250～500mm"], ["砂漠気候(BW)の年降水量は、何mm未満のことが多いか？", "250mm"], ["温帯(C)の最寒月の平均気温は何度未満か？", "-3℃"], ["地中海性気候(Cs)の特徴は？", "夏に少雨"], ["温暖冬季少雨気候(Cw)の特徴は？", "冬に少雨"], ["温暖湿潤気候(Cfa)の特徴は？", "年中多雨"], ["西岸海洋性気候(Cfb, Cfc)の特徴として、月平均気温10℃以上の月は何ヶ月以上あるか？", "4か月以上"], ["亜寒帯(冷帯)(D)の最寒月の平均気温は何度未満か？", "-3℃"], ["亜寒帯湿潤気候(Df)の特徴は？", "年中湿潤"], ["亜寒帯冬季少雨気候(Dw)の特徴は？", "冬に少雨"], ["寒帯(E)の最暖月の平均気温は何度未満か？", "10℃"], ["ツンドラ気候(ET)の最暖月の平均気温は何度以上何度未満か？", "0℃以上10℃未満"], ["氷雪気候(EF)の最暖月の平均気温は何度未満か？", "0℃"]];
-    case "気候区分3" :item =[["熱帯は主にどこに分布しているか？", "赤道付近"], ["熱帯雨林気候(Af)はどこに分布しているか？", "赤道低圧帯の影響を受ける地域"], ["熱帯モンスーン気候(Am)は、弱い何があるか？", "乾季"], ["熱帯モンスーン気候(Am)で形成される森林は？", "熱帯季節風林（雨緑林）"], ["サバナ気候(Aw)は、熱帯雨林気候の何に分布しているか？", "周辺"], ["サバナ気候(Aw)は、どの大陸に広く分布しているか？", "アフリカ、南アメリカ"], ["高日季（夏季）には、サバナ気候(Aw)は何の影響を強く受けるか？", "赤道低圧帯"], ["低日季（冬季）には、サバナ気候(Aw)は何の影響を強く受けるか？", "亜熱帯高圧帯"], ["乾燥帯は、およそ南北の何付近に分布しているか？", "回帰線付近（ほぼ緯度25度）"],["砂漠気候(BW)はどこに分布している?", "大陸内部や大河川の流域"],["ステップ気候はどこに分布していますか", "砂漠の周辺部"]];break;;
-    case "気候区分4" :item =[["乾燥帯(B)は、年間の何が蒸発量は気温に比例するか", "降水量"],["砂漠気候(BW)は、ほとんど年降水量が何mm未満の地域か？", "250mm"], ["砂漠気候(BW)で、人々は何を建設し、何を行うオアシス農業を営んでいるか？", "灌漑施設、ナツメヤシなどの栽培"], ["ステップ気候(BS)は、年降水量が何mm程度の地域か？", "250～500mm"], ["ステップ気候(BS)で、何が広がっているか？", "短草草原"], ["ステップ気候(BS)の地域では、何が盛んに行われているか？", "牧畜"], ["温帯(C)は、何が明瞭で、人間が最も生活しやすい気候環境にあるか？", "四季"], ["温帯(C)は、およそ緯度何度から何度に当たる地域に分布しているか？", "30～45度"],["大陸西岸には何気候(Cs)が分布していますか", "地中海性気候"], ["大陸東岸には何気候(Cfa)が分布していますか", "温暖湿潤気候"],["西岸海洋性気候は高緯度側に、温暖小雨気候は低緯度側に分布していますか？","はい"],["地中海性気候(Cs)は、夏に何の影響で乾燥し、冬は何の影響を受けるため降水が多くなるか？", "亜熱帯高圧帯、偏西風"], ["地中海性気候(Cs)は、主にどこの地域の何沿岸地方が代表的か？", "ヨーロッパの地中海"], ["温暖冬季少雨気候(Cw)は、主にどこの何部から何部にかけて広く分布するか？", "中国南部からインド北部"], ["Csの高緯度側(緯度45~60度付近)には、年に何の影響を受ける何気候(Cfb)が分布しているか？", "偏西風,西岸海洋性気候"]];break;;
-    case "気候区分5" :item =[["亜寒帯(冷帯)は、主にどの大陸の何に分布しているか？", "ユーラシア大陸と北アメリカ大陸の高緯度地域"], ["亜寒帯(冷帯)では、何が形成されているか？", "針葉樹林(タイガ)"], ["シベリアやカナダの地域には、何が残っているところがあるか？", "永久凍土"], ["永久凍土とは何か？", "土や岩が一年中凍結している状態"], ["凍土現象とは何か？", "いったん融解して生じた水分が、冬季に再び凍結する際に、地面が隆起する現象"], ["凍土現象によって、何が放出される問題が生じているか？","温室効果ガスのメタンガス"], ["亜寒帯湿潤気候(Df)は、どこでみられるか？", "ユーラシア大陸や北アメリカ大陸"], ["亜寒帯冬季少雨気候(Dw)は、どこにしか分布していないか？", "冬季に優勢なシベリア高気圧の影響を受けるユーラシア大陸東部"], ["亜寒帯冬季少雨気候(Dw)は、何と呼ばれているか？", "北の寒極"], ["寒帯は、北極や南極のような何(66度33分より高緯度)などに分布するか？", "極圏"], ["寒帯でも何気候(ET)は、海抜高度が非常に高いどこやどこなどに分布しているか？", "ツンドラ、チベット高原やアンデス"], ["ツンドラ気候(ET)は、年間を通じて何が小さいか？", "受熱量"], ["ツンドラ気候(ET)は、主にどこの何沿岸に分布しているか？", "北極海"], ["ツンドラ気候(ET)では、何と何が生育するか？", "コケや小低木"], ["ツンドラ気候の分布地域には、人間は住んでいないということなのか？", "いいえ"], ["氷雪気候(EF)では、何に覆われていて、何もないか？", "年中雪や氷、草木"]];break;
-    case "気候区分6" :item =[["高山気候(H)は、主にどこの何と何の内陸部がこれに当たるか？", "南極大陸とグリーンランド"], ["高山気候(H)では、何の影響で降雪は少ないか？", "極高圧帯"], ["高緯度側の極圏では、夏に何が起こり、冬に何が起こるか？", "一日中太陽が沈まない白夜、一日中太陽が昇らない極夜"], ["海抜高度が中緯度で何m以上の森林限界(樹木が生育する限界)より高い地域でみられるか？", "2,000m"], ["低緯度の高山気候では何が小さいか？", "気温の年較差"], ["低緯度の高山気候では何が強いか？", "低く紫外線"], ["ケッペンの気候区分は、何をもとに何と何で決定するか？", "植生、気温の年変化と降水量"], ["ケッペンの気候区分で、A・C・Dは何気候で、B・Eは何気候となるか？", "樹林気候、無樹林気候"], ["気候帯は、赤道を中心にほぼ何に分布しているか？", "南北対称"], ["高山気候(H)は、ケッペン自身が作った気候区分か？", "いいえ"]];break;
-    case "気候区分7" :item =[["植生(森林や草地などの植物の集団)は何と何に影響されるか？", "気温と降水量"], ["熱帯(A)地域は熱量、降水量ともに豊富だから、植物の生育はどうか？", "活発"], ["熱帯雨林気候(Af)では、何と呼ばれる密林が形成され、アマゾン川流域では何、東南アジアやアフリカでは何と呼ばれているか？", "常緑広葉樹、セルバ、ジャングル"], ["マングローブ林は、どこの何や何に繁茂する森林で、ほかの樹木と異なり、何が高いか？", "大河川の河口付近や沿岸部、耐塩性"], ["熱帯モンスーン気候(Am)では、何と何が混じった熱帯季節林(雨緑林)がみられるか？", "常緑広葉樹と落葉広葉樹"], ["サバナ気候(Aw)では、強い何があり年降水量もAfよりやや少ないので、何(樹林密度が低い森林)と何が分布しているか？", "乾季、疎林、長草草原"], ["温帯地域の低緯度側には、何(何、何、何などが葉の硬い照葉樹林を形成)が分布しているか？", "常緑広葉樹、クス、カシ、シイ"], ["温帯地域の高緯度側には、何(何、何、何など)と何が分布しているか？", "落葉広葉樹、ブナ、ナラ、カエデ、針葉樹の混合林"], ["地中海沿岸には、何(何、何が、何)が生育しているか？", "硬葉樹、オリーブ、コルクがし、月桂樹"], ["亜寒帯(D)地域では、低温に耐える何(何、何、何)が多く、何と呼ばれる針葉樹林が広がっているか？", "針葉樹、エゾマツ、カラマツ、トウヒ、タイガ"], ["ツンドラ気候(ET)地帯では、樹木は生育できなくなり(森林限界)、何(何)が生える何になるか？", "地衣類、蘚苔類、ツンドラ"], ["乾燥帯(B)は植生に乏しいけど、何気候(BS)では短い何があるため、何と呼ばれる何が分布しているか？", "ステップ、雨季、短草草原"], ["砂漠気候(BW)では何はほとんどみられないことに注意しよう", "植生"]];break;
-    case "気候区分8" :item =[["土壌とは、岩石が何してできた砂や粘土のような、細かい粒子になったものか？", "風化"], ["土壌には、何や何などが含まれたものか？", "有機物や腐植"], ["湿潤地域では土壌は何性で、乾燥地域では土壌は何性を帯びることが多いか？", "酸性、アルカリ性"], ["土壌は大きく何と何に大別されるか？", "成帯土壌と間帯土壌"], ["成帯土壌とは、何や何の影響を強く受けた土壌か？", "気候や植生"], ["間帯土壌とは、土壌のもととなる何の影響を強く受けたもので、何に分布する土壌のことか？", "岩石、局地的"], ["熱帯では、激しいスコールにより、栄養塩類のように水に溶かされやすい物質が流され、何や何などの金属が多く残った土壌になるか？", "鉄やアルミニウム"], ["熱帯で、赤色のやせた土壌を何というか？", "ラトソル"], ["ラトソルは、何の原料となる何を含む岩石の産地が、熱帯に多い理由の一つか？", "アルミニウム、ボーキサイト"], ["亜熱帯気候の地域では、主に何色の土壌が分布している", "赤黄色"], ["温帯の、落葉広葉樹林土は主に何色をしていますか", "褐色"], ["温帯湿潤気候地域では落葉の堆積によって、比較的厚い何を含む何色の土ができているか", "腐食層、茶色"], ["亜寒帯では、低温のため微生物があまり活動しないので、有機物の分解が進まず、何が形成されにくいか？", "腐植や栄養塩"], ["亜寒帯で、酸性が強いため、土中の金属成分が溶かされて下方に移動してしまって、酸に溶けにくい石英だけが地表付近に残され白っぽい土になったものを何というか？", "ポドゾル"], ["寒帯のツンドラ気候地域には、コケなどの遺骸が、低温のために分解されないまま堆積して炭化した何を含むやせた何が分布しているか？", "泥炭、ツンドラ土"], ["半乾燥のステップ気候では、一面の何が乾季に枯れ、土中に何を形成するか？", "短草草原、腐植層"], ["半乾燥のステップ気候で、黒色土のことをなんと呼ぶか？", "チェルノーゼム"], ["腐植は何によって適度に分解された微粒子で、何に富むか？", "有機物中の微生物、腐植"]];break;
-    case "気候区分9" :item =[["土壌は、何と対応する何と、局地的に分布する何に大別される。", "気候帯、成帯土壌、間帯土壌"], ["土壌には何があって、植物の成長や農業の生産性に影響を与える。", "肥沃度の高低"], ["土壌には何が含まれており、植物の成長や農業の生産性に影響を与えるか", "肥沃度"], ["寒帯には主に何の土が分布しているか", "ツンドラ土"],  ["冷帯には主に何の土が分布しているか", "ポドゾル"], ["温帯には主に何の土が分布しているか", "褐色森林土"],["乾燥帯には主に何の土が分布しているか", "砂漠土、栗色土、黒色土"],["熱帯には主に何の土が分布しているか", "ラトソル"],["砂漠気候の植生は？", "植生なし(オアシスを除く)"],["ステップ気候の植生は？", "短草草原"],["ツンドラ気候の植生は？", "地衣類、蘚苔類"],["氷雪気候の植生は？","植生なし"]];break;
-    case "陸水と海洋" :item =[["地球上には約何km³の水があるか？", "14億km³"], ["地球上で、海水の割合は何％か？", "97.5%"], ["陸水の割合は何％か？", "2.5%"], ["陸水のうち、約76.4%は何や何などとして存在するか？", "氷河や氷雪"], ["陸水のうち、約22.8%は何として存在するか？", "地下水"], ["図1によると、地表水はわずか何%にも満たないか？", "1%"]];break;
-    case "陸水と海洋2" :item =[["陸水のうち多くを占めているのは何か？", "氷河や氷雪"], ["地下水とは何か？", "降水が地下に浸透し、不透水層(粘土層や岩盤)上に滞留したものを地下水という。"], ["地表に近い不透水層上を流れるものを何と呼ぶか？", "自由地下水"], ["自由地下水の下のさらに不透水層上を流れるものを何と呼ぶか？", "被圧地下水"], ["自由地下水はどこから近いため、取水しやすく、古くから世界中で利用されてきたか？", "地表"], ["乾燥地域では何の影響を受け、水量が乏しいことが多いか？", "気候"], ["被圧地下水の話で、何盆地での利用が有名か？", "オーストラリアのグレートアーテジアン(大鑽井)"], ["被圧地下水は、人が飲んだり、灌漑に使ったりするには何が高いので、人間や農作物より塩分の許容限界が大きい何に使われることになり、大規模な牧畜が行われているか？", "塩分濃度、羊や牛の飲み水"], ["一般的に被圧地下水は水量が豊富で、何や何として利用されているか？", "灌漑などの農業用水や工業用水"], ["被圧地下水は、岩盤を掘り抜いて何(これを掘り抜き井戸、または鑽井と呼ぶんだ)をつくらなければならないので、何が必要になってくるか？", "井戸、技術や資本"], ["不透水層上に局地的にある地下水のことを何と呼び、水が得にくい台地上の集落にとって貴重な水資源になっていたか？", "宙水"], ["1人当たり水資源賦存量とは何か？", "理論上人間が最大限利用可能な水資源量のことで、降水量から蒸発散量を引いたものに面積を乗じてその国の人口で割って求めた値"], ["日本の1人当たり水資源賦存量(m³/人・年)を海外と比較すると、世界平均の何以下か？", "1/2"]];break;;
-    case "陸水と海洋3" :item =[["河川水は、何や何として利用されるだけでなく、何にも利用されている。", "生活用水や農業・工業用水、水運"], ["ヨーロッパは低地が広がるので、河川勾配が小さく、気候的にも何(Cfb)の地域では降水が年間を通じて一定だから、何が発達しているか？", "西岸海洋性気候、内陸水路"], ["日本の河川は、河川のある地点における何と何が大きいのが特徴か？", "最大流量と最小流量の比(河況係数)"], ["メコン川はどこを流れる河川で、流域は何が広がり、夏の何の影響で、何月の流量が増加しているのがわかるか？", "インドシナ半島、Aw、モンスーン、7～9月"], ["レナ川はどこを流れる河川で、流域には何が広がっているか？", "シベリア東部を北極海に向かって、Dw"], ["レナ川は、何月に流量のピークを迎えるけど、これは初夏の何による流量の増加か？", "6月、融雪"], ["ライン川はどこからどこに向かって流れる河川か？", "アルプス山脈から北海"], ["ライン川は、流域の大部分が何で、年中平均した降水があるため、何変化も少ないことが読み取れるか。", "Cfb, 流量"],["湖沼水は河川と同じように用水としても利用されてるけど、それ以外にも沿岸の気候をやわらげたり(高緯度にある何や何沿岸に都市が発達しているのはその例)、洪水の調節(何)、何、何などに役立ったりしている。", "五大湖やシベリアのバイカル湖、遊水池、水産業、観光"], ["氷河湖とは何か？", "氷河の侵食作用による凹地に湛水、または堆積作用によるせき止めで形成"], ["断層湖とは何か？", "地溝や断層運動によってできた凹地に形成"], ["カルデラ湖とは何か？", "火山活動によって生じたカルデラ内に形成"], ["海跡湖とは何か？", "かつて海洋であったところが地殻変動などにより閉ざされて形成"], ["氷河湖の例を３つ答えなさい", "五大湖、北欧、ヨーロッパロシア、カナダの湖"], ["断層湖の例を３つ答えなさい", "東アフリカのリフトバレー沿いの湖、バイカル湖、琵琶湖、諏訪湖"], ["カルデラ湖の例を３つ答えなさい", "洞爺湖、支笏湖、十和田湖、田沢湖"], ["海跡湖の例を３つ答えなさい", "カスピ海、アラル海、霞ヶ浦"],["海洋は、何、何、何ヨーロッパ地中海や日本海などの何に大別できる?", "太平洋、大西洋、インド洋の三大洋と、付属海"]];break;;
-    case "陸水と海洋4" :item =[["貿易風や偏西風が吹くと、海との間で何が生じるか？", "摩擦"], ["表層の海水を動かす原動力となっているものは何か？", "貿易風や偏西風"], ["地表付近の卓越風の影響を強く受けて流れる海流を何と呼ぶか？", "吹送流"], ["主な海流は、北半球では何回り、南半球では何回りになっているか？", "時計回り、反時計回り"], ["ヨーロッパを見てごらん！何海流は明らかに何に引っ張られて、高緯度まで流れてるのがわかるよね？", "北大西洋海流、偏西風"], ["低緯度から高緯度に向かうものが何で、高緯度から低緯度に向かうものが何か？", "暖流、寒流"],["海流は、何と何によって生じる表層流で、気候因子の一つとして何温度を少なくする働きを行う。", "卓越風、低緯度"],["海流で、大部分は何によって生じる表層流で、何因子の1つとして何温度差を少なくする働きを行う。", "卓越風、気候、低緯度"], ["海流は、大部分は卓越風によって生じる何で、気候因子の1つとして何温度差を少なくする働きを行う", "表層流、低緯"], ["大部分は卓越風によって生じる表層流で、何因子の1つとして何温度を少なくする働きを行う。", "気候、低緯度"],["自由地下水と被圧地下水、浅い不透水層上にある地下水で、ほぼ大気と同じ圧力しか受けていないのは何？","自由地下水"],["自由地下水と被圧地下水、は、不透水層にはさまれ、大気より大きな圧力を受けている地下水で、自噴することもあるのは何？","被圧地下水"],["地中海と沿海、海洋は大洋と何に大別され、付属海は地中海と何(縁)海からなる。", "付属海、沿"],["地中海と沿海、何とは大陸に囲まれた海のことで、何、何、何などが代表的な地中海である。", "地中海、北極海、ヨーロッパ地中海、アメリカ地中海"],["地中海と沿海、何とは半島や島によって限られた海で、日本海、オホーツク海、北海などのように大陸に沿って分布している。", "沿海"],["エルニーニョ現象とは、平年に比べ東太平洋の赤道付近で何温度が高くなる現象のこと", "海面"],["エルニーニョ現象が起こり、何が広がるペルー沿岸やチリ北部(何砂漠)での集中豪雨や洪水、何ネシアの干ばつや何火災、日本の何豪雨、何フォニアでの冬季の降水量増加など世界中の何現象の原因ではないかと考えられている。", "砂漠、アタカマ、インド、森林、集中、カリフォル"],["エルニーニョ現象の反対で、貿易風が強まることにより東太平洋の海面水温が平年より低下する状態を指す現象は?", "ラニーニャ現象"]];break;
-    case "自然災害と防災" :item =[["プレートテクトニクスとは何か？","大陸や海洋などの分布を説明している理論"],["日本列島は何枚のプレートの境界付近に位置しているか？","4枚"],["太平洋プレートはどちらの方向に移動しているか？","北西方向"],["日本の国土の約何%が山地か？","約70%"],["日本の国土を大きく3つに分ける際、その境界線となるものは何か？","フォッサマグナと中央構造線"],["フォッサマグナとは、どことどこのプレートの境界に当たるか？","北アメリカプレートとユーラシアプレート"],["中央構造線とは、西南日本を何と何に分ける大規模な構造線か？","西南日本内帯と西南日本外帯"],["太平洋プレートが北西方向に移動することで、何プレートに沈み込んでいるか？","ユーラシアプレート"],["フォッサマグナの東縁は不明瞭だが、西縁はどこからどこまでか？","新潟県糸魚川市から静岡県静岡市"],["フォッサマグナ周辺で、火山が集中している場所はどこか？","日本アルプス"],["日本アルプスを構成する山脈を北から順に3つ答えよ。","飛騨山脈、木曽山脈、赤石山脈"],["水深が200m未満の浅海底を何というか？","大陸棚"],["プレート境界に沿って、何が分布しているか？","海溝やトラフ"]];break;
-    case "自然災害と防災2" :item =[["日本はプレート境界に位置しているため、どのような特徴があるか？","変動帯で、国土が山がち"],["日本には安定陸塊周辺にみられるような地形はあるか？","侵食平野はない"],["日本の地形は、主に何によって形成されたか？","侵食された土砂が堆積して形成された台地"],["千島・カムチャツカ海溝は、何プレートが何プレートに沈み込むところに形成されたか？","太平洋プレートが北アメリカプレート"],["千島・カムチャツカ海溝の最大深度は？","9,500mを超える"],["日本海溝は、何プレートが何プレートに沈み込むところに形成されたか？","太平洋プレートが北アメリカプレート"],["日本海溝の最大深度は？","8,000mを超える"],["日本海溝付近を震源とする地震は？","東北地方太平洋沖地震（2011年）"],["相模トラフは、何プレートが何プレートの沈み込むところに形成されたか？","フィリピン海プレートが北アメリカプレート"],["相模トラフ付近で発生した地震は？","関東地震（1923年、関東大震災）"],["伊豆・小笠原海溝は、何プレートが何プレートに沈み込むところに形成されたか？","太平洋プレートがフィリピン海プレート"],["伊豆・小笠原海溝の最大深度は？","9,800m以上"],["南海トラフは、何プレートが何プレートに沈み込むところに形成されたか？","フィリピン海プレートがユーラシアプレート"],["南海トラフ付近で発生が危惧されているものは何か？","近い将来における巨大南海トラフ地震"],["琉球（南西諸島）海溝は、何プレートが何プレートに沈み込むところに形成されたか？","フィリピン海プレートがユーラシアプレート"],["トラフと海溝の違いは何か？","水深6,000m未満の海底盆地がトラフ、6,000m以上が海溝"]];break;
-    case "自然災害と防災3" :item =[["日本の国土は、南北と東西どちらに細長いか？","南北"],["北海道を除くほとんどの地域は何気候に属するか？","温暖湿潤気候(Cfa)"],["日本の夏は、何の影響により温暖で湿潤な気候となるか？","南東季節風と小笠原気団（太平洋高気圧）"],["日本の冬は、何の影響により寒冷で乾燥した気候となるか？","北西季節風とシベリア気団（シベリア高気圧）"],["日本における気温の年較差は何度前後か？","だいたい20℃前後"],["日本の地形は、何の影響を受けやすいか？","低気圧や前線"],["日本の特徴として、降水量の何が大きいか？","季節的変化"],["春に、本州付近をたびたび通過するものは何か？","低気圧"],["春に見られる、3日ほど寒い日が続くと4日ほど暖かい日が続くというような現象を何というか？","三寒四温"],["小笠原気団の北上によって、日本付近に発達する停滞前線は何か？","梅雨前線"],["南西諸島では何月に梅雨入りするか？","5月"],["本州では何月に梅雨入りするか？","6月"],["小笠原気団の南下により、シベリア気団が優勢になると発達する停滞前線は何か？","秋雨前線"],["秋雨前線は、何月から何月にかけて発達し、雨をもたらすか？","9月～10月"],["シベリア気団から吹き出す寒冷で乾燥した風を何というか？","北西季節風"],["日本海上で暖流の対馬海流から大量の水蒸気を供給され、雪雲が発生するのはどこか？","北陸、山陰などの日本海側"],["冬に、日本海側と太平洋側で大きく違うものは何か？","降水量"]];break;
-    case "自然災害と防災4" :item =[["日本は地形的にも気候的にも何が起こりやすいと言えるか？","自然災害"],["地震は、世界中どこでも発生する可能性があるか？","はい"],["日本のようにプレート境界付近に位置している国・地域では、何が起こりやすいか？","地震などの地殻変動"],["プレートが動くことで何がたまり、そのパワーが地殻を破壊するか？","プレート境界やプレート内部にひずみ"],["岩石が破壊されたり、ずれたりする際の震動を何というか？","地震"],["プレート境界付近で発生する地震を何というか？","海溝型地震"],["海溝型地震では何が発生することがあるか？","津波"],["2011年に日本海溝付近で発生した地震は何か？","東北地方太平洋沖地震"],["東北地方太平洋沖地震のマグニチュードは？","M9.0"],["津波の高さは1mであったとしても、海岸から何km離れていても到達することがあるか？","数km"],["プレート境界だけでなく、プレート内の活断層の動きで発生する地震を何というか？","内陸直下型地震"],["海溝型地震に比べ、内陸直下型地震は何が大きいことが多いか？","マグニチュード（地震発生時のエネルギー）の割に、震度（実際の地表での揺れ）"],["1995年に神戸市付近を中心に発生した地震は何か？","兵庫県南部地震"],["兵庫県南部地震による被害は何というか？","阪神・淡路大震災"],["地震にともなう災害には、何があるか？","液状化"],["液状化とは、地震による震動で、地盤がどうなってしまう現象か？","液体状"],["液状化が起きやすい場所は？","埋め立て地や三角州など"],["津波から陸地を守るために作られた堤防を何というか？","防潮堤"],["津波から港を守る堤防を何というか？","防波堤"],["津波警報を発表するのはどこか？","気象庁"],["日本が多くの恵みを得てきたけど、有史以来なんどもなんども自然の猛威によって、考えられないくらいの被害やつらい思いをしてきたことを何というか？","自然災害伝承碑"]];break;
-    case "自然災害と防災5" :item =[["日本は、世界でも有数の何大国か？","火山大国"],["活火山とは、具体的にどのような火山のことか？","概ね過去1万年以内に噴火した火山及び現在活発な噴気活動のある火山"],["現在、日本にはいくつの活火山があるか？","111"],["火山噴火予知連絡会とは何か？","火山噴火に関する情報を交換し、火山の総合的な判断を行う組織"],["東日本火山前線と西日本火山前線は、どこに沿って分布しているか？","それぞれ海溝にほぼ並行して"],["火山から噴出しているものがわかるだろう？それは何を見ればわかるか？","火山から海溝側には火山が分布していないことに注意"],["紀伊半島や四国には活発な火山があるか？", "ない"],["近年、どのような方法で火山噴火に対する避難訓練などが行われているか？","噴火警報・予報（気象庁が噴火災害軽減のために発表）の発令やハザードマップを利用"],["火山灰による被害は何か？","農地の被害や家屋の倒壊、火山灰の浮遊で太陽光が遮られることによる異常気象。"],["溶岩流による被害は何か？", "高温の溶岩が流下し、建造物や農地を破壊。"],["火砕流による被害は何か？","高温のガスを含む火山噴出物が⾼速で流下し、周囲を焼き尽くす。"],["火山泥流による被害は何か？","⼭地に堆積した⽕⼭灰や⽕⼭岩などが、降⾬によって⼟⽯流となって流下し、家屋や建造物を破壊。"],["山体崩壊とは何か？","火山体の一部が大規模に崩壊し、山麓に向かって岩なだれが発生。"],["1923年に発生した地震は？","関東地震"],["1995年に発生した地震は？","兵庫県南部地震"],["2011年に発生した地震は？","東北地方太平洋沖地震"]];break;
-    case "自然災害と防災6" :item =[["地震などの自然災害に比べ、何は起こりにくいとされているか？","気象災害"],["冬に、ユーラシア大陸で発達した何から何が吹き出すか？","シベリア高気圧、北西季節風"],["北西季節風が、日本海上で何をもたらし、どこに大雪を降らせるか？","水蒸気を供給し、雪雲を発生させ、日本海側"],["大雪は何を引き起こすか？","交通障害、落雪、家屋や送電塔の倒壊、雪崩など"],["雪によって視界が真っ白になって、周囲の状況が全くつかめなくなることを何というか？","ホワイトアウト"],["北海道、東北、北陸、山陰などの多雪地域では、何のためにどのような工夫を行っているか？","落雪の被害を防ぐため、家の軒を長くしたり、地吹雪よけの防雪柵、道路を示す標識（積雪により、どこまでが道路か分からなくなるのを防ぐ）、消雪パイプ（路面へ地下水を散布し除雪、融雪）"],["夏季に油断は禁物なのはなぜか？","温暖化に伴う猛暑と冷夏"],["猛暑は何を引き起こすか？","熱中症や野菜などの不作"],["冷夏は何を引き起こすか？","米の凶作"],["冷涼湿潤なやませが日本列島に吹き込み、東日本の太平洋岸では何が発生し、農作物に打撃を与えるか？","冷害"],["梅雨期には、何が長いので、何が起こったりするので、困るか？","梅雨が長いので、水不足（渇水）"],["台風の進行方向に対して右側は、台風の渦に何が加わるため、風速がすごく速くなり、何による被害を受けやすくなるか？","偏西風の風速が加わるため、暴風による被害"],["台風による自然災害として、高潮はどのようなときに危険か？","高潮がすごく危険"],["台風による自然災害として、高潮はどのような現象で、何をもたらすか？","熱帯低気圧の吸い上げと強風による海水の吹き寄せで、海面が上昇する現象で、大規模な浸水被害"],["台風や梅雨などによる大雨や集中豪雨は、何を引き起こすか？","河川などの氾濫"],["河川の氾濫には、何と何があるか？","外水氾濫と内水氾濫"],["外水氾濫とは何か？","大雨や融雪によって、大量の水が一気に河川に流れ込むこと（河道から水があふれること）"],["破堤とは何か？","堤防が壊れ、水が堤内に流れ込むこと"],["内水氾濫とは何か？","河川の水が堤内地に流入する氾濫のこと"],["堤内地とは何か？","堤防で守られていて、住宅などが建設されている側の土地、つまり河川から見て、堤防の外側のことで、堤防から河川側のことを堤外地"],["河道が急に曲がるところ、川幅が急に狭くなるところ、河川の合流点などは何が起こりやすいので注意が必要か？","越流や破堤"],["洪水の被害を最小限にするために何が設置されているか？","不連続堤（図５）や遊水池（河川からいったん水をあふれさせ、帯水させるための池）"]];break;
-    case "自然災害と防災7" :item =[["内水氾濫とは、どのような状態を指すか？","住宅地などが立地している堤内に降った雨が、河川に排出されず、家屋などが浸水する氾濫のこと"],["短時間の集中豪雨に排水が追いつかない場合と、何が高くなりすぎて、河川に排出されない場合があるか？","河川水位"],["最近、よく耳にする都市型水害とは何か？","都市化が進んだ地域で、地表のほとんどがアスファルト、コンクリート、高層ビルや戸建て住宅などの建築物に覆われているため、降った雨が地下に浸透しないで、あっという間に排水路や小河川に流入し、排水が追いつかない場合に起こる内水氾濫"],["都市型水害が起こりやすい場所はどこか？","地下街、地下鉄、アンダーパス（掘り下げ式の立体交差）など雨水が流れ込みやすいところ"],["都市型水害を防止するためにどのような対策がとられているか？","公園や運動場を洪水調整池（もし想定外の大洪水が起きたら、いったん水をここに貯める）としたり、地下に大規模な空間を設けた地下調整池や地下河川の建設"],["自然災害のテーマの防災・減災と復旧・復興について説明している言葉は何か？","自助・共助・公助"],["自助とは何か？","自ら対応し、自らが自分の身を守ること"],["共助とは何か？","近隣の人々や共同体で助け合うこと"],["公助とは何か？","消防、警察、自衛隊などの公的支援"],["どのような時に、自助・共助、つまり、自らが動き、家族、友人や隣人などの地域住民どうしの助け合いによる救助、避難誘導、避難所運営などを行うことが必要になるか？","大規模な機関自体が被災してしまった場合には全く機能しなくなることがあるので"],["復旧とは何か？","電気、ガス、水道、道路などのライフラインを、被災前の機能に戻すこと"],["復興とは何か？","被災者の生活再建、産業の振興、再び災害に見舞われた時の備えとして災害防御力の強化などを行うこと"],["復旧と復興には、何が必要になるか？","多額の資金と多くの人的支援、長い期間"],["津波は、どのようなときに発生するか？","地震発生による海底の隆起・沈降により"],["東北地方太平洋沖地震では、何m以上の高さまで遡上した地域がみられたか？","40m以上"],["不連続堤と連続堤の違いは何か？","不連続堤は、河川から水を徐々に流出させるため、切れ目を入れた堤防で、霞堤ともよばれる。連続堤は、切れ目がない堤防で、常時氾濫を防ぐのに適しているが、想定外の増水による越流・破堤の際には河道から溢れ出た水が、長期間滞留するため被害が大きくなる。"],["不連続堤は何とも呼ばれるか？","霞堤"]];break;
-    case "農業" :item =[["農耕文化と農業の成立条件で、人間は何によって食料を手に入れてきたか？","狩猟・採集"],["農耕を始めたのは最終氷期後から約何万年前か？","1万年前"],["東南アジアでは何を栽培する根栽農耕文化が始まったか？","タロイモやヤムイモ"],["西アジアでは何を栽培する文化が始まったか？","小麦や大麦"],["中南アメリカでは何を栽培する新大陸農耕文化が生まれたか？","トウモロコシやジャガイモ"],["農業を行うには、最暖月平均気温が何度以上必要か？","10℃"],["熱帯での栽培に向いている作物は？","カカオ豆"],["低温に強い作物は？","テンサイ"],["年降水量何mm未満では、農業は難しいか？","250mm"],["年降水量250〜500mmは何気候と呼ばれるか？","ステップ気候(BS)"],["年降水量100mm未満の地域(砂漠気候)で農業を可能にするために利用されている川は？","ナイル川"],["乾燥地域での灌漑用水の蒸発を防ぐために利用された地下水路がある国は？","イラン"],["カナート、北アフリカでは何と呼ばれているか？","フォガラ"]];break;
-    case "農業2" :item =[["自然的条件のまとめで、最暖月平均気温は何℃以上が必要とされているか？","10℃"],["自然的条件のまとめで、牧畜は何mm以上の年降水量が必要とされているか？","250mm"],["自然的条件のまとめで、畑作は何mm以上の年降水量が必要とされているか？","500mm"],["自然的条件のまとめで、水田稲作は何mm以上の年降水量が必要とされているか？","1000mm"],["自然的条件のまとめで、地形は何を好むとされているか？","平地"],["自然的条件のまとめで、腐植に富む土壌の例は？","チェルノーゼム、プレーリー土"],["自然的条件のまとめで、生産力が低い土壌の例は？", "ラトソル、ポドゾル"],["社会的条件のうち、市場・交通の発展によって何が可能になるか？","遠隔地への輸送"],["19世紀後半に何が発達し、牧畜を飛躍的に発展させたとされるか？","冷凍船"],["オーストラリアやアルゼンチンは何を輸送できたが、何を輸送できなかったか？","羊毛や牛皮、干し肉 / 生肉"],["資本・技術があれば、何が可能になるとされるか？","灌漑設備の建設"],["土地生産性とは何か？","単位面積(1ha)当たりの収穫量"],["労働生産性とは何か？","農業従事者1人当たりの収穫量"],["土地生産性が高い地域はどこか？","東アジア"],["労働生産性が高い地域はどこか？","アメリカ"]];break;
-    case "農業3" :item =[["灌漑とは何か？","作物栽培を行うために雨水の利用以外の方法によって農地に水を供給すること"],["灌漑で利用される水の例は？","河川水、地下水、ため池"],["水田稲作が盛んなアジアでは何が高いか？","灌漑率"],["栽培限界とは何か？","作物栽培が可能な範囲の限界"],["農業の成立には、自然的条件と何が必要か？","社会的条件"],["東アジア諸国では、土地生産性が高いか低いか？","高い"],["アメリカ合衆国やカナダでは、労働生産性が高いか低いか？","高い"],["農業地域区分で、世界の諸地域では何が発達しているか？","さまざまな形態の農業"],["自給的農業から始まった農業の中で、特に何が多いか？","発展途上地域"],["遊牧は、最も伝統的なタイプの何か？","牧畜"],["遊牧が行われている地域の気候は？","ステップ気候(BS)やツンドラ気候(ET)"],["遊牧民が飼育している家畜の例は？(ユーラシア大陸)","羊、山羊"],["遊牧民が飼育している家畜の例は？(西アジア〜北アフリカ)","馬"],["遊牧民が飼育している家畜の例は？(チベット〜ヒマラヤ)","ヤク"],["オアシス農業はどこで行われているか？","砂漠"],["オアシス農業で栽培されている作物の例は？","小麦、大麦、ナツメヤシ、綿花、ブドウ"],["乾燥地域での灌漑で注意すべきことは？","塩害"]];break;
-    case "農業4" :item =[["土壌塩類化のしくみで、何が蒸発すると塩類が地表に集積するか？","水分"],["熱帯地域で行われている農業は？","焼畑農業"],["焼畑農業で、何を肥料として利用するか？","草木灰"],["焼畑農業で栽培される作物の例(Af)は？","キャッサバ、ヤムイモ、タロイモ"],["焼畑農業で栽培される作物の例(Aw)は？","モロコシ"],["熱帯の土壌は何が多いか?","ラトソル"],["近年の人口の急増によって何が問題となっているか？","焼畑面積の拡大"],["焼畑の周期を短縮すると、何が起こるか？","環境破壊"],["アジアの伝統的農業は何に恵まれているか？","気温、降水量、土壌"],["アジアでは、何が集約的に発達したか？","労働集約的農業"],["東南アジア、南アジアでは何が中心に行われているか？","稲作農業"],["集約的稲作農業は、年降水量何mm以上の地域を中心に分布しているか？","1,000mm"],["代表的な稲作地域(タイ)は？","チャオプラヤ川流域"],["代表的な稲作地域(中国)は？","長江流域"],["代表的な稲作地域(バングラデシュ)は？","ガンジス川"],["中国の東北・華北やインドの内陸のデカン高原などでは何が栽培されているか？","小麦、トウモロコシ、綿花"],["アジアの農業経営は規模が大きいか小さいか？","小さい"],["世界の農業経営規模(表4)で、農業従事者1人当たりの農地面積が最も大きい国は？","オーストラリア"],["世界の農業経営規模(表4)で、農業従事者1人当たりの農地面積が最も小さい国は？","インド"],["自給的農業の分布(図5)で、アジア式稲作はどこに分布しているか？","アジア"],["自給的農業の分布(図5)で、乾燥地域の灌漑農業はどこに分布しているか？","ゴビ砂漠"]];break;
-    case "農業5" :item =[["自給的農業のまとめで、遊牧はどこに分布しているか？", "乾燥地域(BS〜BW)、北極海沿岸地域(ET)"], ["自給的農業のまとめで、オアシス農業はどこに分布しているか？", "アジアやアフリカの乾燥地域(BW)"], ["自給的農業のまとめで、焼畑農業はどこに分布しているか？", "アジア、アフリカ、南米、オセアニアの熱帯地域(Af〜Aw)"], ["自給的農業のまとめで、アジアの伝統的農業はどこに分布しているか？","モンスーン気候下のアジア(東アジア、東南アジア、南アジア)"], ["商業的農業の説明に入る前に、何が発達するにつれて商業的農業が発達したか？","商工業"], ["ヨーロッパでは、何とともに都市が発達したか？", "商工業の発展"], ["商業的農業とは何か？", "都市へ農産物を販売することを目的とした農業"], ["ヨーロッパの農業は何から発展したか？","混合農業"], ["混合農業とは何か？", "小麦やライ麦などの食用穀物と、大麦、カブ、テンサイ、牧草などの飼料作物を輪作し、牛や豚などの家畜を飼育する農業"], ["ヨーロッパでは古くから何が必要だったため、休閑が必要だったか？","輪作"], ["フランスやドイツなど北西ヨーロッパは、何が低く、何に向かないか？","温暖湿潤気候(Cfa)に比べて気温がやや低く、偏西風のため過ごしやすい気温で、降水量も少ない穀物栽培には適した西岸海洋性気候(Cfb)"], ["西岸海洋性気候(Cfb)で、何によって地力を回復させる必要があったか？", "輪作をすることによって地力の低下を防ぎ、休閑によって地力を回復させる必要があった"], ["混合農業で、家畜から得られるもので一石二鳥なものは？","肉や乳製品"], ["現在の混合農業で、何に重点が移りつつあるか？", "家畜飼育"], ["酪農では、何を飼育し、何を出荷するか？","乳牛を飼育し、生乳やバター・チーズなどの乳製品を出荷する"], ["酪農が盛んな地域(ヨーロッパ)は？","北海〜バルト海沿岸や五大湖沿岸、アルプスの山岳地"], ["酪農が盛んな地域(ヨーロッパ以外)は？","デンマークやオランダ"], ["園芸農業とは何か？", "野菜、果実、花卉を都市へ出荷するために成立した農業"], ["近郊農業に対して、輸送機関も発達して何が可能になったか？","輸送園芸"], ["商業的農業の分布(図6)で、混合農業はどこに分布しているか？","アメリカ合衆国東部"],["商業的農業の分布(図6)で、酪農はどこに分布しているか？","アメリカ合衆国北東部"]];break;
-    case "農業6" :item =[["ヨーロッパの農業の発達で、二圃式農業とは何か？", "耕地を二つに分け、耕作と休閑を隔年交互に繰り返す(北西ヨーロッパ)"], ["ヨーロッパの農業の発達で、三圃式農業とは何か？", "耕地を三つに分け、これを一年周期で一巡させる"], ["ヨーロッパの農業の発達で、混合農業とは何か？", "作物栽培と家畜飼育を組み合わせ、耕地では穀物栽培も鉄道する"], ["混合農業の特徴は？", "小麦などの食用穀物と飼料作物を輪作しながら、牛、豚を飼育。"], ["酪農の特徴は？", "乳牛を飼育し、乳製品を出荷。"], ["園芸農業の特徴は？", "野菜、果実、花卉を出荷。近郊農業と輸送園芸。"], ["地中海式農業の特徴は？", "耐乾性樹木作物栽培(オリーブなど)、地中海沿岸、冬季には小麦栽培。羊・山羊を飼育。"], ["地中海沿岸では、何と呼ばれる気候か？", "地中海性気候(Cs)"], ["地中海式農業で栽培される耐乾性樹木作物の例は？", "オリーブやコルクがし、オレンジ類"], ["地中海式農業では、何が整備されていないと厳しいか？", "灌漑"], ["移牧とは何か？", "家畜とともに移動しながら飼育する方法"], ["移牧で、ゲル(モンゴル)などで呼ばれるものは何か？","テント式の住居"], ["スイスのアルプス地方では、何と呼ばれる高原の牧場で放牧しているか？","アルプ"], ["スペイン中央部のメセタの場合、夏季にはどこで放牧するか？","海抜高度が高い高原"], ["スペイン中央部のメセタの場合、冬季にはどこで放牧するか？","土壌中に水分が残っている"], ["ヨーロッパ起源の商業的農業は、何が大きかったため、大きな影響力をもっているか？","資本と最新の技術が利用されている"],["企業的穀物農業は、何mm前後の黒色土地帯で発達したか？","年降水量500mm"],["企業的穀物農業で、何を使って、大規模に何を行っているか？","コンバインハーベスター(大型収穫機)などの大型機械を用いて大規模に行っている"]];break;
-    case "農業7" :item =[["企業的農業の分布で、企業的穀物農業はどこに分布しているか？", "グレートプレーンズ、プレーリー、パンパ"], ["企業的農業の分布で、企業的牧畜はどこに分布しているか？", "グレートプレーンズ、グランチャコ、パンパ"], ["プランテーション農業はどこに分布しているか？", "南アメリカ"], ["企業的穀物農業の特徴は？", "大型の農業機械を用いて小麦などの大規模栽培。"], ["企業的牧畜の特徴は？", "大規模に肉牛や羊を放牧。"], ["プランテーション農業の特徴は？", "主として欧米など先進国向けに熱帯・亜熱帯性作物を栽培。"],["アメリカ合衆国の小麦地帯やグレートプレーンズでは、何と呼ばれる大規模な灌漑が行われているか？", "センターピボット"], ["センターピボットとは何か？", "地下水をポンプで汲み上げ、360度回転するパイプから散水する灌漑方式"], ["センターピボットで注意すべきことは？", "地下水の枯渇や、塩害(土壌の塩類化)"], ["企業的牧畜で飼育されている家畜は？", "肉牛や羊"], ["企業的牧畜が発達した地域(アメリカ)は？", "グレートプレーンズ"], ["企業的牧畜が発達した地域(アルゼンチン)は？", "パンパ西部"], ["企業的牧畜が発達した地域(オーストラリア)は？","マリー・ダーリング盆地"],["プランテーション農業とは何か？","東南アジア、アフリカ、ラテンアメリカなどの熱帯・亜熱帯地域で、先進国の資本・技術によって開発された大農園"], ["プランテーション農業で、誰が資本を投下し、誰を栽培したか？", "ヨーロッパ人が資本を投下し、現地人や移民の安い労働力を利用して、主に欧米先進国向けの熱帯性作物を栽培した"], ["プランテーション農業で作られる作物の例は？","モノカルチャー(単一耕作)形式"],["小規模の焼畑農業はどこで成立したか？", "アメリカ合衆国からカナダにかけてのプレーリー~アルゼンチンのパンパの奥部、オーストラリアのマリー・ダーリング盆地"]];break;
-    case "農業8" :item =[["かつてのソ連や中国では、農場やその経営が何などの管理下に置かれていたか？", "国"], ["集団農業とは何か？", "一部の国を除いてはもうほとんど行われていない"], ["ソ連では集団農場の何と国営農場の何で行われていたか？", "コルホーズ、ソフホーズ"], ["中国では、何が解体し、現在は何に移行しているか？", "人民公社、生産責任制"], ["生産責任制導入後、農家の何が著しいか？", "生産意欲の伸び"], ["三圃式農業とは何か？", "中世ヨーロッパで行われていた農業で、地力低下を防ぐため、耕地を3分割して輪作をした。"], ["放牧と舎飼いのうち、家畜を飼育する際、牧場や牧草地で放牧する飼い方は何か？", "放牧"], ["放牧では何を飼料とするか？", "牧草"], ["放牧の利点は？", "飼料コストの軽減、管理の省力化"], ["等高線耕作とは何か？", "土壌侵食を防ぐため、等高線に沿って耕作をする"], ["アメリカ合衆国で発達したが、大型機械の導入が難しいため、等高線耕作を放棄する地域もあるものは？", "階段耕作"], ["オガララ帯水層とは何か？", "氷期に形成されたグレートプレーンズ付近の大規模な地下水層"], ["階段耕作とは何か？", "山地で農業を行う場合、斜面を等高線に沿って階段状に耕作すること"], ["階段耕作はどこで行われているか？", "日本、インドネシア、フィリピン"], ["日本の棚田は何のために保全が進められているか？", "景観保護"], ["モノカルチャーとは何か？", "ある特定の作物を栽培する農業経営のこと"]];break;
-    case "農業9" :item =[["世界の諸地域では、何に適した農作物が栽培されているか？", "自然環境"], ["最初に主食として最も重要な三大穀物は？", "米、小麦、トウモロコシ"], ["米はどこからどこにかけてが原産地か？", "中国南部からインド"], ["米はどのような気候を好む作物か？", "夏の高温多雨(年降水量1,000mm以上)"], ["米の生産上位国で、アジア以外の国は？", "ブラジル、アメリカ合衆国、ナイジェリア"], ["米は、アジアでの生産量が世界の何%以上を占めるか？", "90%以上"], ["米、小麦、トウモロコシを比較して、生産量がほぼ一緒なのは？", "米と小麦"], ["米、小麦、トウモロコシを比較して、輸出量がかなり少ないのは？", "米"], ["インドは人口が多くても何があるため、輸出余力がないか？","輸出量"], ["輸出用の稲作も行われている国は？", "タイやベトナム"], ["エジプトと並びアフリカ最大の生産国で、近年米の生産に力を入れている国は？", "NERICA"], ["小麦の生産上位国(表9)で、1位と2位は？", "中国、インド"], ["小麦はどこが原産地か？", "西アジア"],["小麦は何mm前後の黒色土地域を好むか", "500mm"],["小麦は何に加工され主食となる？", "パンやパスタ"],["小麦の生産量と輸出量が多い国は？","アメリカ合衆国"]];break;
-    case "農業10" :item =[["小麦には冬小麦と何小麦があるか？", "春小麦"], ["秋に種を播き、冬に発芽し、翌年の夏に収穫する小麦は？", "冬小麦"], ["春小麦は、何によって生まれた小麦か？", "品種改良"], ["春小麦は、いつ収穫するか？", "秋"], ["春小麦が栽培される地域(アメリカ)は？", "アメリカ合衆国高緯度の寒冷な地域"], ["春小麦が栽培される地域(カナダ)は？", "カナダ"], ["冬小麦が栽培される地域(インド、フランス)は？", "温暖なため冬小麦"], ["ライ麦、大麦が栽培されている地域(ドイツ、ポーランド、ロシア)は？", "寒冷な地域"], ["トウモロコシはどこが原産地か？", "中南米(メキシコ高原付近)"], ["トウモロコシはどのような気候を好むか？", "温暖湿潤気候"], ["トウモロコシは、古くから誰の主食として利用されてきたか？", "先住民(インディオ)"], ["米、小麦とトウモロコシの違いは？", "飼料用、工業用としての用途が多い"], ["トウモロコシの生産量と輸出量が圧倒的に多かった国は？", "アメリカ合衆国"], ["アメリカ合衆国の何に対する影響力がいかに大きいかがわかるか？", "畜産"], ["最近、トウモロコシの生産量が増加しているが、小麦をはるかに上回る約何億t？", "約12億t"], ["温暖化対策になる何などの原料として利用が拡大しているか？","バイオエタノールなどのバイオ燃料"],["主な穀物(表11)で、米の原産地は？","モンスーンアジア"],["米の特徴は？","夏の高温多雨(年降水量1,000mm以上)を好む。アジアが世界総生産量の90%以上を占める。"],["小麦の原産地は？","西アジア"],["小麦の特徴は？","年降水量500mm前後の黒色土を好む。熱帯を除き広範囲で栽培。温暖な地域では冬小麦、寒冷な地域では春小麦。"],["トウモロコシの原産地は？", "メキシコ高原"],["トウモロコシの特徴は？","年降水量1,000mm前後の温暖気候を好む。先進地域では飼料としての重要性が高いが、発展途上地域では重要な食料となる。近年はバイオエタノールの原料としても重要。"],["ライ麦の原産地は？","西アジア"],["ライ麦の特徴は？","耐寒性が強く、やせ地でも栽培が可。黒パンやウイスキーの原料。"],["エン麦の原産地は？","西アジア"],["エン麦の特徴は？","冷涼湿潤な気候を好む。飼料、オートミール。"],["大麦の原産地は？","西アジア"],["大麦の特徴は？","小麦栽培が不可能な寒冷地域でも栽培が可能。乾燥にも強く最も広範囲で栽培が可能な穀物。飼料、ビールの原料。"],["米や小麦、トウモロコシが主食として利用されていることはわかったけど、どこではイモ類が主食になっているんだ？", "アフリカやラテンアメリカの熱帯地域"]];break;
-    case "農業11" :item =[ ["コーヒーはどこが原産地か？", "東アフリカ"], ["コーヒーはどのような気候を好むか？", "高温多雨で雨季・乾季が明瞭な気候"], ["コーヒーの栽培適地となっているのは？", "エチオピア高原のような水はけがよい高原"], ["コーヒーの主な生産地は？", "ラテンアメリカ"], ["コーヒーの生産国(近年)は？", "ベトナム、インドネシア"], ["チョコレートの原料となるカカオはどこが原産地か？", "熱帯アメリカ"], ["カカオはどのような気候を好むか？", "高温多雨で乾季がない低地"], ["カカオの主な生産地は？", "アフリカのギニア湾岸低地"], ["カカオの生産国は？", "コートジボワール、ガーナ、カメルーン、ナイジェリア"], ["茶はどこが原産地か？", "中国南部からインドの北部"], ["茶はどのような気候を好むか？", "温暖多雨で排水良好な山麓、丘陵、台地"], ["茶の原産地のアジアが主産地でもあるということはどこか？","中国、インド"],["茶の生産が多い国は？","ケニア、トルコ、スリランカ、ベトナム"], ["イギリス人は茶が大好きだから、旧何植民地だったどこに多くのプランテーションを開いていたか？","旧イギリス植民地だったインド、ケニア、スリランカ"], ["主な嗜好作物(表12)で、コーヒーの原産地は？","エチオピア高原"], ["コーヒーの特徴は？","成長期に高温多雨、収穫期に乾燥を必要とする。"], ["カカオの原産地は？","熱帯アメリカ"], ["カカオの特徴は？","年中高温多雨なAf〜Amの低地を好む。"], ["茶の原産地は？","中国南部〜インド・アッサム地方"], ["茶の特徴は？","温暖多雨で排水良好な高原、丘陵、台地を好む。"],["油ヤシとココヤシは熱帯の何地域を好む？", "多雨地域"],["油ヤシから採取されるものは？", "パーム油"],["パーム油はどこの国で生産が多い？", "インドネシア、マレーシア"],["ココヤシから採取され、洗剤や食用に使われるものは？", "コプラ"],["コプラはどこの国で生産が多い", "フィリピンとインドネシア"]];break;
-    case "農業12" :item =[["油などの油脂原料として重要で、油ヤシからとれる油は？", "パーム油"], ["油などの油脂原料として重要で、ココヤシからとれる油は？", "コプラ油"], ["ナツメヤシはどこで栽培されているか？", "高温乾燥に強く、砂漠のオアシスなど"], ["ナツメヤシはどこでの生産が多いか？", "西アジア(イラン、サウジアラビア)や北アフリカ(エジプト、アルジェリア)"], ["大豆の原産地は？", "東アジア"], ["大豆の特徴は？", "夏の高温を好む。油脂原料、飼料として重要。"], ["サトウキビの原産地は？", "熱帯アジア"], ["サトウキビの特徴は？", "Aw〜Cwを好む。砂糖原料の大部分を占める。"], ["綿花の原産地は？", "種類によって原産地が異なる"], ["綿花の特徴は？", "乾燥には強いが、寒さに弱い。"], ["ジャガイモの原産地は？", "アンデス地方"], ["ジャガイモの特徴は？", "冷涼な気候を好む。"], ["天然ゴムの原産地は？", "アマゾン地方"], ["天然ゴムの特徴は？", "高温多雨のAfを好む。"], ["羊はどこで飼育が可能か？", "乾燥地域"], ["牛はどこで飼育が多いか？", "肉牛は混合農業地域や企業的牧畜地域で、乳牛は酪農地域で飼育。"], ["豚はどこで飼育されていないか？", "混合農業との結びつきが強い。北アフリカや西アジアなどイスラーム圏では宗教上の理由から飼育されていない。"], ["ネリカ米とは何か？", "アフリカの食糧事情を改善するために開発された稲の品種"], ["ネリカ米は何を交配させたものか？", "病虫害に強いアフリカイネを交配させた"], ["ネリカ米はどこを中心に普及しているか？", "近年は、ナイジェリアなど西アフリカを中心に普及している。"], ["家畜と宗教で、何教では、牛は神聖な家畜であると考えられているため、インドの牛の飼育頭数は多いが食用とせず、乳製品を多く摂取しているか？", "ヒンドゥー教"], ["家畜と宗教で、何教では豚を不浄と考えるため、飼育せず豚肉も食べないか？", "イスラーム(イスラム教)"],["遺伝子組み換え作物(GMO)とは？","ジーンの発達で、除草剤への耐性を持つ作物、害虫に強い作物、高収量が可能な作"],["三大穀物で、自給的な性格が強いのは？","米"],["三大穀物で、輸出に占める割合が高いのは？","小麦、トウモロコシ"],["コーヒーはどこ原産の嗜好作物？","アフリカ"],["カカオはどこ原産の嗜好作物", "中南アメリカ"],["茶はどこ原産の嗜好作物", "アジア"],["アフリカ、南米の熱帯地域では何が主食となっている", "イモ類"]];break;
-    case "林業と水産業" :item =[ ["森林は世界の陸地の約何%を占めているか？","約30%"],["森林の持つ多面的な機能には何があるか？","洪水の防止、水源涵養、土壌侵食の防止、防風林"],["森林が少なくなると、何が起きやすくなるか？","洪水"],["ガンジス川やブラマプトラ川の下流域で洪水が頻発しているのはなぜか？","上流の森林伐採が進んだため"],["古くから人間は薪を何として利用してきたか？","燃料"],["発展途上地域での木材の利用は何が多いか？","薪炭材"],["先進地域での木材の利用は何が多いか？","用材（産業用材）"],["木材伐採高が多い国（上位5カ国）はどこか？","アメリカ合衆国、インド、中国、ブラジル、ロシア"],["先進国で用材として木材の伐採が多い国はどこか？","アメリカ合衆国、カナダ、スウェーデン、日本"],["発展途上国で薪炭材の割合が高い国はどこか？","インド、中国、ブラジル、エチオピア"],["広葉樹と針葉樹の割合に注目すべき国はどこか？","インド、中国、ブラジル"],["冷温帯地域の国で、針葉樹の割合が大きい国はどこか？","ロシア、カナダ"],["熱帯地域に位置する国で、広葉樹の割合が高い国はどこか？","インドネシア、マレーシア"],["世界における森林面積と森林率が大きい地域はどこか？","南アメリカとヨーロッパ"],["南アメリカで森林面積が大きいのはどこか？","アマゾン川流域のセルバ"],["ヨーロッパで森林面積が大きいのはどこか？","ロシア"],["アフリカとアジアの森林を見て感じることは何か？","思ったより低い"],["アフリカで森林率が高いと想像される地域はどこか？","赤道直下の熱帯雨林"],["熱帯の割合があまり高くない地域はどこか？","アフリカ"],["乾燥地域や山岳地帯で、何が広がっているか？","草原"],["森林面積の推移で、減少が大きい地域はどこか？","アフリカ、南アメリカ"],["森林面積の推移で、増加の傾向がある地域はどこか？","ヨーロッパ、アジア"]];break;
-    case "林業と水産業2" :item =[["世界の森林は大きく分けて何帯に分類されるか？","熱帯林、温帯林、冷帯林"],["熱帯林の特徴は何か？","蓄積量が大きい、常緑広葉樹林の硬木が多い、多様な樹種"],["温帯林の特徴は何か？","低緯度では常緑広葉樹林、高緯度では混合林や落葉広葉樹林"],["冷帯林の特徴は何か？","針葉樹林（タイガ）、加工しやすい軟木が多い、単一樹種からなる純林を形成"],["熱帯の発展途上地域で人口急増によって何が行われているか？","薪炭材を中心とした過剰な伐採"],["ヨーロッパなどの先進地域では森林伐採はどのように行われているか？","植林をしながら計画的に"],["熱帯地域で森林の再生能力が低いのはなぜか？","激しいスコールによって土壌が流出したり、ラテライト化によって土壌がレンガのように固化してしまうため"],["発展途上国が多いアジアで森林が増加しているのはなぜか？","中国や東南アジア諸国の原木輸出規制などの効果"],["日本は国土面積の約何%が森林か？","約70%"],["森林率が50%以上の主な国はどこか？","フィンランド、日本、コンゴ民主共和国、スウェーデン、ブラジル、マレーシア"],["コンゴ民主共和国、ブラジル、マレーシアに共通する森林は何か？","熱帯雨林"],["フィンランド、スウェーデンに共通する森林は何か？","タイガ"],["日本は世界的な木材の消費国か、自給率が高いか？","消費国"],["日本の木材自給率は1960年には約何%だったか？","約90%"],["日本の木材自給率が低下した理由は何か？","戦後に植林された若木が成木にならなかったこと、バイオマス発電所で使われる燃料材の国内生産量の増加や住宅用の建築に国産材の使用が増えているから"],["日本の木材輸入相手国で、1970年と2022年で大きく変化したのはどこか？","アメリカ合衆国と東南アジアからの輸入割合が減少し、カナダ、ヨーロッパからの輸入割合が増加した"]];break;
-    case "林業と水産業3" :item =[["木材（丸太・製材）の輸出が多い国（上位5カ国）はどこか？","ロシア、カナダ、ニュージーランド、ドイツ、チェコ"],["木材（丸太・製材）の輸入が多い国（上位5カ国）はどこか？","中国、アメリカ合衆国、オーストリア、ベルギー、ドイツ"],["日本の木材輸入先（上位5カ国）はどこか？","カナダ、アメリカ合衆国、スウェーデン、フィンランド、ロシア"],["2022年の日本の輸入総量（左端の数値）はいくつか？","5,019 (千m³)"],["近年輸入量が減少しているのはなぜか？","円安や不況によって輸入木材需要が低下していることや国産材の供給が増加しているから"],["降水を森林土壌がいったん貯留することによって、何が形成されるか？","地下水"],["河川へ流れ込む水の量を平準化させることによって、何を防止するか？","洪水"],["ラワン材とは何か？","フタバガキ科の樹木の総称で、東南アジアなどに分布する"],["ラワン材は何に適しているか？","合板"],["森林は、林産資源としてだけでなく、何の役に立っているか？","洪水防止など国土の保全"],["木材の用途には何があるか？","薪炭材と用材"],["薪炭材と用材、どちらが発展途上国での消費が多いか？","薪炭材"],["日本の木材輸入相手国はどこが多いか？","アメリカ合衆国、カナダ、ロシア"],["水産業が成立するためには何が必要か？","好漁場"],["好漁場の条件は何か？","栄養分（栄養塩類）→植物性プランクトン→動物性プランクトン→魚類という食物連鎖を考える"],["栄養分が上昇して、日光が届くところが好漁場になるのはなぜか？","植物性プランクトンが必要とするため"],["湧昇流とは何か？","中深層の海水が表層に上がってくる流れ"],["大陸棚上のバンク（浅堆）とは何か？","浅い海底部分"],["寒流と暖流が出合う場所を何というか？","潮目"],["世界の水域別漁獲量が多いのはどこか？（上位3つ）","太平洋北西部、太平洋南東部、太平洋西部"],["世界の主要漁場（表７）で、中心海域、立地条件、特色、主な漁獲物が全て記載されている漁場はどこか？","北西大西洋、北東大西洋"]];break;
-    case "林業と水産業4" :item =[["水産業の発達には何が必要か？","資本と技術"],["発展途上国の経済発展や何によって漁獲量が増えているか？","200海里の経済水域（EEZ）の設定"],["発展途上国では、安価で豊富な労働力をいかした何が増加しているか？","養殖生産量"],["世界の漁獲量上位国の推移を示したグラフで、1990年代から漁獲量を伸ばしている国はどこか？","中国"],["中国の経済発展によって何が増加したか？","国内需要"],["ペルーでは浮き沈みが激しい漁獲物があるが、それは何か？","アンチョビー"],["1960年代に世界的な飼料不足が起こり、何が飼料や肥料として輸出を始めたか？","アンチョビー（カタクチイワシ）"],["1960年代は漁獲量が何になったか？","世界最大"],["日本の水産業が低迷しているのはなぜか？","昔の人が魚を食べなくなったから"],["日本の水産業は、何を除いてすべて漁獲量が減少しているか？","養殖"],["日本の漁獲量で、特に何が1973年をピークに激減しているか？","遠洋漁業"],["遠洋漁業が激減したのはなぜか？","石油危機による燃料費の高騰と、各国が200海里経済水域（EEZ）を設定し始めたから"],["1980年代後半からは、何漁業も各種の国際的な規制、マイワシの不漁や国民の嗜好が高級魚に転換したこともあって低迷しているか？","沖合漁業"],["近年、水産物の消費量は1960年代よりどうなっているか？","増加し、以前より多様化、高級化している"],["水産物の輸入相手国はどこが多いか？","チリ、アメリカ合衆国、ロシア、中国、ノルウェーなど"],["1970年代前半までは、水産物の自給率が何%だったか？","100%"],["現在は、水産物の何%以上を輸入しているか？","50%以上"],["好漁場の条件には何が必要か？","大陸棚上のバンクや潮目"],["日本の水産業は資源保護のため、何が注目されているか？","水産養殖や栽培漁業"]];break;
-    case "商業と観光業" :item =[["消費行動の変化について何を認識しよう？","生活の豊かさによる生活スタイルの変化と多様化"],["余暇活動と海外旅行について、何が余暇活動にどのような影響を与えただろうか？","労働時間の短縮"],["商業は、商品を作った生産者から消費者に売る経済活動で、何構成では第3次産業に含まれるか？","産業別人口"],["「生産者→卸売業者→小売業者→消費者」というように商品が販売されていくことを思い出す上で卸売業とは何か？","生産者から工場で生産された商品を仕入れて、小売業者に販売する"],["企業間取引では、何が広く（商品を販売する範囲が広い）、企業が集積している中心地で発達することになるか？","商圏"],["三大都市圏の中心地の国家的中心都市はどこか？","東京、大阪、名古屋"],["地方の中心地の中広域中心都市はどこか？","札幌、仙台、広島、福岡"],["県庁所在地で卸売業が発達しているのはどこか？","準広域中心都市"],["小売業とは何か？","スーパー, コンビニ, 商店などの小売業者が, 一般消費者に商品を販売する"]];break;
-    case "商業と観光業2" :item =[["商業販売額は何に比例することになるか？","人口"],["先進国では人々の収入が多く、生活水準も高いので、何などに対する支出が多くなるか？","食費などの生活必需品以外にも、趣味やレジャー"],["経済の発展は、何を引き起こし、新しいタイプの商業・娯楽施設、観光業などを発達させることになるか？","モータリゼーションの進展や生活スタイルの変化"],["発展途上国では、収入の大部分が何にあてられているか？","日常生活に最低限度必要なものの消費"],["消費支出に占める食費の割合と趣味・娯楽費の割合が高い国はどこか？","アメリカ合衆国"],["消費支出に占める食費の割合と趣味・娯楽費の割合が低い国はどこか？","バングラデシュ"],["先進国における工業の発展は、何と所得の増大は大量消費を可能にしたか？","大量生産"],["自動車の普及と道路の整備は、製品を輸送する流通業を発展させただけでなく、人々の行動空間を飛躍的に拡大させ、何を行えるようにしたか？","自分が行きたいときに、行きたいところへ買い物をしに行ける"],["モータリゼーションの進展による行動空間の拡大は、大規模な何を郊外に立地させ、消費行動をますます便利にし、多様化させているか？","ショッピングセンター、ファミリーレストラン"],["日本でも郊外の幹線道路沿いなどには、大きな何ができているか？","ショッピングセンター"],["アメリカ合衆国に代表される郊外型のショッピングセンターとは何か？","郊外は地価が安いため、広い売場に大量の商品を並べることができ、広い駐車場"],["アメリカ合衆国では、郊外に購買力の高い何が多いから、売り上げも見込めるか？","富裕層の住宅地"],["かつては消費行動が集中していた都心部にも何は立地していたか？","ショッピングセンター"],["現在は過密化による交通渋滞や地価の高さ、駐車場が少ないことなどから、都心部には大規模なショッピングセンターは建設しにくいのはなぜか？","過密化による交通渋滞や地価の高さ、駐車場が少ない"],["業態別小売業の単位当たり年間商品販売額（2014年）のうち、就業者1人当たり、売場面積1㎡当たりの額が最も大きい業態は何か？","百貨店"],["百貨店、大型スーパー、コンビニエンスストアの販売額推移で、バブル崩壊以降、何などの需要が低下したこともあり百貨店の販売額が減少し、代わってセルフサービスによる大型スーパー、コンビニエンスストアの販売額が増加しているか？","贈答品・高級品"],["主な国の産業別国内総生産（GDP）の変化で、第1次、第2次、第3次産業の割合が全て示されている国はどこか？","インド、ベトナム、ロシア、ブラジル"]];break;
-    case "商業と観光業3" :item =[["2022年の年間労働時間が最も長い国はどこですか？","韓国"],["2022年の年間労働時間が最も短い国はどこですか？","ドイツ"],["2020年の観光客数(百万人)が最も多い国はどこですか？","フランス"],["2020年の観光収入(百億ドル)が最も多い国はどこですか？","アメリカ合衆国"],["観光客数と観光収入の両方で上位3位以内に入っている国はどこですか？","フランス、アメリカ合衆国"],["年次有給休暇の取得日数が最も多い国はどこですか？","フランス"],["ヨーロッパで長期休暇を取ることが多い理由として挙げられているものは何ですか？","夏季に長期休暇を取ること、晴天に恵まれた地中海沿岸に人気が移動すること、比較的安価で長期に宿泊できる宿泊施設が多いこと"],["日本で有給休暇の取得が義務化されたのはいつですか？","2019年"],["海外旅行者の大半は、旅行の主な目的を何にしていますか？","観光"]];break;
-    case "商業と観光業4" :item =[["日本人海外旅行者数が急増した主な出来事は何ですか？（複数回答）","プラザ合意、円高"],["2020年以降に日本人海外旅行者数が激減した理由は何ですか？","新型コロナウイルス感染拡大"],["2019年の日本人海外渡航先として最も多かった国はどこですか？","アメリカ合衆国"],["1990年と2019年を比較して、渡航先として増加数が最も大きかった国はどこですか？","中国"],["訪日外国人旅行者のうち、最も多い地域はどこですか？","東アジア"],["訪日外国人旅行者のうち、「その他」を除いて、2番目に多い地域はどこですか？","東南アジア、南アジア"],["日本人の海外渡航先として、アジア諸国が多い理由は何ですか？","近くて旅費が安く、日程も取りやすいため"],["2015年に日本への訪日外国人旅行者数は何人を超えましたか？","2003万人"], ["訪日外国人旅行者数は何年に過去最多を記録しましたか?","2019年"]];break;
-    case "エネルギーと鉱山資源" :item =[["18世紀後半にイギリスで何が起こり、エネルギー消費が増大しましたか？","産業革命"],["1960年代にエネルギー革命が起こった主な理由を3つ挙げてください。","多くの油田開発により、安価で安定した供給が可能になったため、パイプラインの敷設や大型タンカーの就航で輸送コストが低下したため、石油のほうが石炭より発熱量も大きい化学工業原料としても利用しやすいため"],["石炭に代わってエネルギーの主役になったのは何ですか？","石油"],["1970年代に世界を驚かせた出来事は何ですか？","石油危機（オイルショック）"],["石油危機は、消費国にどのような影響を与えましたか？","経済危機を招き、消費国は省エネルギー政策をとることになった"],["石油危機後、先進国は何エネルギーの利用拡大を試みましたか？","原子力発電や天然ガス"],["現代において、できるだけ環境負荷が小さいエネルギーとして注目されているのは何ですか？","再生可能エネルギー"],["再生可能エネルギーの例を3つ挙げてください。","バイオマスエネルギー、太陽光、風力"],["2020年に最も生産量の多いエネルギーの種類は何ですか？","固体燃料"],];break;
-    case "エネルギーと鉱山資源2" :item =[["世界のエネルギー生産（生産と消費）は、1960年から2020年までの約60年間で、およそ何倍以上になっていますか？","5倍"],["1960年と1970年のデータを比較して、生産量・消費量が逆転したエネルギーは何ですか？","石炭と石油"],["1人当たりエネルギー消費量が最も多い国はどこですか？","カナダ"],["1人当たりエネルギー消費量が最も少ない発展途上国はどこですか？","インド"],["カナダとアメリカ合衆国の1人当たりエネルギー消費量が、ドイツや日本よりもはるかに大きいのはなぜですか？","国土面積が広く、人やモノの輸送距離が長いこと、エネルギー資源も豊富にあるため"],["1次エネルギー消費割合が最も高い国はどこですか？","中国"], ["日本は、何のエネルギーの割合が高いですか？","石油"],["ロシアは、何のエネルギーの割合が高いですか？", "天然ガス"], ["エネルギー資源を生産できるかどうか大きなポイントになるけど、先進国はどこへの依存度が高い傾向にある？","石油"], ["先進地域では、何が盛んなため、大量のエネルギーを消費している？", "商工業などの産業や人々の生活"]];break;
-    case "エネルギーと鉱山資源3" :item =[["石炭、石油、天然ガスは、何と呼ばれる資源ですか？", "化石燃料"], ["化石燃料は、どのようにしてできたものですか？", "古い地質時代に動植物が化石化して形成されたもの"], ["石炭生産量が最も多い国はどこですか？", "中国"], ["石炭生産量上位3か国を答えてください。", "中国、インド、インドネシア"], ["石炭輸出量が最も多い国はどこですか？", "インドネシア"], ["石炭輸出量上位3か国を答えてください。", "インドネシア、オーストラリア、ロシア"],["第1次石油危機は西暦何年に起きましたか？", "1973年"], ["第1次石油危機は、何が原因で発生しましたか？", "第4次中東戦争"], ["第2次石油危機は西暦何年に起きましたか？", "1979年"], ["第2次石油危機は、何が原因で発生しましたか？", "イラン革命"], ["カーボンニュートラルとは、どのような考え方ですか？", "農作物などの植物は生長過程で大気中のCO₂を吸収するため、その植物を燃焼させたり、植物から抽出した燃料を燃焼させ、排出したとしても大気中のCO₂総量に影響を与えない"], ["中国が世界の石炭生産量の何%以上を生産していますか？","50%以上"]];break;
-    case "エネルギーと鉱山資源4" :item =[["主要な石炭産出国として、オーストラリアは何位にランクインしていますか？", "4位"], ["主要な石炭の主な炭田として、中国の炭田を3つ挙げてください。", "フーシュン炭田、カイロワン炭田、タートン炭田"], ["原油価格が大きく上昇した主な出来事を2つ挙げてください。", "第1次石油危機、第2次石油危機"], ["1960年に設立された、石油輸出国機構の略称をアルファベットで答えてください。", "OPEC"], ["1968年に設立された、アラブ石油輸出国機構の略称をアルファベットで答えてください。", "OAPEC"], ["2022年の原油生産量が最も多い国はどこですか？", "アメリカ合衆国"], ["OPEC加盟国の中で、2022年の原油生産量が最も多い国はどこですか？", "サウジアラビア"], ["2022年の原油輸出量が最も多い国はどこですか？", "サウジアラビア"], ["OPEC加盟国の中で、2022年の原油輸出量が最も多い国はどこですか？", "サウジアラビア"], ["「資源ナショナリズム」とは、どのような考え方ですか？", "自国の資源を自国の発展のために利用しようという考え方"], ["先進国が、自国の利益を優先して、発展途上国の資源を自由に利用できない状況を表す言葉は何ですか？", "資源ナショナリズム"], ["石油の埋蔵や採掘、精製、流通、販売をするには、何が必要ですか？", "巨額な資本と高度な技術"]];break;
-    case "エネルギーと鉱山資源5" :item =[["1980年代後半から、逆オイルショックと呼ばれる石油価格の何が起こった？", "下落"], ["2020年に原油輸入量が最も多かった国はどこですか？", "中国"], ["日本は2020年に原油輸入量が世界で何番目に多いですか？", "5番目"], ["ロシアの主要な油田を2つ挙げてください。", "チュメニ油田、ヴォルガ・ウラル油田"], ["アメリカ合衆国の主要な油田を3つ挙げてください。", "内陸油田、メキシコ湾岸油田、カリフォルニア油田"], ["ペルシャ湾岸に面するサウジアラビアは、何という油田で世界最大級の埋蔵量を誇り, OPECのリーダー的存在？", "ガワール油田"], ["2018年以降、サウジアラビアとロシアを追い抜いた、世界最大の消費量と輸入量の国はどこ？", "アメリカ合衆国"], ["世界最大の輸入国だったが、近年は中国が最大の輸入国になっている。ほとんど石油を産出しない日本は何の輸入量が多い？", "原油"], ["図3で、OPECとOAPECの両方に加盟している国を3つ挙げてください。", "サウジアラビア、クウェート、アラブ首長国連邦"], ["天然ガスは、石炭や石油に比べて何が少ない？", "汚染物質やCO₂の排出量"], ["近年需要が伸びている液化天然ガスをアルファベット3文字で何と呼ぶ？", "LNG"], ["メキシコは、いつOPECに加盟していましたか？", "OPEC設立前"]];break;
-    case "エネルギーと鉱山資源6" :item =[["ガスの分布で偏りが大きい、アメリカ合衆国とロシアで世界の約何%を生産している？", "約40%"], ["ガスの輸送で、陸上や大陸棚上で使われるものはなに？", "パイプライン"], ["ガスの輸送で、海上輸送で使われるものはなに？", "LNG専用タンカ"], ["最近、アメリカ合衆国とカナダで進められている天然ガスは？", "シェールガス"], ["シェールガスとは、地中の何に閉じ込められた天然ガスのこと？", "頁岩"], ["アメリカ合衆国は、何という原油の開発や生産にも力を入れている？", "シェールオイル"], ["図4から、日本は、石炭、石油、天然ガスを主にどこから輸入している？3つ答えよ", "オーストラリア、サウジアラビア、アラブ首長国連邦"], ["日本が石炭を最も多く輸入している国はどこですか？", "オーストラリア"], ["日本が石油を最も多く輸入している国はどこですか？", "サウジアラビア"], ["日本が天然ガスを最も多く輸入している国はどこですか？", "オーストラリア"], ["電力を作り出すための代表的な発電方法を3つ挙げてください。", "水力発電、火力発電、原子力発電"], ["産業革命後、エネルギー消費の中心となった発電は何ですか？", "火力発電"], ["1970年代の石油危機以後、日本が建設を進めた発電は何ですか？", "原子力発電"], ["表10で、水力発電の主な発電形式で、「流れ込み式」とは何ですか？", "河川を流れる水を直接利用して発電"], ["表10で、水力発電の主な問題点は何ですか？", "森林等の水没など自然環境破壊、ダムの堆砂"]];break;
-    case "エネルギーと鉱山資源7" :item =[["2011年3月に発生した東日本大震災によって、日本のどの原子力発電所が事故を起こしましたか？", "福島第一原子力発電所"], ["日本の電力構成で、2022年時点で最も割合が高いのは何ですか？", "火力"], ["日本の電力構成で、2022年時点で2番目に割合が高いのは何ですか？", "原子力"], ["再生可能エネルギーとは、どのようなエネルギーのことですか？", "枯渇の心配がないエネルギー"], ["再生可能エネルギーの例を3つ挙げてください。", "風力発電、太陽光発電、地熱発電"], ["カーボンニュートラルとしての利用が進んでいるバイオマスエネルギーの原料の例を3つ挙げてください", "トウモロコシ、サトウキビ、木くず"], ["風力発電は、何が高いので新エネルギーの中で最も発電量が多いですか？", "エネルギー変換効率"], ["太陽光発電は、何が多い地域で有利ですか？", "日射量"], ["2021年時点で、日本の発電電力量が最も多い発電方法は何ですか？", "LNG火力"], ["2011年以降、原子力発電の割合はどのように変化しましたか？", "大幅に減少"], ["日本の火力発電の燃料消費量が最も多いのは何ですか？", "LNG"], ["図6で、日本の家庭用エネルギー消費の内訳で、最も割合が高いのは何ですか？", "電気"], ["新エネルギーによる発電で、風力発電（設備容量ベース、2022年）は、どこの国で盛んですか（3つ）", "中国、アメリカ合衆国、ドイツ"]];break;
-    case "エネルギーと鉱山資源8" :item =[["産業革命以降、工業化が進むと何の需要が高まりましたか？", "鉱産資源"], ["鉄鉱石は、何という産業を支える最も重要な金属資源になっていますか？", "鉄鋼業"], ["鉄鉱石の生産量が最も多い国はどこですか？", "オーストラリア"], ["鉄鉱石の生産量上位3か国を答えてください。", "オーストラリア、ブラジル、中国"], ["銅鉱は、何として重要ですか？", "金属資源、電気伝導性が高いため電線の材料"], ["銅鉱の生産量が最も多い国はどこですか？", "チリ"], ["銅鉱の生産量上位3か国を答えてください。", "チリ、ペルー、中国"], ["アフリカ大陸で銅鉱が産出する地域として、コンゴ民主共和国と、もう一つはどこですか？", "ザンビア"], ["ボーキサイトは何の原料ですか？", "アルミニウム"], ["ボーキサイトの生産量が最も多い国はどこですか？", "オーストラリア"], ["ボーキサイトの生産量上位3か国を答えてください。", "オーストラリア、中国、ギニア"], ["レアメタルとは何ですか？", "先端技術産業で利用される希少金属"], ["中国の生産量が一位の鉱産資源を３つ答えてください","すず鉱、金鉱、タングステン鉱"]];break;
-    case "工業" :item =[["工業(Industry)とは何か？","さまざまな製品を手にいれることができるようにするもの"],["世界で最初の工業は何か？","家内制手工業"],["18世紀後半に何が起きたか？","イギリスで紡績機械や蒸気機関の発明などの技術革新による産業革命"],["産業革命はどこで起きたか？","イギリス"],["当初は何工業が発達したか？","綿工業などの軽工業"],["第二次世界大戦後はどこの国が工業の中心となったか？","アメリカ合衆国、ドイツ、日本などの先進国"],["1970年代の石油危機以降、先進工業国で何が停滞したか？","重工業"],["1970年代の石油危機以降、先進工業国で何の産業が中心になったか？","エレクトロニクス産業など知識集約型工業"],["現在、何が進歩により工業も大きく変わろうとしているか？","ICT(情報通信技術)"],["第二次世界大戦後、発展途上国の一部で何が進んだか？","工業化"],["NIESとは何か？","新興工業経済地域"],["NIESにはどんな国・地域が含まれるか？","韓国、シンガポール、台湾、ブラジル、メキシコなど"]];break;
-    case "工業2" :item =[["BRICsとは何か？", "ブラジル、ロシア、インド、中国の4カ国の総称"], ["発展途上国が工業を発展させる最初の段階は？", "国産化"], ["輸入代替型工業とは？", "これまで輸入に頼っていた製品を自国生産して、国内で販売すること"], ["輸出指向型工業とは？", "安くて優秀な輸出用製品を製造できる国の安い労働力で、輸出品を生産すること"], ["「世界の工場」と呼ばれるようになった国は？", "中国"], ["工業立地で重要視されるコストは？", "生産費(輸送費と労働費)"], ["工業立地論を最初に考えたのは誰？", "ドイツのウェーバー"], ["原料指向型工業とは？", "原料の重量が大きく、製品の重量が小さい工業"], ["労働力指向型工業とは？", "安価な労働力、または高度な技術を持つ労働力への依存度が大きい工業"], ["市場指向型工業とは？", "製品の重量が大きくなったり、豊富な情報に依存するため、大市場付近に立地する工業"], ["臨海指向型工業とは？", "輸入原料に依存するため、海上輸送に有利な臨海部に立地する工業"],["産業革命後、蒸気機関は何を燃料として利用していた？","石炭"]];break;
-    case "工業3" :item =[["産業革命はいつ始まったか？", "18世紀後半"], ["産業革命はどこで始まったか？", "イギリス"], ["フォードシステムとは何か？", "大量生産方式"], ["輸出加工区とは何か？", "外国企業を誘致するため、各種の税金を免除するなど優遇措置をとる地域"], ["中国の経済特区はどこか？", "シェンチェン、チューハイ、アモイ、スワトウ、ハイナン島"], ["工業の集積と分散とは？", "工場は有利な立地条件を備えた特定地域に集積し、工業地域を形成すること"], ["BRICSとは？", "ブラジル、ロシア、インド、中国の頭文字を用いた新語"], ["2024年からBRICSに加わることが検討中とした国は？", "アルゼンチン、エジプト、エチオピア、イラン、サウジアラビア、アラブ首長国連邦"], ["繊維工業とは？", "衣服類などを生産する工業"], ["発展途上国の工業化の初期段階で重要な工業は？", "繊維工業"], ["綿工業で労働力を必要とするのは？", "安価で豊富な労働力"], ["化学繊維の生産一位は？", "中国"], ["羊毛の生産が世界最大級の国は？", "オーストラリア"], ["羊毛の輸出一位は？", "オーストラリア"]];break;
-    case "工業4" :item =[["鉄鋼業で必要なものは？", "鉄鉱石と石炭"], ["鉄鉱石の中から何を取り出す？", "金属の鉄"], ["鉄鉱石と石炭から何を作る？", "コークス"], ["取り出した鉄を何というか？", "銑鉄(iron)"], ["銑鉄から不純物を除去したものを何というか？", "鋼鉄(steel)"], ["銑鉄、鋼鉄、圧延までを連続して行える工場は？", "製鉄一貫工場"], ["鉄鉱石の主な産地は？", "ルール炭田"], ["鉄鋼業の立地で多いのは？", "臨海立地"], ["鉄鋼業に必要なものは？", "広い敷地や大規模な装置のための巨額な資本と技術"], ["鉄鋼業が発達していた国は？", "アメリカ合衆国やドイツ、フランス、イギリス、日本"], ["粗鋼生産量が一位の国は？", "中国"], ["20世紀の初め、1トンの鉄を作るのに必要な石炭と鉄鉱石の量は？", "約4トンの石炭と約2トンの鉄鉱石"]];break;;
-    case "工業5" :item =[["「粗鋼(crude steel)」の「粗」は何を意味するか？", "鉄鋼などの鋼材とは違うから"], ["アルミニウムは何に使われる？", "航空機、自動車など"], ["アルミニウム1トンを生産するのに必要なボーキサイトの量は？", "約4トン"], ["アルミニウムはどのような立地で作られる？", "電力指向型"], ["アルミニウム生産の上位国に共通する点は？", "電力費が安い"], ["アルミニウム生産の上位5カ国は？", "中国、ロシア、アメリカ合衆国、オーストラリア、"], ["日本は何を輸入している？", "アルミニウム地金や合金"], ["ボーキサイトの主な産出国は？", "中国、オーストラリア、ロシア"], ["機械工業で、研究・開発部門はどこがリードしている？", "先進国"], ["電気機械工業で、量産部門はどこが伸びている？", "安価で豊富な労働力をもつ発展途上国"], ["パーソナルコンピュータ(PC)の生産一位は？", "中国"], ["ハードディスクドライブ(2014年)の生産一位は？", "タイ"], ["携帯電話の生産一位は？", "中国"]];break;
-    case "工業6" :item =[["自動車は何の工業の代表？", "総合組立工業"], ["総合組立工業で必要なものは？", "巨額な資本と高度な技術"], ["組立工場の周辺には何が必要？", "下請工場や関連企業"], ["自動車はどこで発明された？", "ヨーロッパ"], ["モータリゼーションが最初に進んだのは？", "アメリカ合衆国"], ["1980年代から急成長した日本の基幹産業は？", "自動車産業"], ["最近、自動車産業で成長が著しいのは？", "中国、インド、メキシコ、ブラジル、タイ"], ["自動車の輸出が多い国は？", "日本、ドイツ、"], ["2009年、自動車の生産で世界最大の国は？", "中国"], ["EVとは？", "電気自動車"], ["集積回路(IC)やコンピュータなどの開発で重要な部門は？", "研究開発部門"], ["自動車の生産、一位の国は？", "中国"], ["1990年自動車の生産、一位の国は？", "アメリカ"]];break;
-    case "工業7" :item =[ ["量産部門で安価で良質な労働力があるのは？", "NIESやASEAN, 中国, インド"], ["パーソナルコンピュータの生産台数が多い国は？", "中国"], ["ICTとは？", "情報通信技術"], ["アメリカでエレクトロニクス産業の集積地は？", "シリコンバレー"], ["日本ではどこでエレクトロニクス産業が発達？", "シリコンアイランド(九州)"], ["エレクトロニクス製品の特徴は？", "軽量で高付加価値"], ["造船竣工量一位は？", "中国"], ["GDPに占める研究開発費の割合が高い国は？", "韓国"], ["石油化学工業の立地は？", "石油産出地や輸入港付近"], ["造船工業一位は？", "中国"], ["航空機工業が盛んな国は？", "アメリカ合衆国"], ["製紙・パルプ工業で必要なものは？", "大量に処理用水"], ["セメント工業の原料は？", "石灰石"]];break;;
-    case "地域開発と環境問題" :item =[["近代化が進み、地域活性化に大きく貢献したのは？", "アルミニウム工業や原子力工業"], ["世界の河川総合開発で、何を確認しておく？", "河川の位置と、何のために行われた地域開発なのか"], ["テネシー川流域開発、どこの国？", "アメリカ合衆国"], ["テネシー川流域開発、何のため？", "世界恐慌に伴う景気・失業対策と地域経済活性化"], ["TVAとは？", "テネシー川流域開発公社"], ["コロラド川、どこの国？", "アメリカ合衆国"], ["コロンビア川、どこの国？", "アメリカ合衆国"], ["ダモダル川、どこの国？", "インド"], ["黄河、どこの国？", "中国"], ["長江、どこの国？", "中国"], ["ナイル川、どこの国？", "エジプト"], ["ヴォルタ川、どこの国？", "ガーナ"], ["ザンベジ川、どこの国？", "ザンビア〜ジンバブエ"], ["河川総合開発には、どんな側面もある？", "マイナスの側面"],  ["エジプトは何気候？", "砂漠気候(BW)"], ["1971年にエジプトは何を完成させた？", "アスワンハイダム"], ["アスワンハイダムは何を可能にした？", "洪水の防止だけでなく、年間を通じた灌漑"], ["河川総合開発は、何を目的に？", "多目的ダムの建設により、電力や用水の供給"], ["大規模な開発は、何の一因となっている？", "環境の破壊や災害"]];break;;
-    case "地域開発と環境問題2" :item =[["環境問題とは何か？", "人間が生活を豊かにするために様々な経済活動を行った代償として地球環境に大きな負担をかけてきたこと"],  ["先進国では何が大量に消費されているか？", "原料やエネルギー資源"], ["1967年に制定された法律は何か？", "公害対策基本法"], ["水俣病の原因物質は？", "有機水銀"], ["イタイイタイ病の原因物質は？", "カドミウム"], ["生活排水による湖沼の環境破壊は何か？", "富栄養化"], ["酸性雨のpHの定義は？", "5.6以下"], ["ヨーロッパで酸性雨の被害が大きい地域はどこか？（国名）", "スカンジナビア半島南部、ドイツ、チェコ、ポーランドなど"], ["偏西風は何の運搬に関係するか？", "汚染物質"], ["酸性雨の原因物質を多く含む物質は？", "石炭"]];break;
-    case "地域開発と環境問題3" :item =[["中国も酸性雨に苦しんでいる原因は？", "石炭を大量消費するため硫黄酸化物の排出が多い"], ["日本の気象庁を中心に行われていることは？", "酸性雨の観測"], ["硫黄酸化物の排出を減らすための装置は？", "脱硫排煙装置"], ["自動車の排ガスに含まれる汚染物質は？", "窒素酸化物"], ["酸性雨が発生する仕組みで、工場などから排出されるものは？", "硫黄酸化物"],["フロンは何に使われてきた？", "クーラーの冷媒、スプレーの噴射剤、半導体の洗浄剤"], ["オゾン層の役割は？", "紫外線を吸収する"], ["オゾンホールが最初に観測されたのは？", "南極"], ["モントリオール議定書で原則禁止されたものは？", "フロンの製造と輸出"], ["21世紀に入り何が確認されている？", "オゾンホールの縮小"], ["発展途上国で深刻な問題は？", "人口増加に伴う環境破壊"], ["先進国で沈静化しているが、発展途上国で深刻な公害は？", "大気汚染"], ["熱帯林の破壊の原因は？", "焼畑の拡大や薪炭の過伐採"], ["東南アジアで行われていることは？", "油ヤシなどのプランテーション"]];break;
-    case "地域開発と環境問題4" :item =[["2005年から2010年にかけて、森林面積が純増した国は？", "中国"], ["日本の沿岸部で進んでいることは？", "エビ養殖池の造成"], ["ブラジルのアマゾン地方で大規模な何が進んでいる？", "鉱山・道路開発や外国企業などの牧場経営"], ["熱帯林の破壊は何に影響を与えるか？", "地球温暖化や砂漠化"], ["砂漠化とは、砂漠のような何もない土地になってしまうことか？", "不毛の地"], ["砂漠化の原因となる気候は？", "BW(砂漠気候)"], ["砂漠化は、局地的な何の影響もあるか？", "降水量の減少"], ["発展途上地域では何によって過放牧が行われるか？", "人口増加"], ["過放牧で家畜は何を根こそぎ食べてしまうか？", "牧草"], ["サヘル地方は何の南縁地域か？", "サハラ砂漠"], ["砂漠化はどこで起きているか？", "発展途上国と先進国"], ["アメリカ合衆国やオーストラリアで何が行われているため塩害が発生しているか？", "大規模な灌漑農業"], ["砂漠化が進んでいる地域の特徴は？", "半乾燥地域(BS)"], ["地球の人口は増えているのに、砂漠化が進んでいるのは何が拡大しているから？", "生活できない地域"]];break;;
-    case "地域開発と環境問題5" :item =[["地球温暖化の原因となるのは？", "温室効果ガスの増加"], ["温室効果ガスには何があるか？", "二酸化炭素、メタン、フロン、一酸化窒素、水蒸気"], ["温室効果ガスがないと地表の温度はどうなる？", "-20℃くらいになる"], ["現在、最も増加が心配されている温室効果ガスは？", "二酸化炭素"], ["産業革命以降、何を大量に消費するようになった？", "石炭、石油、天然ガス"], ["大気中の二酸化炭素が増加すると何が上昇する？", "気温"], ["海面上昇に加えて何が起こるとされている？", "熱膨張"], ["海面上昇により水没の危険性が出てくる島は？", "サンゴ礁島(キリバスやモルディブなど)や三角州(ガンジスデルタなど)"], ["北極海で何が減少している？", "海氷"], ["2020年の二酸化炭素排出量1位の国は？", "中国"], ["1997年に採択されたものは？", "京都議定書"], ["先進国も足並みがそろっているわけではない、その理由は？", "京都議定書から離脱した国がいるため"], ["自動車の排ガスに含まれる窒素酸化物は何を引き起こす？", "光化学スモッグ"], ["近年、中国からの汚染物質流入によりどこで光化学スモッグが発生している？", "西日本"]];break;;
-    case "地域開発と環境問題6" :item =[["アグロフォレストリーとは何か？", "農業と林業の複合経営"], ["アグロフォレストリーはどこで行われているか？", "東南アジアなどの熱帯地域"], ["アグロフォレストリーで間作される作物は？", "樹木"], ["地球温暖化の主な原因物質は？", "化石燃料の大量消費による温室効果ガス(CO₂、メタン、フロン)の増加"], ["酸性雨の主な原因物質は？", "工場や自動車から排出される硫黄酸化物・窒素酸化物の増加"], ["森林破壊の主な原因は？", "人口爆発による薪炭材の過剰な伐採、原木輸出、焼畑面積の拡大、道路・ダム建設、放牧地の開発"], ["オゾン層破壊の主な原因物質は？", "クーラー、冷蔵庫、スプレーなどに使用されていたフロンガス"], ["砂漠化の主な原因は？", "自然的要因(気候変動による降水量減少)と人為的要因(人口増加に伴う過放牧、耕地の塩性化)"], ["1972年に開催された国際会議は？", "国連人間環境会議"], ["1992年に開催された国際会議は？", "地球サミット"], ["2002年に開催された国際会議は？", "環境・開発サミット"], ["2012年に開催された国際会議は？", "国連持続可能な開発会議(リオ+20)"], ["地球温暖化の影響で、何が融解している？", "氷河・氷雪"], ["地球温暖化で、何が上昇している？", "海水面"], ["メタンはどこから排出される？", "湿地、水田、家畜の糞"], ["京都議定書が採択されたのはいつ？", "1997年"], ["京都議定書で何が設定された？", "先進国全体の温室効果ガス削減目標値"], ["パリ協定が採択されたのはいつ？", "2015年"]];break;;
-    case "人口" :item =[["ブルネイで示している、ドイツやイギリスなどの工業地域から越境汚染の説明で、スウェーデンやフィンランドなどの北欧諸国では深刻な被害が生じたものは何か？","酸性雨"],["インドでは、家畜の糞尿を肥料にして何を行っているか？","耕作"],["マレーシアで伐採し、エビの養殖池に転換しているものは何か？","マングローブ林"],["日本で、循環型社会形成推進基本法に基づき、希少で偏在性が高いレアメタルを、電子機器などから回収し、再資源化する努力が行われており、これは何と呼ばれているか？","都市鉱山(urban mine)"],["アメリカ合衆国では、ペットボトルを返却すると一部返金される制度を導入している州もある。これを何というか？","リサイクルデポジット制度"],["日本のペットボトルの回収率は？","96.7%"],["日本のペットボトルのリサイクル率は？","88.5%"],["人口分布で、世界の人口分布を何で表したものか?","人口密度"],["現在、世界にはどれくらいの人がいるか？","約80億人(2022年)"],["日本には約何人の人がいるか？","約1億2,500万人(2022年)"],["熱帯雨林の破壊に関する説明で、カリマンタン島では輸出用の木材伐採、焼畑や油ヤシの何が拡大などが要因となっているか","プランテーション"],["長江に建設されているサンシャダムとその影響に関する説明で、周辺地域の水没や流域の何への影響が危惧されているか","生態系"]];break;
-    case "人口2" :item =[["人口密度が高い地域として、3か所特に人口密度が高い地域はどこか？","西ヨーロッパ、モンスーンアジア、アメリカ合衆国北東部"],["モンスーンアジアは、恵まれた地形、気候、土壌を利用して何が可能で生産性が高く、米は熱量も大きいから何が高い地域だったか？","稲作(連作が可能)","人口支持力"],["アメリカ合衆国北東部は何が発達している地域か？","世界的な商工業地域（アメリカンメガロポリス）"],["人口密度が最も高い主な国はどこか？","バングラデシュ"],["人口密度が最も低い主な国はどこか？","モンゴル"],["モナコは何人/km2か？","18,235人/km2"],["シンガポールは何人/km2か？","8,202人/km2"],["モンゴル、オーストラリア、リビアなどの乾燥地域を含む国やどこなどの高緯度の寒冷な国で人口密度が低いことがわかる？","カナダ"],["人口が1億人以上の国々で、1位はどこか？","インド"],["人口が1億人以上の国々で、2位はどこか？","中国"],["人口が1億人以上の国々で、日本は何位か？","12位"],["エクメーネとアネクメーネ、人間が日常的に居住・活動している地域を何というか？","エクメーネ"],["エクメーネとアネクメーネ、人間が日常的に居住・活動していない地域を何というか？","アネクメーネ"],["現在、陸地の約何%がエクメーネになっているか。","約90％"]];break;;
-    case "人口3" :item =[["世界の総人口は1650年ごろには約何億人で、現在の日本の総人口の約4倍もしかなかった？","約5億人"],["1987年には何億人を超え、現在は約80億人(2022年)？","50億人"],["特に第二次世界大戦後の発展途上地域における何の影響は大きい？","人口爆発"],["世界の人口の推移で、何が始まるまでは、ほぼ横ばいになっているか？","産業革命"],["人口増加には何増加と社会増加があるか？","自然増加"],["自然増加率は何から死亡率を引いたもの？","出生率"],["社会増加率は何から転出率を引いたもの？","転入率"],["人口増加は、自然増加と何を足し合わせたもの？","社会増加"],["世界の年平均人口増加率（2010～2015年）は11.8‰。これを上回っているのはどこか？","発展途上国が多いアフリカ"],["世界の年平均人口増加率（2010～2015年）は11.8‰。これを大きく下回っているのはどこか？","先進国が多いヨーロッパ、アングロアメリカ"],["2021年の世界の人口は何人か？","7,909百万人"],["1950年は何直後で、このあたりから発展途上地域で人口が急増している？","第二次世界大戦"],["2010-2015の世界平均の自然増加率は？","11.8"],["1950-1955のアジアの出生率は？","42.0"],["2045-2050(予測)のアフリカの死亡率は？","6.5"],["先進国の日本や経済発展が進みつつある国（NIEsやASEANなど）や、何を実施してきた中国があるからだね？","一人っ子政策（1979～2015年）"]];break;
-    case "人口4" :item =[["先進地域で出生率が高くなっている要因の一つは何か？","移民の流入"],["死亡率が高い地域はどこか？","アフリカとヨーロッパ"],["乳児死亡率が高いのはなぜか？","経済発展の遅れ、医療の普及の遅れ、栄養状態の悪さ"],["ヨーロッパで高齢者死亡率が高いのはなぜか？","高齢化の進行"],["自然増加率が低い地域はどこか？","先進地域"],["自然増加率が高い地域はどこか？","アフリカ、ラテンアメリカ"],["人口増加の3つのタイプとは何か？","多産多死、多産少死、少産少死"],["近代以前の人口増加タイプは何か？","多産多死"],["人口爆発とは何か？","出生率は高いまま、死亡率だけが低下する現象"],["現在の発展途上国の人口増加タイプは何か？","多産少死"],["ドイツやイタリアで人口が急激に減少した年はいつか？","2010年代"],["バルト三国などで人口が減少した要因は何か？","社会不安や経済停滞"]];break;;
-    case "人口5" :item =[["人口ピラミッドとは何か？","男女別、年齢別の人口構成を表すグラフ"],["人口転換による変化で、人口ピラミッドの形はどう変化するか？","富士山型から釣鐘型、つぼ型へ"],["エチオピアの人口ピラミッドは何型か？","富士山型"],["アメリカ合衆国の人口ピラミッドは何型か？","釣鐘型"],["先進国の人口ピラミッドは何型が多いか？","釣鐘型やつぼ型"],["発展途上国の人口ピラミッドは何型が多いか？","富士山型"],["第1次産業とは何か？","農林水産業"],["第2次産業とは何か？","鉱工業・建設業"],["第3次産業とは何か？","商業・サービス業、運輸・通信業、観光、金融・教育・医療・公務など"],["先進国で就業人口の割合が高いのは第何次産業か？","第3次産業"],["アメリカ合衆国とイギリスで進んでいることは何か？","脱工業化・サービス経済化"],["韓国やブラジルは何と呼ばれているか？","NIEs"],["発展途上国で、第1次産業の割合が高い国はどこか？","中国、インド"],["経済発展が遅れている東アフリカの国はどこか？","タンザニアやサヘル"]];break;;
-    case "人口6" :item =[["15世紀末の何以降、人口移動が盛んになったか？","大航海時代"],["ヨーロッパから新大陸への移動例として、何系の人々がどこへ移動したか？","ラテン系のスペイン人、ポルトガル人の中南米（ラテンアメリカ）へ移動、アングロサクソン系のイギリス人の北米（アングロアメリカ）への移動"],["アジアではどこの国の人々が世界各地に移住しているか？","中国人とインド人"],["中国で、誰が東南アジアを中心に出稼ぎに行ったか？","華南の貧しい農民"],["中国の社会主義革命後、現地の国籍を取得する人も多く、何と呼ばれているか？","華人"],["インド人がイギリス領だった時代に、他のイギリス植民地(どこ)へ、何として渡った人が多いか？","マレーシア、フィジー、ケニアなどの東アフリカ、ガイアナに契約労働者"],["アフリカ系黒人はどのようにアメリカ大陸へ移住させられたか？","自発的ではなく強制的に奴隷として"],["1960年代に、どこへ多くの労働力が流入したか？","アメリカ合衆国やヨーロッパ"],["1970年代の何によって、どこへ労働力が流入したか？","石油危機、中東の産油国"],["1990年代に、日本では何が改正され、何人(かつて何)の就労が認められるようになったか？","出入国管理法、日系人、他国へ移民した人の子孫"],["どこの国から、研修生・技能実習生として日本企業が受け入れるようになったか？","中国、ベトナム、フィリピン"],["発展途上国の人口問題は何による雇用機会の不足と食料不足が大きいか？","人口爆発"],["先進国の主な産業で、人口の約何%が職を持っているか？","60%"]];break;
-    case "人口7" :item =[["人口増加に追いつかない状態になっているものは何か？","経済の発展や食料生産"],["貧困を解決するためには何が必要か？","教育水準を向上させ、貧困をなくすこと"],["人口抑制策は何のために必要か？","女性の地位や権利の向上のため"],["日本をはじめとする先進国は何という問題に直面しているか？","高齢化と少子化"],["高齢者の割合が急増すると何が不足するか？","労働力"],["高齢化に対応するために必要なことは何か？","出産奨励や十分な育児休暇や育児施設の完備、退職後の再雇用"],["社会保障制度の充実した国はどこか？","北欧諸国(スウェーデンやデンマークなど)"],["第二次世界大戦後、急速に高齢化が進んだ国はどこか？","日本"],["合計特殊出生率とは何か？","1人の女性が平均して何人の子どもを産むかを示す数値"],["人口を維持するために必要な合計特殊出生率はいくつか？","2.1以上"],["M字曲線とは何か？","女性が出産・育児によって一旦離職し、子育てが落ち着くと再び社会復帰している様子"],["合計特殊出生率が特に低い国はどこか？","日本"],["合計特殊出生率が比較的高い先進国はどこか?","アメリカ合衆国, フランス, 北欧諸国"]];break;
-    case "人口8" :item =[["2023年の日本の合計特殊出生率はいくらか？","1.20"],["高齢化社会とは、総人口に占める何歳以上の割合が何%を超える社会か？","65歳以上、7%"],["高齢化率が何%を超えると高齢社会(Aged Society)というか？","14%"],["近年、高齢化率は何%を超える「何社会」と呼ばれるようになっているか？","21%, 超高齢社会(Super-aged society)"],["人口ピラミッドは何を表すことができるか？","その国の経済発展のレベルや人口増減の状況"],["産業別人口構成は、先進国では第何次産業人口割合が小さいか？","第1次産業"],["産業別人口構成は、経済の発展とともに第何次産業に移行していくか？","第2次、第3次産業"],["発展途上国では何による人口増加に何が追いつかないため、生活水準が低下するなどの問題が生じているか？","「人口爆発」、経済発展"],["先進国では、何が進展し、労働力不足や福祉負担が増大するなどの問題が生じているか？","高齢化、少子化"]];break;;
-    case "村落と都市" :item =[["人間が共同の社会生活を営んでいる場所のことを何というか？","集落"],["集落は、何によって分類されるか？","経済"],["第1次産業が経済を支えている集落を何というか？","村落"],["第2次・第3次産業が経済を支えている集落を何というか？","都市"],["村落で農業を行うために必要なものは何か？","水"],["日本やヨーロッパの村落で、古くから何が行われていたか？","農業"],["村落で、住民相互の結びつきが強い集落形態は何か？","集村"],["集村で家屋が密集した村落形態は何か？","塊村"],["道路に沿って家屋が並んだ集落を何というか？","路村"],["道路以外の要因で列状に並んだ集落を何というか？","列村"],["主要街道沿いに発達した集落を何というか？","街村"],["集会や市場に利用される広場を中心に家屋が環状に並んだ集落を何というか？","円村"],["散村とは何か？","一戸または数戸の農家が散在している集落"],["アメリカ合衆国のタウンシップ制にもとづく村落は何というか？","散村"],["日本の村落で条里制に基づく集落と何か？","新田集落"]];break;;
-    case "村落と都市2" :item =[["世界の伝統的な家屋は何に適応するように作られているか？","気候などの自然条件"],["高温多湿な地域では、家屋はどのような造りになっていることが多いか？","通気性をよくするために開放的な造り"],["熱帯雨林などでは、何から身を守ったり、水害から逃れるために家屋をどうしているか？","害獣、高床式"],["熱帯で、家屋の建築材料は何を多く利用しているか？","木や葉、草"],["シベリアなど寒冷な地域では、何を防ぐために何を利用して何造の家屋が作られているか？","外気を遮断し保温する、木造住宅、"],["シベリアなどの寒冷な地域では、出入り口のドアや窓はどんな大きさか？","小さい"],["西アジアや北アフリカの乾燥地域では、何のために出入り口を小さくしているか？","日中の気温が高くなるため、強い日射や外気を遮断するため"],["西アジアや北アフリカの乾燥地域で、窓はどのようなものが多いか？","小さいか、まったくない"],["西アジアや北アフリカの乾燥地域では、何などを建築材料として利用してきたか？","石、日干しレンガ、泥"],["伝統的家屋で急傾斜の屋根の場合、何が多い地域と考えられるか？","降水量や降雪量"],["伝統的家屋で平屋根の場合、何が少ない地域と考えられるか？","降水量"],["タウンシップ制と屯田兵村はいつどこで行われた公有地分割制度か？","18世紀後半から19世紀にかけてアメリカ合衆国やカナダ"],["タウンシップ制で、1区画約何haの土地に何が入植し、農業開拓を行ったか？","約64ha、一家族"],["屯田兵村は何を規範とし、何時代に何を目的に建設されたか？","タウンシップを模範、明治時代、北海道の開拓、防備、士族授産"],["古代の都市は主に何などを担っていたか？","政治、宗教、軍事的な役割"],["中世になると何が発達し、何革命後に本格的な都市化が進んでいったか？","商業都市、産業革命"],["日本では古代、何が政治の中心として発達したか？","平城京、平安京"],["中世には何などの城下町が現在の都市の起源となっていることが多いか？","鎌倉、室町、江戸"],["メトロポリスでは何が集積し、何が大きくなっているか？","生産、流通、消費に関する施設や情報、中心地機能"],["大都市圏を形成するようになっている日本の都市は？","東京大都市圏、大阪大都市圏、名古屋大都市圏"],["政治都市の例は？","キャンベラ(オーストラリア)、ブラジリア(ブラジル)、アブジャ(ナイジェリア)、オタワ(カナダ)、デリー(インド)"],["宗教都市の例は？","メッカ(サウジアラビア)、エルサレム(イスラエル)、ヴァラナシ(インド)"],["学術都市の例は？","オックスフォード(イギリス)、ハイデルベルク(ドイツ)、つくば(茨城)"],["観光・保養都市の例は？","ニース、カンヌ(フランス)、マイアミ、ラスベガス(アメリカ合衆国)"]];break;;
-    case "村落と都市3" :item =[["コナベーションとは何か？","複数の都市が、都市の規模に関係なく、市街地が連続して一体の都市地域となること"],["メトロポリスとは何か？","大都市圏のこと"],["メガロポリスとは何か？","複数のメトロポリスや周辺都市が帯状に連なり、交通・通信網で結ばれた都市化地域"],["中心業務地区(CBD)とは何か？","行政機関や企業の本社などが立地する地区"],["東海道メガロポリスに含まれる都市は？","東京、川崎、横浜、静岡、浜松、名古屋、京都、大阪、神戸など"],["スプロール現象とは何か？","郊外への無秩序な開発"],["都市の形態で、放射環状型の例は？","パリ、モスクワ"],["都市の形態で、迷路型の例は？","テヘラン、ダマスカス"],["日本の城下町に多い都市の形態は？","迷路型"],["門前町の例は？","長野（善光寺）、成田（新勝寺）"],["城郭都市の例は？","ドイツのネルトリンゲン"],["市街化区域とは何か？","都市計画法による都市計画地域のうち、現在すでに市街化されている地域、または今後優先的に市街化を図ることを認められている地域"],["市街化調整区域とは何か？","都市計画法による都市計画地域のうち、郊外への無秩序な開発（スプロール現象）を防ぐために、開発が抑制されている地域"],["ロンドンのグリーンベルトは何に当たるか？","市街化調整区域"]];break;;
-    case "村落と都市4" :item =[["先進国で都市化が始まったのはいつか？","産業革命以降"],["都市化(Urbanization)とは何か？","人口が都市に集中し、都市的地域が拡大していく現象"],["先進国でインナーシティ問題が発生した原因は？","富裕層が郊外へ移動し、都心部にスラムが形成されたため"],["郊外化(Suburbanization)とは何か？", "人口が都市の中心部から周辺部へと移動する現象"],["大ロンドン計画とは何か？","イギリスが世界に先駆けて実施した過密化対策"],["ニュータウンとは何か？","大都市の過密化問題を解消するために、大都市周辺に新たに建設された都市"],["大ロンドン計画でニュータウンはどこに建設されたか？","ロンドンの周りを囲むグリーンベルトの外側"],["ドックランズとは何か？","ロンドンの港湾施設として栄えたが、産業構造の転換により衰退した地区"],["ウォーターフロントの再開発とは何か？","港湾や倉庫の跡地に、オフィスビル、マンション、ホテル、レジャー施設などを建設し、活性化を図る開発"],["イギリスのニュータウンやウォーターフロントの再開発は何のモデルとなったか？","日本など他の先進国の再開発"],["都市再開発の二つの手法とは？","クリアランス型と修復保全型"],["クリアランス型とは何か？","スラムなどの不良住宅地区をすべて撤去し、その跡地に高層ビルなどを建設する手法"],["修復保全型とは何か？","歴史的な建造物や街並みを残しつつ、できる限り古い住宅や建物を修復し、保全していく手法"],["ヨーロッパの都市に多い再開発の手法は？","修復保全型（歴史的景観を重視するため、都心部などにおける高層ビルの建設を制限）"],["アメリカ合衆国や日本の大都市に比べて、高層ビルが少ないヨーロッパの都市が多い理由は？","歴史的景観を重視し、修復保全型の再開発を重視しているため"]];break;;
-    case "村落と都市5" :item =[["パリのラ・デファンス地区は何の中心に建設されたか？","ビジネスセンター"],["パリ都市圏にはフランスの総人口の約何%が居住しているか？","約20%"],["パリ都市圏にはフランスの企業本社の約何%が集中しているか？","約50%"],["パリの市内には高層ビルが少ない理由は？","都市計画によって建築物の高さや美観上の規制があるため"],["パリのラ・デファンス地区では何が行われたか？","超高層のオフィスビル、大規模なショッピングセンター、近代的⾼層住宅などを備える副都⼼建設"],["日本のニュータウン建設で、職住近接型でないニュータウンの例は？","多摩ニュータウンや大阪府の千里ニュータウン"],["日本で多くのニュータウンが大都市の郊外を中心に建設されたのはいつ？","1950年代の後半"],["オールドタウンとは何か？","同じような世代の人々がいっせいに入居してすでに50年以上が経過し、建物も街もみんなそろって歳をとったニュータウン"],["横浜のみなとみらい21(MM21)は何の代表的な例か？","ウォーターフロントの再開発"],["北海道の小樽や函館は何の代表的な例か？","クリアランス型の再開発"],["環境共生都市(エコシティ)とは何か？","環境に配慮した都市整備や都市再開発"],["環境共生都市(エコシティ)の取り組みが行われている都市の例は？","船橋市、横浜市、大阪市、北九州市など"],["発展途上国で農村で起こっていることは？","人口爆発"],["push型の都市化要因とは何か？","農村での余剰労働力により、人々が都市へ押し出されること"],["プライメートシティとは何か？","特定の都市に人口や都市機能が集中し、他都市を圧倒している都市"],["プライメートシティの例は？","バンコク(タイ)、ジャカルタ(インドネシア)、リマ(ペルー)、サンティアゴ(チリ)、ブエノスアイレス(アルゼンチン)"],["バラックとは何か？","プライメートシティでさえ雇用能力はあまり大きくないため、収入を得られない人々が都市郊外の未利用地(山麓や河川の後背湿地など)に形成する不良住宅地区"]];break;
-    case "村落と都市6" :item =[["スラム(squatter)とは何か？","都市郊外の未利用地を不法占拠して形成された不良住宅地区"],["先進国のスラムはどこに形成されることが多いか？","インナーシティ"],["発展途上国のスラムはどこに拡大していく傾向が強いか？","都市郊外"],["日本のニュータウンは、職住○○型の住宅衛星都市が多い。○○は？","分離"],["都市人口率とは何か？","総人口に占める都市居住者の割合"],["発展途上国でプライメートシティへの集中度が高い理由は？","その都市でなければ十分な雇用機会が得られないため"],["日本の都市人口率は？","92.0%"],["タイの都市人口率は？","52.9%"],["ラ・デファンス地区はパリの中心から西へ約何kmの位置にあるか？","約4km"],["ラ・デファンス地区の再開発の目的は？","パリの都心機能を分担し、過密化が進むパリの都心機能を分散させること"],["マレ地区ではどのような再開発が行われたか？","老朽化した建造物や街並みの修復・保全事業"],["ジェントリフィケーション(gentrification)とは何か？","インナーシティ地区やスラム化した街区を再開発により高級化した場合、低所得層が流出し、富裕層が流入する現象"],["ジェントリフィケーションの代表的な例は？","アメリカ合衆国のハーレム(ニューヨーク)などのスラム再開発"],["pull型の都市化とは何か？","雇用能力の大きい都市が周辺の農村から人口を吸引する都市化"],["push型の都市化とは何か？","農村で人口が急増し、押し出された人々が都市へ流入する都市化"]];break;;
-    case "交通と通信" :item =[["交通・通信の発達によって何が短縮されたか？","時間距離"],["産業革命後、何が発明されたか？","蒸気機関車や蒸気船"],["20世紀に入って何が進展したか？","モータリゼーション"],["1970年代から何が発達したか？","高速ジェット機時代"],["私たちが日常的に利用している陸上交通は？","鉄道と自動車"],["鉄道交通の特色は？","高速・大量輸送に向いていることと、定時性にすぐれること"],["19世紀に実用化が始まった鉄道はどこで著しく発展したか？","ヨーロッパ、アメリカ合衆国、日本など"],["鉄道の敷設に大きな資本が必要な地域は？","先進国"],["鉄道が発達しにくい発展途上国は？","アフリカやラテンアメリカ"],["自動車交通の発達に有利な地形は？","平坦地"],["戸口輸送とは何か？","自動車が出発地から目的地まで直接輸送できること"],["自動車の普及があまり進んでいない発展途上国では何が大きいか？","鉄道の役割"],["発展途上国のインドでは、何を鉄道輸送量が多い？","旅客も貨物も"],["日本では何が鉄道輸送の中心？","旅客"],["アメリカ合衆国では何が鉄道輸送の中心？","貨物"],["自動車はいつ発明された？","19世紀"],["自動車はどこで最も早くモータリゼーションが進展したか？","アメリカ合衆国"]];break;;
-    case "交通と通信2" :item =[["2018年の鉄道輸送量で、旅客輸送量が最も多い国は？","中国"],["2018年の鉄道輸送量で、貨物輸送量が最も多い国は？","アメリカ合衆国"],["ロードプライシングとは何か？","入域課金制など、自動車の乗り入れ規制"],["大都市間を結ぶ新幹線や高速鉄道の例は？","TGV(フランス)、ICE(ドイツ)"],["都市近郊から都心などへの移動手段として重要性が高まっているものは？","電車、地下鉄、LRT"],["パークアンドライドとは何か？","郊外の駅付近で自動車を駐車(park)し、都市へは鉄道を利用(ride)する方法"],["モーダルシフトとは何か？","貨物輸送では自動車から鉄道や船舶への輸送手段の転換"],["日本における旅客輸送で最も割合が高い輸送機関は？(2020年)","乗用車等(90.1%)"],["日本における貨物輸送で最も割合が高い輸送機関は？(2020年)","自動車(91.8%)"],["大気汚染の原因となる自動車の排気ガスに含まれる物質は？","窒素酸化物や二酸化炭素"],["ヨーロッパやアメリカ合衆国の都市で復活や普及が進められている公共交通機関は？","LRT(路面電車など)"],["自動車の大型化・高速化が進み、高速道路が多数建設されるようになったのはいつ？","第二次世界大戦後"],["1人当たりGNIと自動車保有数の関係は？","1人当たりGNIが高いほど、自動車保有数も多い傾向にある"],["2020年の日本における国内旅客輸送で、鉄道の占める割合は？","24.7%"],["2020年の日本における国内貨物輸送で、内航海運の占める割合は？","4.7%"]];break;;
-    case "交通と通信3" :item =[["2020年頃に自動車保有台数が急増している国は？","中国"],["2020年頃に自動車保有台数が最も多い国は？","アメリカ合衆国"],["高速道路は主にどこを中心に整備されているか？","先進国"],["ドイツの高速道路は？","アウトバーン"],["高速鉄道で、日本の新幹線がその先駆けしているものは？","TGV(フランス)、ICE(ドイツ)、AVE(スペイン)"],["近年、高速鉄道の敷設が進んでいる国は？","韓国(KTX)、台湾"],["LRTとは何か？","次世代型路面電車のことで、環境負荷が少なく低コストでの建設が可能なシステム"],["LRTはどこを中心に導入されているか？","ヨーロッパ"],["LRTの導入で、都心部では何と共存することが可能か？","歩行者や自動車"],["LRTの有名な例は？","ドイツのフライブルク、フランスのストラスブール、富山市"],["交通機関の発達によって何が著しく短縮されたか？","時間距離"],["鉄道交通の地位は何に対して低下しているか？","相対的に"],["大都市圏の長距離輸送の手段で再評価されているものは？","鉄道交通"],["陸上交通の中心となったが、大気汚染などが深刻化したものは？","自動車交通"],["モータリゼーションとは何か？","自動車が大衆化し、人々の生活が自動車に大きく依存するような社会になること"],["モータリゼーションは日本ではいつから進行したか？","1960年代"],["開拓鉄道で、国土が広く、開発が比較的新しい国で、国土の統一と開発に鉄道が大きく貢献した例は？","北アメリカ(カナダやアメリカ合衆国)の大陸横断鉄道)やロシア(シベリア鉄道)"]];break;;
-    case "交通と通信4" :item =[["水上交通とは何か？","船舶を利用した、最も大量に安く輸送できる交通手段"],["水上交通で輸送するのに適しているものは？","資源や木材など、重いわりに安いもの"],["船舶の大型化や高速化が進み、導入されている専用船の例は？","コンテナ船、オイルタンカー、LNG専用船、自動車専用船、鉱石ばら積み船"],["商船の船腹量が最も多い国は？","パナマ"],["船種別の船腹量が最も多いのは？","ばら積み乾貨物船(42.8%)"],["海上交通で運ぶ穀物や資源を運ぶ船は？","ばら積み貨物船（バルクキャリア）"],["世界の主要航路で、タンカー、コンテナ船の占める割合が大きいのはどこを結ぶ航路？","西アジアからヨーロッパや日本、中国に向かっている帯"],["世界の主要航路で、海上貨物輸送量の約3分の1を占めるものは？","原油"],["内陸水路交通とは何か？","河川、湖沼、運河を利用した船舶交通"],["日本の河川が内陸水路交通に適していない理由は？","季節による流量変化が大きく、急流が多い"],["内陸水路交通が発達している地域の例は？","ヨーロッパやロシア、アメリカ合衆国のように平坦な地形で、流量が安定しているところ"],["ヨーロッパで、内陸水路が発達している河川は？","ライン川やドナウ川"],["アメリカ合衆国で、内陸水路が発達しているのは？","五大湖"],["アフリカで内陸水路交通があまり発達していない理由は？","高原状の大陸で、下流部には多くの滝があるため"],["アフリカで内陸水路交通がある河川は？","コンゴ川とナイル川"]];break;;
-    case "交通と通信5" :item =[["航空交通はいつから発達したか？","1970年代に大型ジェット機が開発されてから"],["航空交通は何輸送で圧倒的に速いか？","長距離"],["以前は旅客輸送が中心だった航空輸送で、最近増えているものは？","軽量・小型で高付加価値(価格が高い)な電子部品や精密機械などの貨物輸送、生鮮食料品など"],["技術革新などによって、航空機の何が伸びているか？","航続距離"],["輸送機関の発達は、どこの国でもだいたい同じような状況か？","そうではなく、経済発展のレベルだけでなく、地形、気候、資源の有無など各国の事情によってかなり違いがみられる"],["日本の国内輸送における旅客輸送で、最も割合が高い輸送機関は？(2009年)","自動車(65.6%)"],["日本の国内輸送における貨物輸送で、最も割合が高い輸送機関は？(2009年)","自動車(63.9%)"],["アメリカ合衆国の国内輸送における旅客輸送で、最も割合が高い輸送機関は？(2009年)","自動車(88.4%)"],["アメリカ合衆国の国内輸送における貨物輸送で、最も割合が高い輸送機関は？(2009年)","鉄道(38.5%)"],["イギリスの国内輸送における旅客輸送で、最も割合が高い輸送機関は？(2009年)","自動車(91.0%)"],["ドイツの国内輸送における旅客輸送で、最も割合が高い輸送機関は？(2009年)","自動車(90.0%)"],["日本は国土が狭く、海に囲まれているので、国内輸送の何%以上が船舶による輸送か？","90%"],["アメリカ合衆国は、旅客輸送のほとんどが何で、残りは航空機か？","自動車"],["国土が広い国で、鉄道が貨物輸送の主役となっている国は？","アメリカ合衆国、カナダ、ロシア、中国など"],["日本の主な国内路線の旅客輸送量で、最も輸送量が多い都市は？","東京(羽田)"],["水上交通の長所は？","安価に長距離大量輸送が可能。エネルギー効率が非常に高い。"],["水上交通の短所は？","速度が遅い。荷役作業には多くの時間・労働力、港湾設備が必要。"],["航空交通の長所は？","高速でほぼ大圏コースを飛行。"],["航空交通の短所は？","重量当たりの輸送費が高い。空港施設には広大な敷地、騒音問題。"]];break;;
-    case "交通と通信6" :item =[["コンテナ船とは何か？","荷役作業の軽減や荷役時間の短縮などを目的とするコンテナの普及が進んでいる船"],["コンテナとは何か？","ISO(国際標準化機構)の基準に基づいた鋼鉄製の箱"],["コンテナ船で、専用のクレーンによって積み降ろしを行う港湾で、取り扱い量が多い港湾は？","シャンハイ、シンガポール、シェンチェン、ホンコン、プサンなどアジア"],["国際海峡で、条約により外国船の航行が認められている海峡は？","マラッカ海峡、ペルシャ湾の出入口のホルムズ海峡、地中海の出入口のジブラルタル海峡、黒海の出入口のボスポラス海峡"],["国際運河で、条約により外国船の航行が認められている運河は？","スエズ運河やアメリカ大陸東岸と西岸を短縮したパナマ運河"],["国際河川で、複数の国を流れ、外国船の航行が条約で認められている河川は？","ライン川(スイス⇒ドイツ⇒オランダ⇒北海)、ドナウ川(ドイツ⇒オーストリア⇒東欧諸国⇒黒海)"],["ハブ空港とは何か？","空港の効率的な活用を図るため建設された大規模拠点空港"],["ハブ空港で、地方空港から旅客を集め、目的地まで放射状に運行することからこう呼ばれているものは？","スポーク方式"],["近年、発展途上国にも建設されている国際ハブ空港の例は？","インチョン(韓国)、チャンギ(シンガポール)、ドバイ(UAE)"],["パイプラインで輸送するものは？","石油や天然ガス"],["20世紀末のICT(情報通信技術)革命によって、何が世界的な規模の情報ネットワークに発展したか？","コンピュータ、インターネット"],["インターネットや携帯電話の普及率は何によって大きく違うか？","国"],["固定電話、携帯電話、インターネットの普及率が高いのは？","先進国"],["携帯電話も固定電話と同じように、何で普及率が高いか？","先進国"],["携帯電話が普及し、固定電話の普及率を大きく上回っている国は？","発展途上国"],["インターネットは何が進んだため、最近は、大量のデータのやりとりが可能か？","情報インフラの整備や情報リテラシーの向上、ブロードバンド化"],["中国のインターネット普及率は低いが、最近は何が進み、徐々にインターネットを利用できる環境が整い始めているか？","情報インフラの整備"]];break;;
-    case "交通と通信7" :item =[["情報を獲得し、利用できる国とできない国との間で、何が生じているか？","情報格差(デジタルデバイド)"],["情報格差(デジタルデバイド)が生じていると、何がより発展するか？","情報を得られる地域の経済"],["インターネットは、最初はどこで何目的として開発されたか？","アメリカ合衆国で学術研究・軍事目的"],["インターネットはいつ、世界規模の情報ネットワークに発展したか？","1990年代の自由化以降急速に普及"],["情報リテラシーとは何か？","情報を獲得できる技能があるかどうかということ"],["情報リテラシーがあると、何ができるようになるか？","パソコンの操作ができて、インターネットなどにより情報を獲得できる"],["情報リテラシーがないと、何が生じるか？","デジタルデバイド"],["20世紀末の何によって、コンピュータが飛躍的に進歩するとともに、インターネットも社会に広く浸透しつつあるか？","ICT(情報通信技術)革命"],["情報を利用できる者とできない者との間で、何が生じているか？","情報格差(デジタルデバイド)"]];break;;
-    case "貿易と資本の移動" :item =[["世界の貿易総額のうち、先進国は何%を占めているか？","約60%"],["先進国は何を輸入しているか？","原材料や農産物"],["発展途上国は何を輸出しているか？","工業製品"],["国際分業とは何か？","それぞれの国が、国産品と外国製品を比較して、得意なものを生産し、不得意なものを輸入すること"],["近年、先進国で何が進んでいるか？","産業の空洞化"],["ASEANとは何か？","東南アジア諸国連合"]];break;;
-    case "貿易と資本の移動2" :item =[["一般に先進国は何を輸出しているか？","工業製品"],["一般に発展途上国は何を輸出しているか？","農林水産物やエネルギー・鉱産資源"],["水平的分業とは何か？","先進国どうしの貿易"],["垂直的分業とは何か？","先進国と発展途上国の貿易"],["モノカルチャー経済とは何か？","特定の一次産品の輸出に依存する経済"],["2022年、輸出上位1位の国はどこか？","中国"],["2022年、輸出総額が1位の国はどこか？","中国"], ["ブラジルの主要輸出品目は何か？","大豆"],["インドネシアの主要輸出品目は何か？","石炭"],["タイの主要輸出品目は何か？","機械類"],["マレーシアの主要輸出品目は何か？","機械類"],["ケニアの主要輸出品目は何か？","茶"],["ナイジェリアの主要輸出品目は何か？","原油"],["コロンビアの主要輸出品目は何か？","原油"],["チリの主要輸出品目は何か？","銅鉱"] ,["ベネズエラの主要輸出品目は何か？","原油"]];break;;
-    case "貿易と資本の移動3" :item =[["2019年まで、輸出入ともに首位だった国はどこか？","アメリカ合衆国"],["2020年には、輸出入相手国ともに何という国が首位になっているか？","中国"],["1980年代以降、大幅な何によって、アメリカ合衆国と貿易摩擦が生じてきたか？","輸出超過（黒字）"],["近年、中国とどこの国との貿易摩擦が深刻になっているか？","アメリカ合衆国"],["2008年の世界同時不況の影響で、日本の輸出入はどうなったか？","ともに激減"], ["2011年の何によって、日本の輸入が増加したか？","東日本大震災"],["東日本大震災の際、何の輸入が増加したか？","化石燃料"], ["2016年には、日本は何によって黒字になったか？","原油価格の上昇"],["第二次世界大戦後、輸出額の首位を争ってきたのはどことどこの国か？","アメリカ合衆国とドイツ"],["2009年以降、世界最大の輸出国はどこか？","中国"],["2022年時点で輸出貿易に占める主要国の割合が一番大きい国は？","アメリカ合衆国"],["2022年の輸出のランキングで1位は？","中国"],["2022年の輸入のランキングで1位は？","アメリカ合衆国"]];break;;
-    case "貿易と資本の移動4" :item =[["日本が輸入超過になっている主な相手国はどこか？","オーストラリア、サウジアラビア、アラブ首長国連邦"],["日本の主要輸入品目で、図9中の赤字で示されている品目は何か？","電気機器、一般機械"],["オーストラリアから日本への主要輸入品目は何か？","石炭、LNG、鉄鉱石"],["インドネシアから日本への主要輸入品目は何か？","石炭、LNG、電気機器"],["ロシアから日本への主要輸入品目は何か？","LNG、石炭、原油"],["サウジアラビアから日本への主要輸入品目は何か？","原油"],["アラブ首長国連邦から日本への主要輸入品目は何か？","原油"],["カナダから日本への主要輸入品目は何か？","石炭、肉類、木材"],["ブラジルから日本への主要輸入品目は何か？","鉄鉱石、トウモロコシ、鶏肉"],["チリから日本への主要輸入品目は何か？","銅鉱、魚介類"],["図10で、1935年（第二次世界大戦前）の日本の主要輸入品目は何か？","繊維原料"],["現在、日本の輸出割合が高くなっている品目は何か？","自動車、電子部品、精密機械"],["日本のFTAカバー率が最も高い相手国はどこか？","シンガポール"],["自由貿易と保護貿易、国内産業を保護するための政策はどちらか？","保護貿易"],["WTOとFTAは何を推進しているか？","自由貿易"]];break;;
-    case "貿易と資本の移動5" :item =[["GATTは何年にWTO（世界貿易機関）に改組されたか？","1995年"],["日本は何とFTA（自由貿易協定）を締結する傾向にあるか？","シンガポール、メキシコ、タイ、インドネシア、ブルネイ、ASEAN、フィリピン、スイス、ベトナム、インド"],["NAFTA（北米自由貿易協定）は何年に発効したか？","1994年"],["NAFTAは何を目標としているか？","加盟国間の関税撤廃、金融や投資の自由化、知的所有権の保護"],["USMCA（アメリカ合衆国・メキシコ・カナダ協定）は何年に発効されたか？","2020年"],["FTA（自由貿易協定）とは何か？","関税やサービス貿易（運輸、情報通信、金融、旅行、建設など）の制限撤廃を目的とする協定"],["EPA（経済連携協定）とは何か？","FTAに加え労働市場の開放、投資円滑化、経済協力推進などを含む協定"],["TPP（環太平洋経済連携協定）とは何か？","環太平洋諸国の経済自由化を目指すEPA"],["海外直接投資とは何か？","海外に工場やオフィス、販売店を設立すること"],["対内直接投資とは何か？","外国企業が国内に進出してくること"],["なぜ日本企業は国内より活動の制限がいろいろある外国へ進出するのか？","外国に進出するメリットがあるため"],["日本企業は、どのような理由でNIEsやASEAN諸国に進出したか？","円高や国内賃金水準の上昇に対応し、コストダウンを図るため"],["多国籍企業とは何か？","複数の国にまたがって活動する企業"],["ODAとは何か？","政府開発援助"],["OECD（経済協力開発機構）の下部機関で、ODAの調整を担当しているのはどこか？","DAC（開発援助委員会）"]];break;;
-    case "貿易と資本の移動6" :item =[["2022年に最もODAの拠出額が多い国はどこか？","アメリカ合衆国"],["日本は何年から何年まで世界最大のODA拠出国だったか？","1991年から2001年"],["2001年にアメリカ合衆国に首位の座を明け渡した要因は何か？","バブル崩壊後の長引く不況の影響"],["日本が批判されることがある理由として、GNI（国民総所得）比が他の先進国より低いこと以外に何があるか？","無償援助ではなく有償（低金利で融資すること）が多いこと"],["援助の相手国は地理的にどこに近いか？","アジア諸国"],["日本はどこの地域への援助が多いことに注意すべきか？","アフリカ諸国"],["海外直接投資とは何か？","企業の海外進出をさし、生産費のコストダウンや貿易摩擦を解消するため"],["ODA（政府開発援助）とは何か？","政府による発展途上国への援助"]];break;;
-    case "国家と民族" :item =[["第二次世界大戦後、どこの国々が独立？","アジア諸国"],["1960年は何と呼ばれた？","アフリカの年"],["「領域」って何？","領土、領海、領空"],["国家の三要素とは？","領域、国民、主権"],["排他的経済水域（EEZ）とは？","沿岸から200海里内の水産資源、エネルギー鉱産資源などに関して沿岸国に排他的管理権を認めた水域"],["領海は何海里まで？","12海里"],["国家間には何が必要？","国境"],["日本のように海洋を国境にしている国もあるが、どんな国境の場合もある？","アメリカ合衆国のアラスカとカナダのように経緯線を国境にしている場合"],["自然国境とは？","海洋、河川、湖沼、山脈など自然物を国境に利用している場合"]];break;;
-    case "国家と民族2" :item =[["人為的国境(数理的国境)を利用している場合が多いのはどこ？","北アメリカやアフリカ諸国"],["アフリカでヨーロッパ諸国は何を引いた？","植民地支配によって民族の居住地域を無視した勝手な線引き"],["国内に民族問題を抱え、政治的に不安定な国が多いのはどこ？","分断された主な国境"],["自然国境の「海洋」の例は？","日本、ニュージーランド、スリランカなど島国"],["自然国境の「河川」の例は？","オーデル川(ドイツ、ポーランド)、リオグランデ川(アメリカ、メキシコ)"],["自然国境の「湖沼」の例は？","五大湖(カナダ、アメリカ)、チチカカ湖(ボリビア、ペルー)"],["自然国境の「山脈」の例は？","ピレネー山脈(スペイン、フランス)、アンデス山脈(チリ、アルゼンチン)"],["数理的国境の「経度」の例は？","141°W(アメリカのアラスカ州、カナダ)、141°E(インドネシア、パプアニューギニア)"],["数理的国境の「緯度」の例は？","49°N(カナダ、アメリカ)、22°N(エジプト、スーダン)"],["国連の主要機関の「総会」の加盟国数は？","193か国"],["国連の主要機関の「安全保障理事会」の常任理事国は？","アメリカ合衆国、イギリス、フランス、ロシア、中国"],["国際司法裁判所の本部はどこ？","オランダのハーグ"],["国連の主な内部機関の「UNICEF」とは？","国連児童基金"],["国連の主な内部機関の「UNHCR」とは？","国連難民高等弁務官事務所"],["国連の主な関連専門機関で、本部はワシントンにあるのは？","国際通貨基金(IMF)"],["国連の主な関連専門機関で、本部はパリにあるのは？","国連教育科学文化機関(UNESCO)"],["国連の主な関連専門機関で、本部はジュネーブにあるのは？","世界保健機関(WHO)"],["その他の主な関連機関で、本部はウィーンにあるのは？","国際原子力機関(IAEA)"],["その他の主な関連機関で、本部はジュネーブにあるのは？","世界貿易機関(WTO)"],["国際連合(UN)が組織されたのはいつ？","1945年"],["国際連合(UN)は何のために組織された？","国際平和と安全の維持を目的"],["日本はいつ国連に加盟した？","1956年"],["ASEANとは？","東南アジア諸国連合"],["USMCAとは？","アメリカ・メキシコ・カナダ協定"],["EUとは？","ヨーロッパ連合"]];break;;
-    case "国家と民族3" :item =[["UNESCOの略称は？","国連教育科学文化機関"],["UNESCOの活動内容として正しいものは？","教育・科学・文化の研究とその普及。世界遺産の登録・保護"],["FAOの略称は？","国連食糧農業機関"],["FAOの活動内容は？","農業生産の改善による生活水準の向上"],["WTOの略称は？","世界貿易機関"],["WTOの活動内容として正しいものは？","貿易障壁と輸入制限の撤廃。世界貿易の自由化およびサービス貿易や知的所有権などを加えた新しい貿易ルールを確立"],["UNCTADの略称は？","国連貿易開発会議"],["UNCTADの活動内容は？","貿易促進による発展途上国の経済開発促進"],["UNEPの略称は？","国連環境計画"],["UNEPの活動内容は？","環境保護のための国際協力"],["OECDの略称は？","経済協力開発機構"],["OECDの活動内容は？","先進国を中心に38か国から構成(「先進国クラブ」)。世界経済の発展と途上国への援助(ODA)"],["NATOの略称は？","北大西洋条約機構"],["NATOはどんな組織？","欧米西側諸国で結成された集団安全保障機構"],["ASEANの略称は？","東南アジア諸国連合"],["ASEANの活動内容は？","東南アジア10か国。経済発展と域内貿易の拡大"],["AUの略称は？","アフリカ連合"],["AUの活動内容は？","OAU(アフリカ統一機構)が発展的に解消。EU型の政治・経済統合。"],["EUの略称は？","ヨーロッパ連合"],["EUの活動内容は？","政治・経済・通貨統合を目指す"],["EFTAの略称は？","ヨーロッパ自由貿易連合"],["EFTAはどんな組織？","EUとの拡大統一市場を目指すEEA(ヨーロッパ経済領域)を発足"],["USMCAの略称は？","アメリカ・メキシコ・カナダ協定"],["USMCAはどんな組織？","旧NAFTA。アメリカ合衆国、カナダ、メキシコ3か国の自由貿易圏の形成を目指す"],["MERCOSURの略称は？","南米南部共同市場"],["MERCOSURはどんな組織？","域内関税撤廃と域外共通関税を設定"],["APECの略称は？","アジア太平洋経済協力会議"],["APECはどんな組織？","環太平洋地域の貿易・投資の拡大・自由化による経済発展を目指す"],["OPECの略称は？","石油輸出国機構"],["OPECはどんな組織？","メジャーに対抗して設立。産油国石油産業の発展を目指す"],["OAPECの略称は？","アラブ石油輸出国機構"],["単一民族国家とは？","単一の民族で国家を形成するという理念(民族国家、国民国家)"],["中央集権国家と連邦国家、中央政府が直接的に国民・領土を支配する国家は？","中央集権国家"],["中央集権国家の例は？","日本、フランス、韓国"],["連邦国家とは？","中央政府が外交・軍事などを担当し、地方(州)政府が内政に関する権限を委任されている国家"],["連邦国家の例は？","アメリカ合衆国、ドイツ、スイス"],["君主国と共和国、君主国とは？","世襲的な元首によって統治される国家"],["君主国の例は？","イギリス、オランダ、日本"],["共和国とは？","国民から選出された元首によって統治される国家"],["共和国の例は？","アメリカ合衆国、フランス、ロシア"],["国家は〇〇・〇〇・〇〇からなる","領域、国民、主権"]];break;;
-    case "国家と民族4" :item =[["人種とは？","人類を肌の色や体の形態などの身体的な特徴で分類したグループ"],["モンゴロイド(黄色人種)の特徴は？","黄・銅色の皮膚、黒髪・直毛"],["モンゴロイド(黄色人種)の主な分布地域は？","東アジア・東南アジア・南北アメリカ(先住民)"],["コーカソイド(白色人種)の特徴は？","白色の皮膚、金髪・褐色髪の波状毛"],["コーカソイド(白色人種)の主な分布地域は？","ヨーロッパ・西アジア・南アジア、北アフリカ・南北アメリカ"],["ネグロイド(黒色人種)の特徴は？","黒色の皮膚、黒色の巻き毛・縮状毛"],["ネグロイド(黒色人種)の主な分布地域は？","中部アフリカ"],["オーストラロイド(濃色人種)の特徴は？","濃色の皮膚、黒色の巻き毛・波状毛"],["オーストラロイド(濃色人種)の主な分布地域は？","ニューギニアやオーストラリア先住民など(アボリジニー)"],["コーカソイドはどこを中心に分布？","ヨーロッパ"],["西アジアと北アフリカの分布地域で間違っているのは？","ネグロイドの分布地域と思っている人がいる"],["ネグロイドはアフリカ系人種と呼ばれる、どこに分布？","サハラ砂漠以南の中南アフリカ"],["南米に多い人種は？","メスチソ(白人とインディオ)、ムラート(白人と黒人)などの混血人種"],["民族とは？","言語や宗教の関わりが大きく、同じ言語を話し、同じ宗教を信じているなど、人生観や価値観をもっている"],["民族を考える場合最も重要な指標は？","言語"]];break;;
-    case "国家と民族5" :item =[["世界で最も話者人口が多い言語は？", "中国語"], ["世界で2番目に話者人口が多い言語は？", "スペイン語"], ["世界で3番目に話者人口が多い言語は？", "英語"], ["ゲルマン語派に属する言語は？", "英語・ドイツ語・オランダ語・ノルウェー語・スウェーデン語"], ["ゲルマン語派の主な分布地域は？", "北西ヨーロッパ、アングロアメリカ、オーストラリア"], ["ラテン語派に属する言語は？", "イタリア語・スペイン語・ポルトガル語・フランス語"], ["ラテン語派の主な分布地域は？", "南ヨーロッパ、ラテンアメリカ"], ["スラブ語派に属する言語は？", "ロシア語・ポーランド語・チェコ語・セルビア語"], ["スラブ語派の主な分布地域は？", "東ヨーロッパ～ロシア"], ["インド=ヨーロッパ語族のその他の言語は？", "ケルト語、ギリシャ語、ペルシャ語(イラン)、ヒンディー語(インド)"], ["アフリカ=アジア語族(アフロ=アジア)に属する言語は？", "アラビア語・ヘブライ語(イスラエル)"], ["アフリカ=アジア語族(アフロ=アジア)の主な分布地域は？", "北アフリカ～西アジア"], ["ウラル語族に属する言語は？", "フィンランド語・エストニア語・マジャール語(ハンガリー)"], ["ウラル語族の主な分布地域は？", "フィンランド、エストニア、ハンガリー"], ["アルタイ語族に属する言語は？", "トルコ語・モンゴル語"], ["アルタイ語族の主な分布地域は？", "トルコ～中央アジア、シベリア～モンゴル"], ["シナ=チベット語族に属する言語は？", "中国語・チベット語・ミャンマー語"], ["シナ=チベット語族の主な分布地域は？", "中国～インドシナ半島"], ["オーストロネシア語族(マレー=ポリネシア)に属する言語は？", "マレー語・インドネシア語・フィリピノ語"], ["オーストロネシア語族(マレー=ポリネシア)の主な分布地域は？", "東南アジア島嶼部、マダガスカル"], ["ニジェール=コルドファン語族に属する言語は？", "スーダン語系・ギニア湾沿岸、バンツー語系"], ["ニジェール=コルドファン語族の主な分布地域は？", "サハラ以南の中南アフリカ"], ["三大宗教は？", "キリスト教、イスラーム教、仏教"], ["キリスト教、イスラーム教、仏教の三大宗教を何と呼んでいる？", "世界宗教"], ["キリスト教はどこで生まれた？", "西アジア(パレスチナ)"], ["キリスト教がヨーロッパに広まっていったのはなぜ？", "ローマ帝国の発展とともに"], ["ローマ帝国の東西分裂で、西に何、東に何ができた？","西にカトリック、東にオーソドックス"], ["カトリックから宗教改革を経て何が普及した？","プロテスタント"], ["世界で最も信者人口が多い宗教は？", "キリスト教"], ["キリスト教の信者数は？", "2,586百万人"], ["イスラーム教の信者数は？", "1,999百万人"]];break;;
-    case "国家と民族6" :item =[["キリスト教は、カトリック(旧教)、〇〇、〇〇という3つのグループに発展していった", "オーソドックス(正教会、東方正教会), プロテスタント(新教)"], ["イスラームもどこで生まれた？", "西アジア(アラビア半島)"], ["仏教はどこで生まれた？", "インドのガンジス川流域"], ["宗教人口でキリスト教、イスラームの次にくるのは？", "ヒンドゥー教"], ["ヒンドゥー教はどこから生まれた？", "インド古来のバラモン教"], ["ヒンドゥー教は〇〇〇〇などの影響を受けて成立した", "仏教、各地の民間信仰"], ["ユダヤ教も同様にどこに住むユダヤ人に信仰されている？", "イスラエルや世界各地"], ["中南アフリカやアメリカ大陸では何が信仰されている？", "自然崇拝の伝統宗教"], ["語族と類語、同一起源から派生したと証明されている言語グループを何というか？", "語族"], ["語族とはっきりとは同系統と認められない言語グループのことを何と指す？", "類語"], ["ケルト系民族、古代ヨーロッパの先住民で、どこなどに居住している？", "アイルランド、イギリスのスコットランド、ウェールズ、フランスのブルターニュ半島"], ["北アイルランド(イギリス)では何と何の間で対立がみられる。", "プロテスタントとカトリック"], ["バスク人、どこからどこにかけてのバスク地方に居住する少数民族？", "スペインからフランス"], ["スペインでは何が認められているが、分離独立運動も盛んである。", "自治"], ["チベット仏教(ラマ教)、何がチベットの民間宗教の影響を受けたもので、どこで信仰されている？", "チベットやモンゴル"], ["チベット自治区の中心地は？", "ラサ"], ["キリスト教はどこで始まった？", "西アジア(パレスチナ)"], ["キリスト教の聖典は？", "聖書"], ["キリスト教における精神的な支柱となるものは？", "日曜日とし、礼拝を行う"], ["イスラーム(イスラム教)はどこで始まった？", "西アジア(アラビア半島)"], ["イスラーム(イスラム教)の聖典は？", "コーラン(クルアーン)"], ["イスラーム(イスラム教)での義務は？", "礼拝、断食、巡礼"], ["イスラーム(イスラム教)で金曜日にはどこで礼拝を行う？", "モスク"], ["イスラーム(イスラム教)の最高の聖地はどこ？", "メッカ(サウジアラビア)"], ["仏教はどこで始まった？", "インド北部地方"], ["仏教はどこでは定着せず、どこへ発展した？", "スリランカ、東南アジア(インドシナ半島)、中国、朝鮮半島、日本"], ["ヒンドゥー教の特徴は？", "自然崇拝の多神教で特定の教祖・経典を持たない。輪廻思想、カースト制度とのかかわりが深い。牛を神聖化し、菜食主義者が多い。"], ["ユダヤ教はどこで始まった？","西アジア(パレスチナ)"], ["ユダヤ教で何が敵われるという「選民思想」？","ユダヤ人だけ"], ["ユダヤ教、キリスト教、イスラームの聖地は？","エルサレム(イスラエル)"]];break;;
-    case "国家と民族7" :item =[["ユーゴスラビア紛争はいつからいつまでか？","1991~2002年"],["北アイルランド紛争で対立しているのは？","カトリックとプロテスタント"],["スペインで分離を求めている民族は？","バスク民族"],["メキシコで反政府運動を起こしている先住民は何年？","1994年〜"],["パレスチナ問題で対立しているのは？","アラブ人とユダヤ人"],["シリア内戦はいつから？","2011年〜"],["ソマリア内戦はいつから？","1991年〜"],["ルワンダ、ブルンジで対立しているのは？","ツチ人とフツ人"],["南スーダン内戦はいつから？","2013年〜"],["クリミア半島をめぐる対立はどことどこの対立？","ウクライナとロシア"],["チェチェン共和国の独立を求める運動はいつから？","1994年〜"],["カシミールをめぐる対立はどことどこの対立？","インドとパキスタン"],["南沙群島の領有をめぐる問題はいつから？","1974年〜"]];break;;
-    case "東アジア" :item =[["アジアの大部分は何と何が広がっているか？","安定陸塊と古期造山帯"],["新期造山帯に属する山脈は？","ヒマラヤ山脈"],["新期造山帯に属する高原は？","チベット高原"],["新期造山帯に属する島は？(2つ以上)","日本列島、フィリピン諸島、スンダ列島"],["最も北に位置する海は？","北極海"],["最も東に位置する海は？","ベーリング海"],["最も南に位置する海は？","インド洋"],["最も西に位置する海は？","地中海"],["安定陸塊の高原の例は？","デカン高原"],["古期造山帯の山地の例は？","ウラル山脈"],["日本列島は何という造山帯に属しているか。","環太平洋造山帯"],["インドシナ半島の西に位置する湾は？","ベンガル湾"], ["チベット高原の北に位置する盆地","タリム盆地"]];break;;
-    case "東アジア2" :item =[["黄河はどこからどこへ流れるか？","チベット→華北"],["長江はどこからどこへ流れるか？","チベット→華中"],["メコン川はどこからどこへ流れるか？","チベット→タイ・ラオス→カンボジア→ベトナム"],["チャオプラヤ川はどこからどこへ流れるか？","インドシナ北部→タイ"],["ガンジス川はどこからどこへ流れるか？","チベット→インド→バングラデシュ"],["インダス川はどこからどこへ流れるか？","チベット→パキスタン"],["Awは何気候か？","熱帯雨林気候"],["図2で、BSは何気候か？","ステップ気候"],["BWは何気候か？","砂漠気候"],["Cfaは何気候か？","温暖湿潤気候"],["Cwは何気候か？","温暖冬季少雨気候"],["Dfは何気候か？","冷帯湿潤気候"],["Dwは何気候か？","冷帯冬季少雨気候"],["ETは何気候か？","ツンドラ気候"],["アジアは大きく分けると、モンスーンの影響が(1)アジアと、乾燥気候が卓越する(2)アジアに分類される。","(1)強い、(2)乾燥"]];break;;
-    case "東アジア3" :item =[["朝鮮半島は、日本とほぼ同緯度にあるが、気候の違いは？","大陸性の気候(Dw・Cw)が広がり、気温の年較差も日本より大きい"],["北京の気候区分は？","BS"],["札幌の気候区分は？","Df"],["ソウルの気候区分は？","Cw"],["図4で、東京の気候区分は？","Cfa"],["朝鮮半島には、南に何という国があるか？","大韓民国(韓国)"],["朝鮮半島には、北に何という国があるか？","朝鮮民主主義人民共和国(北朝鮮)"],["韓国と北朝鮮は、いつ国連に同時加盟したか","1991年"],["ハングル文字で、「こんにちは」は何と読むか？","アンニョンハセヨ"],["韓国の宗教別人口(2022年)で、最も多いのは？","無宗教"],["韓国の宗教別人口(2022年)で、キリスト教の割合は？","27.7%"],["韓国の宗教別人口(2022年)で、仏教の割合は？","15.5%"],["韓国の伝統的な家屋に見られる床暖房設備は？","オンドル"],["韓国の民族衣装で女性のものは？","チマ・チョゴリ"],["セマウル運動とは何か？","農村の近代化運動"],["韓国がアジアNIEsの一つとして、経済発展したのはいつからか?","1980年代"]];break;;
-    case "東アジア4" :item =[["キョンイン工業地域にある主な工業は？(2つ以上)","工業地域、鉄鋼、一般機械工業、自動車工業、造船、電子工業、化学工業"],["南東沿岸工業地域にある主な工業は？(2つ以上)","鉄鋼、一般機械工業、自動車工業、造船、電子工業、化学工業、製油所"],["ホナム工業地域にある主な工業は？","化学工業"],["テグにある主な工業は？","繊維工業"],["クミにある主な工業は？","電子工業"],["ウルサンにある主な工業は？","自動車工業"],["日本海沿岸に成立している工業地域は？","ポハン、ウルサン"],["韓国はいつOECDに加盟したか？","1996年"],["韓国の首都ソウルへの人口一極集中で、ソウルに住んでいる人口は、総人口の約何分の1？","約5分の1"],["韓国と北朝鮮の政治体制の違いは？","韓国は資本主義国、北朝鮮は社会主義国"],["北朝鮮で、経済・外交・国防の自立を目指した考え方は？","チュチェ(主体)思想"],["北朝鮮で経済が不振に陥っている原因は？(2つ以上)","資本や技術の不足、軍事費の増大、自然災害"],["朝鮮半島の土地利用で最も多いのは？","森林"]];break;;
-    case "東アジア5" :item =[["韓国の気候は主に何が分布しているか？","北からDw・Cw・Cfa"],["韓国の首都は？","ソウル"],["韓国の人口は約何万人？","約5,200万人"],["ソウルの人口は都市人口の約何%以上？","80%以上"],["韓国の主要産業は？(2つ以上)","自動車、石油化学、造船"],["北朝鮮の気候はほぼ全域で何？","Dw"],["北朝鮮の首都は？","ピョンヤン"],["北朝鮮の人口は約何万人？","約2,600万人"],["北朝鮮で自力更生を掲げた思想は？","チュチェ思想"],["北朝鮮の主要産業は？","工業"],["中国の国土面積はどこの国に次いで大きい？","ロシア、カナダ、アメリカ合衆国"],["中国の地形の特徴は？","西高東低"],["中国で、東部の沿岸地域と西部の内陸部、どちらの気候が湿潤？","東部の沿岸地域"],["中国の総人口約14億人のうち、何%以上が東部の平野に住んでいるか？","90%以上"],["中国の東部を流れる大河は？(2つ)","黄河、長江"]];break;;
-    case "東アジア6" :item =[["中国は、大きく分けると5つの地域に分けられる。何か？","東北、華北、華中、華南、内陸地域"],["東北地方の地形と主な河川は？","東北平原。リヤオ川、ソンホワ川。"],["東北地方の気候は？","冬季寒冷なDw"],["華北地方の地形は？","黄河流域に華北平原、黄土高原"],["華北地方の気候は？","降水量が少なくBS、一部Dw、Cwも"],["華中地方の地形は？","長江流域に長江中下流平原、スーチョワン盆地。"],["華中地方の気候は？","温暖多雨なCfa"],["華南地方の地形は？","山がちで沿岸部に狭い平野。チュー川のデルタ。"],["華南地方の気候は？","亜熱帯性のCw"],["内陸地方の地形は？","ゴビ砂漠、タクラマカン砂漠、テンシャン山脈、クンルン山脈、チベット高原"],["内陸地方の気候は？","BS〜BWが大部分だが、チベット高原はET"],["中国の行政区分で、人口の90%以上は何語を話す何族？","中国語、漢族"],["中国には、55の何があるか？","少数民族"],["チベット自治区の主な民族は？","チベット族"],["シンチヤンウイグル自治区の主な民族は？","ウイグル族"],["内モンゴル自治区の主な民族は？","モンゴル族"],["中華人民共和国が成立したのはいつ？","1949年"],["1970年代末から、中国で実施された政策は？","改革・開放"],["改革・開放政策で、農業に取り入れられた制度は？","生産責任制"]];break;;
-    case "東アジア7" :item =[["中国で、1979年から採用された政策は？","一人っ子政策"],["一人っ子政策によって、何が低下したか？","出生率、人口増加率"],["2022年の中国の合計特殊出生率は？","1.09"],["一人っ子政策が廃止されたのはいつ？","2015年"],["一人っ子政策廃止後、何人まで出産を認められているか？","三人"],["1950年の中国の人口ピラミッドで、最も割合が高い年齢層は？","0-4歳"],["2021年の中国の人口ピラミッドで、最も割合が高い年齢層は？","50-54歳"],["2050年(推定)の中国の人口ピラミッドで、最も割合が高い年齢層は？","75-79歳"],["東北地方で栽培されている作物は？(2つ以上)", "とうもろこし、大豆、水稲"],["華北地方で栽培されている作物は？(2つ以上)", "小麦、とうもろこし、綿花"],["華中地方で栽培されている作物は？","水稲"],["華南地方で栽培されている作物は？(2つ以上)","水稲、サトウキビ"],["図12で、内陸地方で栽培されている作物は？(2つ以上)","綿花、ブドウ"],["チンリン・ホワイ川線より北で栽培が盛んな作物は？","畑作"],["チンリン・ホワイ川線より南で栽培が盛んな作物は？","稲作"],["中国が輸入を増やしている主要な農産物は？","大豆"],["大豆の主な輸入元は？","ブラジル"]];break;;
-    case "東アジア8" :item =[["中国で石炭の依存度が最も高い地域はどこか？","山西省周辺"],["粗鋼の生産量が世界で占める割合は？","54.0%"],["化学繊維の生産量が世界で占める割合は？","68.9%"],["携帯電話の生産量が世界で占める割合は？","78.6%"],["パソコンの生産量が世界で占める割合は？","98.2%"],["1980年代に中国南部で設立された、外国資本を受け入れた地域を何というか？","経済特区"],["外国企業の進出が活発なのは、中国の沿岸部と内陸部のどちらか？","沿岸部"],["近年、中国が積極的に投資を行っている地域はどこか？","アフリカ"],["中国が国内陸部からユーラシア、東南・南アジア、アフリカ東岸を結ぼうとしている政策を何というか？","一帯一路"],["郷鎮企業とは何か？","村・町などが経営する企業"],["台湾の一人当たりGNIはいくらか？","33,756ドル"], ["中国の経済政策、「改革・開放」政策は何を目的として行われたか？","外国企業の誘致と市場経済の導入"],["中国で近年進められている、地域格差解消のための大規模プロジェクトとは？","西部大開発など"]];break;;
-    case "東アジア9" :item =[["東北地方の主要工業都市はどこか？","シェンヤン"],["華北地方で、先端産業や家電で発展している都市はどこか？","ペキン"],["長江河口付近に位置し、中国経済の中心地となっている都市はどこか？","シャンハイ"],["華南地方で、経済特区に指定されている都市はどこか？","コワンチョウ、シェンチェン、アモイ、スワトウ"],["内陸部で、資源開発が行われている地域はどこか？","パオトウ、ウルムチ"],["台湾の主要工業都市で、IT関連産業が盛んな都市はどこか？","タイペイ"],["中国の国土の特徴として、地形の高低差はどうか？","西高東低"],["中国の年間降水量は、どの山脈を結ぶ線によって分けられるか？","チンリン山脈とホワイ川"],["中国で、砂漠化防止のために進められている政策は何か？","退耕還林"],["2000年頃から中国で実施されている、内陸部の経済格差を解消するためのプロジェクトは何か？","西部大開発"],["中国で、電力を東部に輸送するプロジェクトを何というか？","西電東送"],["中国で、水を南から北へ送るプロジェクトを何というか？","南水北調"],["香港やマカオで採用されている、中国本土とは異なる政治・経済体制を何というか？","一国二制度"]];break;;
-    case "東南アジアと南アジア" :item =[["東南アジアに含まれる主な半島や島を3つ以上挙げよ。", "インドシナ半島、マレー半島、スマトラ島、ジャワ島、バリ島、フィリピン諸島"],["フィリピン諸島やスンダ列島付近の地質学的特徴は何か？","火山が多い、地震活動が活発"],["東南アジアの気候帯は主に何と何に分けられるか？","熱帯雨林気候(Af)、熱帯モンスーン気候(Am)"],["モンスーンとは何か？","季節風"], ["インドシナ半島で、6世紀から13世紀ごろインドから伝わった宗教は何か？","上座仏教"],["島嶼部で13世紀以降アラビア商人により伝えられた宗教は何か？","イスラーム教(イスラム教)"],["フィリピンと東ティモールで多く信仰されている宗教は何か？","キリスト教(カトリック)"],["インドネシアのバリ島で多く信仰されている宗教は何か？","ヒンドゥー教"],["マレー半島から島嶼部にかけて広く分布している民族は何か？","マレー系民族"],["インドシナ半島で主に用いられている言語は何か？","シナ・チベット語族"],["1月のモンスーンの風向きは？","大陸から海洋へ"],["7月のモンスーンの風向きは？","海洋から大陸へ"]];break;;
-    case "東南アジアと南アジア2" :item =[["ASEANの正式名称は何か？","東南アジア諸国連合(Association of South-East Asian Nations)"],["ASEANが結成されたのは何年か？","1967年"],["ASEAN結成当初の主な目的は何か？","反共産主義の防衛網"],["1995年にASEANに加盟した国はどこか？","ベトナム"],["1997年にASEANに加盟した国はどこか？","ミャンマーとラオス"],["1999年にASEANに加盟した国はどこか？","カンボジア"],["AFTAとは何か？","ASEAN自由貿易地域"], ["2015年にASEANで発足したものは何か？", "AEC(ASEAN経済共同体)と、それを深化させたASC(ASEAN安全保障共同体)、ASCC（ASEAN社会・文化共同体）を包括したASEAN共同体(AC)"],["プランテーション作物とは何か？","商品価値の高い農産物を大規模に栽培するもの"],["輸出指向型工業とは何か？","輸出向けの製品を製造する工業"],["表１で、ベトナムの主な宗教は何か？","大乗仏教"],["マレーシアの主な宗教は何か？","イスラーム教（国教）"],["フィリピンの主な宗教は何か？","カトリック"], ["2022年のシンガポールの主要輸出品は何か?", "機械類、石油製品、精密機器"], ["2022年のタイの主要輸出品は何か?", "機械類、自動車、プラスチック"]];break;;
-    case "東南アジアと南アジア3" :item =[["タイは東南アジアで唯一、戦前から何であった国か？","独立国"],["タイで1960年代半ばから進められた農業政策を何というか？","緑の革命"],["タイの土地生産性が低い理由として、何が普及していないことが挙げられるか？","灌漑システム、機械化"],["タイの主要な輸出品を3つ挙げよ。", "天然ゴム、砂糖、エビなどの水産物"],["近年、タイで自動車産業を筆頭に進出している企業はどこの国が多いか？","日本"],["マレーシアで、民族間の所得格差を向上させるために実施された政策は何か？","マレー人優先政策（ブミプトラ政策）"],["マレー語を何と定めたか？","国語"],["天然ゴムのプランテーションがどこから移植された？","アマゾン地方"],["マレーシアで近年、食用油として需要が伸びているものは何か？","パーム油"],["ルックイースト政策とは何か？","日本や韓国をモデルとした経済政策"],["マレーシアで近年建設された、IT工業団地の名称は？","サイバージャヤ"],["シンガポールが、マレーシアから分離独立したのはいつか？","文章中に記載なし（画像から読み取れない）"],["シンガポールの公用語は何語あるか？","4言語（マレー語、中国語、タミル語、英語）"],["シンガポールは、何と呼ばれるほどに成長したか？","NIEs"],["マレーシアの人口の約60%を占めている民族は？","マレー系民族"]];break;;
-    case "東南アジアと南アジア4" :item =[["インドネシアの人口は、約何人か？", "約2.8億人"], ["インドネシアで、イスラーム教徒の人口が世界で一番多い島はどこか？", "ジャワ島"], ["インドネシアの公用語は何か？", "インドネシア語"], ["ジャワ島に人口が集中していることによる問題点を解消するために、インドネシア政府が実施している政策は何か？", "トランスミグラシ政策"], ["フィリピンが、アメリカ合衆国領になる前に支配していた国はどこか？", "スペイン"], ["フィリピンの公用語は何か？", "フィリピノ語と英語"], ["日本のバナナの最大の輸入相手国はどこか？", "フィリピン"], ["シンガポールの特徴は何か？", "マラッカ海峡に面する島国。アジアNIEs。1人当たりGNIは先進国並みの58,770ドル。"], ["ブルネイの特徴は何か？", "石油・天然ガスに経済を依存。人口が少なく(約45万人)、1人当たりGNIは31,650ドル。"], ["マレーシアの特徴は何か？", "マレー系・先住民族(62.0%)、中国系(22.7%)、インド系(6.9%)からなる多民族国家。ブミプトラ政策。シンガポールに次いで工業化が進展。"], ["表3で、タイの特徴は何か？", "古くから農産物の輸出が盛ん(米の輸出は世界のトップクラス)。近年は、タイ、マレーシアとともに輸出指向型工業が発展。日本などの自動車メーカーが進出。"], ["フィリピンの特徴は何か？", "多島国で火山が多い(ピナトゥボ山)。バナナやココヤシ(コプラ)などフィリピンの農産物が経済を支えてきたが、近年は工業化も進展。"], ["インドネシアの主要輸出品で、日本へも輸出されているものは何か？", "石炭、LNG、原油"], ["多島国で、農村部では大土地所有制が残っている国はどこか？", "フィリピン"]];break;;
-    case "東南アジアと南アジア5" :item =[["インドシナ半島は、第二次世界大戦後どうなったか？", "インドシナ戦争、ベトナム戦争、カンボジア内戦など紛争が続いたため、経済は長く停滞していた"], ["ベトナムで、1986年から打ち出された経済政策は何か？", "ドイモイ（刷新）"], ["ベトナムの主要な輸出品は何か？", "米やコーヒー、原油"], ["マレー語は、東南アジアの島嶼部で何として広く用いられているか？", "商用語"], ["1997年に、タイの通貨バーツの暴落から始まった経済の混乱を何というか？", "アジア経済（金融）危機"], ["東南アジアは、主に何と何からなる地域か？", "インドシナ半島、マレー半島と島嶼部"], ["タイ以外の東南アジア諸国は、第二次世界大戦後までどこの植民地支配を受けていたか？", "欧米"], ["南アジアの地形図で、北部に位置する山脈は何か？", "ヒマラヤ山脈"], ["インド半島の大部分を占める地形は何か？", "デカン高原"], ["インド半島の付け根付近を流れ、ヒンドスタン平原やガンジスデルタを形成している河川は何か？", "ガンジス川とブラマプトラ川"], ["スリランカにあるセイロン島も何として知られる？", "安定陸塊"], ["南アジアの気候図で、大部分を占める気候帯は？","Aw(サバナ気候)とAm(熱帯モンスーン気候)"]];break;;
-    case "東南アジアと南アジア6" :item =[["インド半島で、夏の南西モンスーンの影響が強く、雨も多い地域はどこか？", "インド半島西岸やヒンドスタン平原からアッサム丘陵"], ["デカン高原の西部からパキスタンにかけては、何の影響が少なく、乾燥帯になっているか？", "モンスーン(季節風)と、亜熱帯高圧帯"], ["インド・パキスタン国境付近に広がる砂漠は何か？", "インダス砂漠(タール砂漠)"], ["インドの宗教で、最も信者が多いのは何か？", "ヒンドゥー教"], ["パキスタンとバングラデシュで、最も信者が多いのは何か？", "イスラーム教"], ["スリランカで最も信者が多いのは何か？", "仏教"], ["インドの国土面積は、南アジアで何番目に大きいか？", "一番大きい"], ["インドの人口は、何人を超えているか？", "14億人"], ["インドの公用語は何か？", "ヒンディー語"], ["インドで、準公用語とされている言語は何か？", "英語"], ["インド半島にもともといたとされる、ドラヴィダ系とはどのような人々か？", "黒色の肌をもつマレー系人種とかオーストラロイドとかいわれている"], ["西アジアからインドに侵入してきたとされるのは、何系の何人か？", "インド＝ヨーロッパ系のコーカソイド"], ["南アジアの言語分布図で、インド北部に分布している語族は何か？", "インド＝ヨーロッパ語族"], ["南アジアの言語分布図で、インド南部に分布している語族は何か？", "ドラヴィダ語族"], ["南アジアの米の生産地域で、多く栽培されているのはどこか？", "ガンジス川下流から中流域および海岸部"]];break;;
-    case "東南アジアと南アジア7" :item =[["ヒンドスタン平原からガンジスデルタで栽培されている、黄麻とも呼ばれる繊維作物は何か？", "ジュート"], ["年降水量1,000mm未満の地域や、デカン高原西部のレグールでの分布地域が広い作物は何か？", "綿花"], ["米と小麦の生産は、中国に次いで世界第何位か？", "第2位"], ["1960年代後半から、インドで何によって小麦、米などの高収量品種が導入されたか？", "緑の革命"], ["インドは、何の生産量が世界最大か？", "牛乳"], ["牛乳や乳製品の生産増大、酪農協同組合の設立などにより、生乳（牛と水牛）の生産量が急増したことを何というか？", "白い革命"], ["第二次世界大戦前は、デカン高原の何を利用した伝統的な綿製品の生産と、どこで何くらいしか発達していなかったか？", "綿花、ジャムシェドプルの鉄鋼業"], ["戦後、政府主導の工業化政策のもと、何と何総合開発が実施されたか？", "ダモダル川"], ["近年、デカン高原南部（バンガロール）で、何産業の集積地が形成されているか？", "コンピュータソフトの開発などハイテク産業"], ["インドが1991年から外資の積極的な導入、関税引き下げを行う何を実施しているか？", "経済開放政策"], ["パキスタンは、何人などからなる何国家で、何語（何文字を使用する）が使用されているか？","パンジャブ人、パシュトゥーン人、多民族国家、ウルドゥー語（アラビア文字）"], ["パキスタンで、国語と公用語に指定されているのは何か？", "ウルドゥー語が国語、英語が公用"], ["パキスタンの国土の大部分が、何気候か？", "乾燥気候"], ["パキスタンで、イギリス植民地時代から何が整備されていたため、何地方を中心に何や何の栽培が盛んか？", "灌漑設備、パンジャブ地方、小麦や綿花"], ["南アジアの鉱工業と主な都市で、インドの鉄鉱石の産地は？","デリーの南東、ジャムシェドプル周辺"],["南アジアの鉱工業と主な都市で、インドの石炭の産地は？","デリーの南東、ジャムシェドプルからコルカタにかけて"]];break;;
-    case "東南アジアと南アジア8" :item =[["バングラデシュは、どこから分離独立した国か？", "パキスタン"], ["バングラデシュで、公用語となっているのは何か？", "ベンガル語"], ["バングラデシュの国土の大部分がどこに位置するため、何と何の栽培の中心になっているか？", "ガンジスデルタ、米とジュート"], ["バングラデシュの輸出品の70%以上を占めているものは何か？", "衣類や繊維品"], ["バングラデシュの人口密度はどれくらいか？", "1,000人/km²以上"], ["バングラデシュで、しばしば起こる自然災害は何か？", "サイクロンによる洪水や高潮"], ["スリランカは、インド洋に浮かぶ何島で、何のモンスーンの影響を強く受け、国土の何部はかなり降水量が多いか？", "島国、夏の南西モンスーン、南西部"], ["スリランカで栽培に適しているものは何か？", "茶"], ["スリランカの主要な輸出品は何か？", "茶"], ["インド半島から移住してきた何系の人々と、どこ系何人からなるが、多数を占めるのは何教徒が多い何人か？", "インド=ヨーロッパ(アーリア)系、ドラヴィダ系タミル人、仏教徒が多いシンハラ人"], ["ヒンドゥー教の、身分制度を何というか？", "カースト制度"], ["カーストは、バラモン、クシャトリヤ、ヴァイシャ、シュードラからなる何と呼ばれる社会集団からなるか？", "ジャーティ"], ["インドの人口、主な言語、主な宗教は何か？", "約14億1,717万人、ヒンディー語、英語、その他の22の憲法公認語、ヒンドゥー教"], ["バングラデシュの人口、主な言語、主な宗教は何か？", "17,119万人、ベンガル語、英語、イスラーム教"], ["スリランカの人口、主な言語、主な宗教は何か？", "2,183万人、シンハラ語、タミル語、英語、仏教"]];break;;
-    case "西アジアとアフリカ" :item =[["西アジア・アフリカ地域の学習のテーマは何か？","西アジア、アフリカ、北アフリカと中南アフリカの自然環境・文化の違いに注目"],["西アジアはどこからどこまでを指す地域か？","東はアフガニスタン、西はアラビア半島、北はトルコ"],["アラビア半島の地形的な特徴は？","安定陸塊(旧ゴンドワナランド)"],["アラビア半島にある山脈は？","ヒマラヤ造山帯"],["ティグリス・ユーフラテス川が形成した平野は？","メソポタミア平野"],["アラビア半島の気候は？","大部分が乾燥気候（BS～BW）"],["トルコの沿岸部やイスラエルなどの気候は？","地中海性気候（Cs）"],["BRICSの一員であり、近年急速に経済発展を遂げている国は？","インド"],["インドの1人当たりGNIは中国の約何倍か？","5倍"],["インドで盛んな産業は？","ICT関連産業"],["インドのシリコンヴァレーと呼ばれる都市は？","バンガロール"],["南アジア各国の主要な宗教で、インドの宗教は？","ヒンドゥー教"],["南アジア各国の主要な宗教で、パキスタンの宗教は？","イスラム教"]];break;
-    case "西アジアとアフリカ2" :item =[["厳しい乾燥気候が分布している地域で、人々はどのように生活を営んでいるか？","遊牧とオアシス農業"],["アラビア半島で遊牧生活を送ってきた民族は？","ベドウィン"],["ティグリス・ユーフラテス川などの外来河川の沿岸で行われている農業は？","オアシス農業"],["灌漑によって、オアシスでは何が栽培されている？","小麦、ナツメヤシ、野菜、果実"],["1970年代の石油危機以降、産油国では何が整備された？","工業化やインフラ（道路、上下水道など）"],["サウジアラビアでは都市人口率が何％以上か？","80%以上"],["西アジアといえば、何という民族がイスラームにもとづいた生活を送っているイメージが強い？","アラブ民族"],["アラビア半島は何教の発祥地？","イスラーム教"],["アフリカ＝アジア語族の言語を話す人々は何人？","アラブ人"], ["イラン以東のイスラーム教徒は何人以外？","インド＝ヨーロッパ語族"],["トルコで多いイスラム教徒は何語族？","アルタイ語族"],["イスラエルに多い宗教と、その言語は","ユダヤ教徒、アフリカ＝アジア語族"],["西アジアの石油の埋蔵量がとても多い地域で、経済の中心は？","石油産業"],["1970年代の石油危機以降、西アジアの産油国は何が進んだ？","石油産業の国有化"],["西アジアの産油国で、特に石油収入をもとに何が進んでいる？","工業化"],["世界最大級の石油大国は？","サウジアラビア"],["サウジアラビアの原油埋蔵量、生産量、輸出量は世界でどの程度？","世界最大級"],["アラブの石油大国のサウジアラビアで、国土の大部分は何？","砂漠"],["西アジア・中央アジアの言語分布図で、トルコで話されている言語は？", "トルコ語"],["西アジア・中央アジアの言語分布図で、イランで話されている言語は？", "ペルシア語"]];break;;
-    case "西アジアとアフリカ3" :item =[["石油関連産業をはじめとする工業化を進めている、もともとアラビア半島に居住していた民族は？","ベドウィン"],["イスラーム教徒の巡礼の町は？","メッカ"],["イラクもサウジアラビアと同様に何人国家？","アラブ人国家"],["フセイン政権で実権を握っていたのはイスラームの何派？","スンニ派"],["イラクの国土の大半は、何川が流れる何文明の発祥地？","ティグリス・ユーフラテス川、メソポタミア文明"],["石油資源も豊富だが、何という戦争が続いたため石油生産は低下した？(３つ)", "イラン・イラク戦争、湾岸戦争、イラク戦争"],["イラクの東に位置するイランは、何語族？","インド＝ヨーロッパ系（ペルシャ語）"], ["イランの国土の大部分が何高原、何山脈、何山脈などに位置している？","イラン高原、ザグロス山脈、エルブールズ山脈"],["イランの油田は南部のどこに多く分布している？","ペルシャ湾岸付近"],["トルコはイスラーム国家だが何を進めてきた？","ヨーロッパ型の近代化"],["トルコは何に加盟、さらに現在、何への加盟申請もしている？","NATO、OECD、EU"],["トルコで使われている文字は？","ラテン文字"],["イスラエルは第二次世界大戦後に建国した何人国家だった？","ユダヤ人国家"],["ユダヤ人による民族国家をどこに建設した？","パレスチナ"],["19世紀後半から何運動と呼ばれる祖国再建運動が活発化した？","シオニズム運動"],["第二次世界大戦後、どこにイスラエルが建国された？","パレスチナ"],["イスラエル国内には何語を話すユダヤ人と何語を話すパレスチナ人が居住している？","ヘブライ語、アラビア語"],["イスラエルで比較的進んでいて、何工業や何産業が発達している？","工業化、ダイヤモンド研磨工業、ハイテク産業"],["イスラエルは何の加盟国でもある？","OECD"],["イスラエルの1人当たりGNIは？","53,302ドル"],["トルコはかつて何、何、何にまたがる大帝国を築いていた？","アジア、ヨーロッパ、アフリカ"],["トルコの現在の国土は、何半島と何半島の一部？","アナトリア半島、バルカン半島"],["アジアとヨーロッパの境界となる海峡は？", "ボスポラス海峡"]];break;;
-    case "西アジアとアフリカ4" :item =[["イスラーム教徒（ムスリム）の生活のきまりが詳細に記されている、唯一神アッラーを信じるよりどころは？", "聖典の「コーラン（クルアーン）」"], ["イスラム教徒に義務とされる、神に対する信仰告白の他に４つは？", "礼拝、喜捨、断食、巡礼"], ["イスラム教で禁じられていることは？", "飲酒、ギャンブル、豚肉を食すること、女性が人前で肌を露出させること"], ["トルコ、イラク、イランなどにまたがるクルディスタン地方に居住する民族で、多くが何語を使用？", "インド＝ヨーロッパ系のクルド語"], ["クルド人は何教徒？", "イスラーム教徒"], ["クルド人の人口は？", "3,000万人以上"], ["周辺諸国から国家を形成することを許されず、独立の気運も高いが、イラクでは政府の何により、多くの難民が発生した？", "弾圧"], ["西アジアの地形は、北部が何で、南部のアラビア半島は何？", "新期造山帯の山脈や高原、安定陸塊"], ["西アジアの気候は？", "亜熱帯高圧帯の影響を強く受け、BS～BW気候が分布し、古くから遊牧やオアシス農業が営まれてきた"], ["第二次世界大戦後、大規模な油田開発が進み、何によって人々の生活水準は向上した？", "石油収入"], ["中東戦争をはじめ何が続き、現在でも何問題、何問題などをかかえている？", "紛争、パレスチナ問題、クルド人問題"]];break;;
-    case "西アジアとアフリカ5" :item =[["アフリカ大陸の大部分は何？", "安定陸塊（旧ゴンドワナランド）"], ["アフリカ大陸で、やや高めの高原状の大陸は何？", "高原"], ["アフリカで高度200～1,000mの割合が大きいが、低地の割合がヨーロッパと比較にならないほど小さい河川は？(2つ)", "ナイル川、コンゴ川"], ["北部には何という新期造山帯？", "アトラス山脈"], ["南部には何という古期造山帯の山脈が分布している？", "ドラケンスバーグ山脈"], ["アフリカで忘れてはいけないのが、何という「広がる境界」？", "リフトヴァレー（アフリカ大地溝帯）"], ["リフトヴァレー沿いにある、標高が高い山は？", "キリマンジャロ山"], ["キリマンジャロ山の標高は何m？", "5,895m"], ["リフトヴァレー沿いでは、何が分布し、付近には何湖や何湖などが形成されている？", "火山、氷河、断層湖（タンガニーカ湖、マラウイ湖など）"], ["最初にアフリカの位置関係をしっかり把握して、赤道をマーカーで引っぱった時に、北緯何度と南緯何度の線をなぞってごらん！", "北緯35度と南緯35度"], ["赤道周辺は何の影響を年中受けるから何になる？", "赤道低圧帯、Af"], ["赤道からちょっと高緯度側に離れたら何になる？", "Aw"], ["緯度20～30度のあたりは、何の影響を受けるから何になる？", "亜熱帯高圧帯、BW～BS"], ["北端と南端は何だったよね？", "緯度35度"], ["北端と南端はほぼ何と同じ緯度なんだ。", "東京"], ["アフリカは北端と南端の緯度がほぼ同じだということから、何と何で南北ほぼ対称的に気候が分布している？", "赤道を挟んで"], ["アフリカには、何帯、何帯、何帯の順になっている？", "温帯、乾燥帯、熱帯"], ["北回帰線付近に広がる砂漠は？", "サハラ砂漠"], ["南回帰線付近に広がる砂漠は？", "カラハリ砂漠"], ["南西岸には寒流の何の影響で何砂漠が分布している？", "ベンゲラ海流、ナミブ砂漠"], ["リフトヴァレー沿いは隆起量が大きいので、何などの東部地域は海抜高度が高く、何が分布している？", "エチオピア～ケニア、Cw"]];break;;
-    case "西アジアとアフリカ6" :item =[["北端と南端には何が分布している？", "Cs"], ["赤道に近い東アフリカのソマリア付近は何じゃなくて何が広がっている？", "AじゃなくてBW～BSの乾燥気候"], ["アフリカの人々の生活は、何アフリカと何アフリカでかなり異なっている？", "北アフリカと中南アフリカ"], ["サハラ以北の北アフリカは大部分が何気候で、古くから何や何農業が行われてきたんだ。", "乾燥気候で、遊牧やオアシス農業"], ["北アフリカは、何アフリカと呼ばれていて、住民はコーカソイドの何系で何人が使用され、何教徒が多いんだ。", "「ホワイトアフリカ」、アフリカ＝アジア系、アラブ人、アラビア語、イスラーム教徒"], ["サハラ以南の中南アフリカは、何が広がり、農業も何では焼畑など、何ではプランテーションが行われているのが特徴的だね。", "熱帯、コンゴ盆地、ギニア湾岸"],["コンゴ盆地では何など、ギニア湾岸などでは何などが特徴的？", "焼畑（キャッサバ・ヤムイモなどイモ類）、プランテーション（カカオ・油ヤシなど）"],["住民は何が多く、「何アフリカ」と呼ばれる？", "ネグロイド、「ブラックアフリカ」"], ["宗教は？", "祖先や自然を崇拝する伝統宗教やキリスト教、イスラームなど多様"], ["アフリカの国々は、ヨーロッパ諸国によって、長く何支配を受けてきたので、独立が遅かったんだよね？", "植民地支配"], ["第二次世界大戦前に独立をしていたのは、わずかに何カ国しかなく、どこ？", "４か国、エジプト、エチオピア、リベリア、南アフリカ共和国"], ["アフリカ北部・西部が中心の国は？", "フランス"], ["アフリカ東部が中心の国は？", "イギリス"], ["アフリカで、ベルギーの植民地だった国は？", "コンゴ民主共和国、ルワンダ、ブルンジ"], ["アフリカで、イタリアの植民地だった国は？", "リビア、ソマリア"], ["アフリカで、ポルトガルの植民地だった国は？", "アンゴラ、モザンビーク"], ["第二次世界大戦後に独立が相次ぎ、特に何年は「何」と呼ばれるほど多くの国が独立し、現在は何カ国？", "1960年は「アフリカの年」、54か国（西サハラのみ未独立）"], ["アフリカの国々は、何（何連合）を組織し、地域の経済発展を目指しているんだよ。", "AU（アフリカ連合）"],["アフリカは他の地域に比べ、何が遅れているよね。", "経済発展"], ["アフリカの気候で、熱帯雨林気候は何の記号？", "Af"],["アフリカの言語分布で、コンゴ盆地周辺は何語族？", "ニジェール＝コルドファン語族"]];break;;
-    case "西アジアとアフリカ7" :item =[["北アフリカのエジプト、リビア、アルジェリアやギニア湾岸のナイジェリアにかけての地域は？", "カッパーベルト（Copper Belt：銅地帯）"], ["北アフリカと南部アフリカは比較的豊かだけど、何アフリカは発展が遅れている？", "中南アフリカ"], ["北アフリカは、何が多く、ヨーロッパへの出稼ぎやヨーロッパからの観光客も多いため、アフリカの中では比較的豊かな国が多い？", "産油国"], ["サハラ砂漠を中心に自然環境が厳しいけど、何は、外来河川の何を利用して古くから農業が発達していた？", "エジプト、ナイル川"], ["エジプトの人口、経済を支えているものは？", "約１億人、石油製品・天然ガス・原油など"], ["リビア、アルジェリアは何加盟国で、アフリカの中では1人当たりGNIも高いほうだよ", "OPEC加盟国"], ["西アフリカだが、何湾岸国では、夏の何の影響で雨も多く、何農業が発達しているよ。", "ギニア湾岸国、南西モンスーン、プランテーション農業"], ["コートジボワールは旧何領で、何（世界最大の生産国）と何の栽培が盛んだよ。", "フランス、カカオ、コーヒー"], ["ガーナは旧何領で何が重要？", "イギリス、カカオ"], ["ナイジェリアは何で、何加盟国でもあるんだ。", "アフリカ最大の人口大国（約２億1億人）、OPEC加盟国"], ["東部には何教徒、北部から西部には何教徒が多いんだ。", "キリスト教徒、イスラーム教徒"], ["東アフリカは高原状で、何がある", "リフトヴァレー"], ["東アフリカのエチオピアは、アフリカ最古の何（紀元前5世紀ごろ）で、ほとんど何支配を受けていない珍しい国だ。", "独立国、植民地支配"], ["エチオピアを建国したのは何に移住してきたコーカソイドだったんだよ。", "アラビア半島"], ["エチオピアは何教徒が多いところもアフリカでは異色だね。", "キリスト教"], ["エチオピアの国土の大部分は何高原で、何〜何が広がっているんだ。", "エチオピア高原, Aw〜Cw"], ["エチオピアは何の原産地でもあったよね。", "コーヒー"], ["エチオピアの1人当たりGNIは？", "821ドル"]];break;;
-    case "西アジアとアフリカ8" :item =[["エチオピアの南にあるケニアも高原状の国で、何の下に位置しているため過ごしやすい？","赤道直下"],["ケニアの首都ナイロビ周辺の白人入植者の居住地域は何と呼ばれている？","ホワイトハイランド"],["インド洋に浮かぶ島国はどこ？","マダガスカル"],["マダガスカルの地形的に安定した陸塊は何？","安定陸塊"],["マダガスカルの国土の東岸の気候は何？(アルファベット2文字)","Af"],["マダガスカルで、東南アジアから移り住んできた人々は何系？","マレー系(オーストロネシア)"],["アフリカ最古の独立国とされている国はどこ？","エチオピア"],["ケニアの公用語は何と何？","英語とスワヒリ語"],["旧フランス領とされている国はどこ？","マダガスカル"],["アフリカ最大流域面積を有する河川は何？","コンゴ川"],["ザンビアにかけての地域で産出される鉱産資源は何？","銅"],["南アフリカ共和国の気候は主に何？(アルファベット2文字)","Bs"],["1991年に何という悪名高い法律が南アフリカ共和国で廃止された？","アパルトヘイト(人種隔離政策)"],["南アフリカ共和国内で、不毛の地は何と呼ばれている？","ホームランド"],["南アフリカ共和国内で、資源が豊富だとされているものは？(4文字)","石炭(古期造山帯)"]];break;;
-    case "ヨーロッパ" :item =[["新期造山帯に属する山脈を3つ答えよ。", "ピレネー山脈、アルプス山脈、カルパティア山脈"],  ["バルト海沿岸からスウェーデン、フィンランド付近には何が広がっている？", "安定陸塊（バルト楯状地）"], ["フランス〜ドイツ〜ポーランドに広がる、かなり海抜高度が低くて、構造平野は何？", "パリ盆地"], ["構造平野（パリ盆地）には何が広範囲に分布？", "ケスタ"],["アイスランドは何帯、何帯に属す？(コンマ区切り)","新期造山帯, 安定陸塊"],["フィヨルドはどこの国にある？","ノルウェー"],["東ヨーロッパ平原はどこにある？","ロシア"],["イベリア半島にある主な山脈は何？","ピレネー山脈"]];break;;
-    case "ヨーロッパ2" :item =[["安定陸塊、古期造山帯、新期造山帯のうち、ヨーロッパで最も面積が小さいのはどれか？", "古期造山帯"], ["ヨーロッパの大部分が属する気候帯は何か？", "冷帯(亜寒帯)"], ["北緯50度付近に広がる地形は何か？", "大陸氷河"], ["大陸氷河によって形成された地形を3つ答えよ。", "U字谷、フィヨルド、モレーン"], ["フランスの農業が盛んな理由として、適切でないものはどれか？\n1. 氷食を受けていない\n2. 土壌が肥沃である\n3. 温暖な気候である", "1. 氷食を受けていない"], ["スペイン北西部に発達する地形は何か？", "リアス海岸"], ["北海やバルト海に注ぐ河川の河口に発達しやすい地形は何か？", "エスチュアリー"], ["ライン川がエスチュアリーを形成しやすい理由を2つ答えよ。", "①流域面積が広い ②険しいアルプス山脈から流れるため"], ["地中海沿岸にみられる地形は何か？", "カルスト地形"], ["ヨーロッパで偏西風の影響を強く受ける地域はどこか？", "大陸西岸の緯度50～70度付近"], ["偏西風とともに、ヨーロッパの気候に影響を与える海流は何か？", "北大西洋海流"], ["ヨーロッパとユーラシア東部で、同じ緯度でも気候が異なる理由を説明せよ。", "ヨーロッパは偏西風と暖流の影響で温暖だが、ユーラシア東部は寒冷な気候になるため。"], ["ヨーロッパで、Cfb（西岸海洋性気候）が広い範囲に分布している理由を説明せよ。", "偏西風が内陸部まで入り込みやすく、高峻な山脈がほとんどないため。"], ["地中海沿岸地域に分布する気候は何か？", "Cs（地中海性気候）"], ["ノルウェーの西岸に分布する気候は何か？", "西岸海洋性気候"]];break;;
-    case "ヨーロッパ3" :item =[["北極圏で夏季にみられる現象は何か？", "白夜"], ["スウェーデンやフィンランドなどの北部に広がる植生は何か？", "針葉樹林（タイガ）"], ["ノルウェーの伝統的な住居の特徴は何か？", "急勾配の屋根をもつ木造家屋"], ["イギリスやフランスなどの中部で、木造の住宅や木材の不足を補うために用いられる建築様式は何か？", "木骨づくりの家屋"], ["木骨づくりの家屋で、木材の間に用いられる材料は何か？", "石や土など"], ["スペインやギリシャなど地中海沿岸で多くみられる家屋の特徴は何か？", "豊富な石灰岩を利用した石づくりの家屋"], ["石づくりの家屋が多い理由を説明せよ。", "植生に乏しいことから、豊富な石灰岩を利用し、強い陽射しと暑さを避けるため。"], ["ヨーロッパに主に居住している語族は何か？", "インド=ヨーロッパ語族"], ["北西ヨーロッパに多い民族系統は何か？", "ゲルマン系"], ["南ヨーロッパに多い民族系統は何か？", "ラテン系"], ["東ヨーロッパからロシアにかけて多い民族系統は何か？", "スラブ系"], ["ルーマニア(Romania)が、「ローマ人の土地」という意味を持つ理由を説明せよ。", "ラテン系民族が居住しているため。"], ["フィンランドのフィン人や、スカンディナビア半島北部のサーミ人、ハンガリーのマジャール人が話す言語は、何語族に属するか？", "ウラル語族"]];break;;
-    case "ヨーロッパ4" :item =[["ゲルマン系で主流の宗派は何か。", "キリスト教のプロテスタント(新教)"], ["ラテン系で主流の宗派は何か。", "キリスト教のカトリック(旧教)"], ["スラブ系で主流の宗派は何か。", "キリスト教のオーソドックス(東方正教)"], ["スラブ系のポーランドで信仰されている主な宗派は何か。", "カトリック"], ["クロアチア、スロベニア、ウラル系のハンガリーで信仰されている主な宗派は何か", "カトリック"], ["ケルト系のアイルランドで信仰されている主な宗派は何か。", "カトリック"], ["かつてバルカン半島に支配が及んでいた国はどこか。", "トルコ"], ["トルコの影響を受け、改宗した人々がいた宗教は何か。", "イスラム教"], ["アルバニアで信仰されている主な宗教は何か。", "イスラム教"], ["ボスニア・ヘルツェゴビナで信仰されている主な宗教は何か。", "イスラム教"], ["北西ヨーロッパに居住している主な民族系統とその宗派を答えよ。", "ゲルマン語派のプロテスタント"], ["南ヨーロッパに居住している主な民族系統とその宗派を答えよ。", "ラテン語派のカトリック"], ["東ヨーロッパに居住している主な民族系統とその宗派を答えよ。", "スラブ語派の正教徒"], ["東ヨーロッパで、一部イスラム教徒が多数を占める国もあるが、その理由を説明せよ。", "かつて、トルコ（オスマン帝国）の支配下にあったため。"]];break;;
-    case "ヨーロッパ5" :item =[["第二次世界大戦後、ヨーロッパ諸国の国際的な地位はどうなったか？", "著しく低下した"], ["1952年、フランスの提唱により設立された組織は何か。", "ECSC(European Coal and Steel Community：ヨーロッパ石炭鉄鋼共同体)"], ["ECSC設立の目的は何か。", "加盟国間での石炭と鉄鋼の流通の自由化"], ["1958年に設立された、共同市場と経済統合を目標に掲げた組織は何か。", "EEC(European Economic Community：ヨーロッパ経済共同体)"], ["1958年に設立された、原子力産業の共同開発を推進する組織は何か。", "EURATOM(European Atomic Energy Community：ヨーロッパ原子力共同体)"], ["1967年、ECSC、EEC、EURATOMが統合して結成された組織は何か。", "EC(European Community：ヨーロッパ共同体)"], ["1993年、ECが発展して発足した組織は何か。", "EU(European Union：ヨーロッパ連合)"], ["EUの本部はどこに置かれているか。", "ブリュッセル"], ["2002年に導入が始まった、EUの共通通貨は何か。", "EURO(ユーロ)"], ["2004年以降の新しい加盟国でもEURO流通国は増えているか？", "増えている"], ["EC(現EU)は、経済統合に向かって具体的にどんなことをやってきたか、2つ答えよ。", "①域内関税の撤廃と対外共通関税の設定、②貿易の際の関税を廃止すること"], ["1993年にはEU域内での、人、物、資本、サービスの移動をどうすることを実現させたか？", "自由化"], ["人の移動の自由化について、EU加盟国のうちアイルランドを除く27か国では何が廃止されているか？", "国境管理（国境でのチェック）"], ["国境管理が廃止された協定を何というか。", "シェンゲン協定"]];break;;
-    case "ヨーロッパ6" :item =[["EUの共通農業政策(CAP)の目的は？", "域内農産物に対して関税をかけないため、生産性の低い国の農業が成り立たなくなるのを防ぎ、主要な農産物に統一価格を定めて、国際価格より高い価格で農家から買い上げること。"], ["EU域内での人の移動を自由にする協定は？", "シェンゲン協定"], ["シェンゲン協定は何年に結ばれた？", "1985年"], ["シェンゲン協定が締結された場所は？", "ルクセンブルクのシェンゲン村"], ["EFTAとは何か？", "ヨーロッパ自由貿易連合"], ["EFTAは何年に設立された？", "1960年"], ["ECSC、EEC、EURATOMは何年に統合されてECになった？", "1967年"], ["ECがEUになったのは何年？", "1993年"], ["EUの共通通貨は？", "ユーロ(EURO)"], ["ユーロは何年に流通が開始された？", "2002年"], ["イギリスがEUを離脱したのは何年？", "2020年"], ["EUの立法機関は？", "ヨーロッパ議会"], ["EUの司法機関は？", "EU司法裁判所"], ["EUの金融政策を行う機関は？", "ヨーロッパ中央銀行"], ["EUの本部はどこにある？", "ブリュッセル"]];break;;
-    case "ヨーロッパ7" :item =[["オランダで盛んな農業は？", "園芸農業"], ["オランダの園芸農業で主に栽培されているものは？", "チューリップなどの花卉や野菜"], ["デンマークで発達している農業は？", "酪農"], ["デンマークがかつて依存していた輸出物は？", "穀物"], ["デンマークで酪農と並んで発展している産業は？", "養豚業"], ["イギリスで行われている農業は？", "酪農と混合農業"], ["イギリスの主要な農産物は？", "小麦"], ["ドイツ北部で行われている農業は？", "混合農業"], ["ドイツ北部で混合農業とともに栽培されている作物は？", "ジャガイモ"], ["スペインで盛んな作物は？", "ジャガイモ"], ["フランスで「EUの穀倉」と呼ばれるほど生産量が多い作物は？", "小麦、トウモロコシ"], ["フランスの小麦の生産量は？", "世界最大級"], ["アルプス山中のスイスやオーストリアで行われている農業は？", "移牧"], ["イタリア、スペインなど地中海沿岸諸国で行われている農業は？", "地中海式農業"], ["地中海式農業で主に栽培される作物は？", "ブドウ、オリーブ、オレンジ類"]];break;;
-    case "ヨーロッパ8" :item =[["ヨーロッパで最も農業人口率が低い国は？", "イギリス"], ["ヨーロッパで最も耕地率が高い国は？", "デンマーク"], ["ヨーロッパで最も牧場・牧草地率が高い国は？", "デンマーク"], ["ヨーロッパで最も森林率が高い国は？", "スウェーデン"], ["フランスの国土面積に対する耕地率は？", "34.6%"], ["フランスの国土面積に対する牧場・牧草地率は？", "17.5%"], ["フランスの国土面積に対する森林率は？", "31.5%"], ["農業従事者一人当たりの農地面積が最も大きい国は？", "フランス"], ["フランスで盛んな農業は？", "穀物(小麦, トウモロコシなど)輸出, ブドウ栽培"], ["ドイツで盛んな農業は？", "小麦,ライ麦,ジャガイモを組み合わせた混合農業, 豚の飼育"], ["イギリスで特徴的な農業は？", "小麦栽培,羊の飼育頭数はヨーロッパ最大"], ["デンマークで盛んな農業は？", "乳牛飼育と飼料栽培を組み合わせた酪農"], ["オランダで盛んな農業は？", "酪農と園芸農業"], ["イタリア北部(Cfa)で盛んな農業, 南部(Cs)で盛んな農業", "北部：混合農業, 南部:地中海式農業"], ["スペインで盛んな農業は？", "地中海式農業,オリーブの生産は世界最大"]];break;;
-    case "ヨーロッパ9" :item =[["ヨーロッパの工業化を推進した国は？", "イギリス、ドイツ、フランスなど北西ヨーロッパ"], ["第二次世界大戦後、ヨーロッパの工業を支えた地域は？", "「重工業三角地帯」(北フランス、ルール、ロレーヌ)"], ["1960年代のエネルギー革命以降、中心的な工業は？", "従来の鉄鋼業から自動車、エレクトロニクスなどの機械工業や先端産業"], ["ヨーロッパ経済の中軸を占める、ロンドンからベネルクス三国、ライン川沿岸、北イタリアにかけての地域は？", "「ブルーバナナ」とか「ヨーロッパのメガロポリス」"], ["ドイツ、フランス、イギリスがヨーロッパでトップクラスの工業国である一方、あまり工業が発達していない地域は？", "地中海沿岸諸国"], ["イタリアやスペインで発展している産業は？", "自動車生産や高級服飾品など特色ある産業、特に服飾や家具など高いデザイン性と中小企業のネットワークをいかして伝統産業が発達する「サードイタリー」(第三のイタリア)"], ["北イタリアから南フランス、スペイン北東部のカタルーニャ地方にかけての地域で、先端産業や観光産業の発展が著しい地域は？", "「ヨーロッパのサンベルト」"], ["石油の産出が多いのは？", "北海油田があるノルウェー、イギリス"], ["天然ガスはどこの国での生産が多い？", "ノルウェー、オランダ、イギリス"], ["鉄鉱石を産出する国", "スウェーデン"], ["ノルウェーで盛んな工業", "アルミニウム（水力発電が盛ん）"], ["スウェーデンで盛んな工業", "自動車、鉄鋼（鉄鉱石が産出）"], ["フィンランドで盛んな工業", "製紙・パルプ（森林資源が豊富）"]];break;;
-    case "ヨーロッパ10" :item =[["ヨーロッパで最も人口が多い国は？", "ドイツ"], ["ヨーロッパで最も面積が大きい国は？", "フランス"], ["ヨーロッパで一人当たりGNIが最も高い国は？", "ノルウェー"], ["ドイツの主要産業は？", "ライン川やルール川の水運とルール・ザールなどの石炭を利用した鉄鋼業、ルール地方(エッセン、ドルトムント)が最大の重工業地域、ミュンヘンを中心にエレクトロニクス"], ["フランスの主要産業は？", "北海沿岸(ダンケルク)、地中海沿岸(フォス)に鉄鋼業、パリ大都市圏では衣類や化粧品、トゥールーズ(航空機)"], ["イギリスの主要産業は？", "18世紀後半、世界で最初に産業革命(マンチェスター)、各地の炭田を背景にミッドランド地方(バーミンガムの鉄鋼、コヴェントリの自動車)やヨークシャー地方(リーズの毛織物),北海には油田,ガス田。ロンドン周辺は,先端産業"], ["イタリアの主要産業は？", "資源には乏しいが、北部の平野(ミラノ、トリノ、ジェノヴァ)を中心に工業,南北の経済格差が大。フィレンツェ、ボローニャ、ヴェネツィアなどの伝統的皮革・服飾産業が注目され、「第三のイタリア(サードイタリー)」"], ["スペインの主要産業は？", "工業化はやや遅れていたが、近年は、EU諸国企業の進出により自動車工業(カタルーニャ地方のバルセロナ)などが急速に発達。"], ["1990年前後の民主化革命以降、工業化を進めている東欧で、新しくEUに加盟した国々で成長を始めている国は", "ポーランド、チェコ、スロバキア、ハンガリー"], ["東欧の国々で発展の見られる産業", "自動車産業"]];break;;
-    case "ロシアと周辺地域" :item =[["ロシアの国土面積は約何km²か？", "約1,700万km²"], ["ロシアの国土は、カナダ、アメリカ合衆国、中国の約何倍か？", "約2倍"], ["ロシアとヨーロッパ、シベリアを分ける境界線は何か？", "ウラル山脈"], ["ウラル山脈の西側は何と呼ばれる平原が広がっているか？", "東ヨーロッパ平原"], ["ヴォルガ川は何海に流れ込んでいるか？", "カスピ海"], ["ドニエプル川は何海に流れ込んでいるか？", "黒海"], ["ウラル山脈東側のシベリアで、北極海に流れ込んでいる大河を３つ答えよ", "オビ川、エニセイ川、レナ川"], ["東シベリアは安定陸塊に属する何と呼ばれる高原(卓状地)があるか？", "中央シベリア高原"], ["東シベリアの安定陸塊に属する山脈を2つ答えよ", "ヴェルホヤンスク山脈、カムチャツカ山脈"],["カムチャッカ半島には何が多いか？","火山"], ["西シベリアは何と呼ばれる低地(構造平野)が分布しているか", "西シベリア低地"],["ロシアと日本との関係で、近年何が望まれているか？", "経済交流の活性化"], ["ロシアのウクライナ侵攻により、何の問題が続いているか？", "北方領土問題"]];break;;
-    case "ロシアと周辺地域2" :item =[["シベリアの河川は、下流部で約何年間凍結しているか？", "約半年間"], ["シベリアの河川では、いつ頃に融雪洪水が起こるか？", "初夏(6月ごろ)"], ["夏季、シベリアの河川は何として利用されるか？", "内陸水路"], ["河口付近では何日くらい、冬季の船舶航行は無理か？", "100日くらい"], ["冬季の船舶航行の代わりに何が利用されるか？", "自動車道路、臨時の滑走路"], ["地球温暖化による北極の氷の融解によって、何が利用しやすくなるという期待があるか？", "北極航路"], ["シベリアには何が分布しているか？", "永久凍土"], ["永久凍土とは何か？", "土壌の凍結層"], ["ロシアの半分近くが永久凍土の分布地域になるが、夏には比較的高温となるD（亜寒帯）気候地域では、年間を通して表層だけは凍結していない何という土壌が分布しているか", "ポドゾル"], ["北極海沿岸などのET（ツンドラ気候）地域では、夏季だけ表層がわずかに融解し、何などの湿性植物が繁茂しているか？", "コケ（蘚苔類）"], ["旧ソ連地域は東西に長いので、気候帯も東西に帯状に分布するが、北から順に見ると、北極海沿岸が何気候か？", "ET"], ["その南側に何気候が広く分布し、ウラル山脈以南の中央アジアは大部分が乾燥気候で、何気候が分布しているか？", "Df, BS・BW"], ["特に、レナ川の東にある北東シベリアは、冬季に何が発達するため、極寒の何気候が分布しているか。", "シベリア高気圧, Dw"],["北東シベリアは何と呼ばれるか", "「北半球の寒極」"]];break;;
-    case "ロシアと周辺地域3" :item =[["エニセイ川以東の東シベリアではかなり南まで何が分布しているか？", "永久凍土"], ["永久凍土は何の大きな障害になっているか？", "シベリアの開発"], ["建物やパイプラインを新たに建設したりすると、何が溶けて建物が沈下してしまうか？", "永久凍土"],  ["工場や高層建築物などは何にするなどの工夫が行われているか？", "高床式"], ["近年は針葉樹の大量伐採により、地表に何が到達し、下層の永久凍土が融解することにより湿地ができ、そこから発生する何が地球温暖化を促進しているという問題点も指摘されているか？", "直射日光, メタンガス"],["古期造山帯で丘陵性の何はヨーロッパ＝ロシアとシベリアやアジアの境界線をなすか", "ウラル山脈"],["国土は全体的に低平で、ヨーロッパ＝ロシアや西シベリアには何が広く分布するが、東シベリアの太平洋岸には環太平洋造山帯に属する山脈群が南北に走る。", "構造平野"], ["気候は、北から何が帯状に分布するか。", "ET, Df, Dw, BS, BW"], ["偏西風の影響が少ないウラル以東のシベリアは何が優勢な東シベリアはDw（「北半球の寒極」）が分布している。", "シベリア高気圧"],["ロシア革命によって何年、世界で最初の社会主義国であるソ連（ソヴィエト社会主義共和国連邦）が成立したか", "1922年"],["ソ連解体後、何という12の共和国は、ロシアを中心としてCIS（独立国家共同体）を組織したか。（）は何を除くか", "バルト三国（エストニア、ラトビア、リトアニア）"],];
-    case "ロシアと周辺地域4" :item =[["ロシアやその他の旧ソ連諸国は、現在何経済の国か？", "市場経済"], ["計画経済から市場経済へ十分な準備もないまま急激に変化したので、何が深刻になったか？", "社会の混乱、失業、インフレ、物資不足"], ["貧富の差を築く者もいる反面、以前より厳しい生活を強いられる者も出てきて何が拡大したか", "経済格差"], ["現在は、何や天然ガスの資源価格が高騰し、収入が増えたため、いつ頃から、高度成長が始まったか。", "1999年頃"], ["2008年に起こった何では大きな打撃を受けたか？", "世界同時不況"], ["何年の何侵攻で欧米などとの対立が激化し、経済は停滞しているか", "2022年のウクライナ侵攻"], ["ロシアの1人当たりGNIは何ドル（2021年）？", "11,960ドル"], ["ロシアの人口は約何億人（2022年）で、約何%がスラブ系ロシア人か？", "約1.45億人, 約80%"], ["ロシア語を話し、ラテン文字（アルファベット）とは異なる何文字を使用するか？", "キリル文字"], ["ロシア人は何を信仰している人が多いか？", "正教会（ロシア正教）"], ["シベリアの先住民は何系か？", "モンゴロイド"], ["ロシア,ウクライナ,ベラルーシ,バルト三国などでは何が生じたか", "自然減"],["中央アジアには、何系、何（）系、何教徒が多いか", "アルタイ（トルコ）系,イスラーム教徒"]];break;;
-    case "ロシアと周辺地域5" :item =[["ソ連時代には、集団農場の何や国営農場の何が農業生産の中心だったか", "コルホーズ, ソフホーズ"], ["市場経済移行後は何経営（農業法人）や個人経営に変化しているか", "企業"], ["ソ連時代からある菜園つきの別荘地を何というか", "ダーチャ"], ["北極海沿岸には何が分布し、アジア系の先住民（モンゴロイド）などが何、何や何・狩猟生活を送っているか。", "ET, トナカイの遊牧, 漁労"], ["ヨーロッパ・ロシアでは、何や何、何などを栽培する何農業が行われているか。", "酪農, ライ麦, ジャガイモ, 混合"], ["ウクライナ〜カザフスタン〜ロシアの西シベリア南部にかけて、肥沃な何が分布していて、大規模な何栽培が行われているか。", "チェルノーゼム, 小麦"], ["中央アジアでは、大部分が何気候（何）だから、何などの何や何農業が行われているか。", "乾燥気候（BW〜BS）, 羊, 放牧, オアシス"], ["近年は灌漑によって何栽培が盛んになっているか", "綿花"], ["アラル海に注ぐ何川や何川から過剰に取水したため、何が縮小を招き、消失の危機にあるか。", "シルダリヤ川, アムダリヤ川, アラル海"], ["黒海とカスピ海の間は何地方と呼ばれるか", "カフカス地方"], ["カフカス地方は気候的に恵まれていて旧ソ連地域、ロシアと周辺諸国の中で何気候が分布しているか", "B〜Cなど温暖な気候"], ["ロシアは総何生産量が多くて、世界最大の輸出国に成長しているか", "穀物"], ["ロシアは何などの飼料作物はかなり多く輸入をしているか", "トウモロコシ"],["ロシアはエネルギー・鉱産資源が豊富で、何、何、何などの化石燃料の産出量が多く、自給率も高いか。", "石油, 天然ガス, 石炭"],["シベリアの何油田やヨーロッパ＝ロシアの何油田の産出が多いか", "チュメニ油田, ヴォルガ＝ウラル油田"],["その他の旧ソ連諸国でも、何沿岸（何油田）などは古くから油田開発が行われているか", "カスピ海沿岸（アゼルバイジャンのバクー油田）"]];break;;
-    case "ロシアと周辺地域6" :item =[["世界最初の社会主義国家であるソ連は何年に解体し（何終結）、ロシア連邦など15の共和国となる。", "1991年, 東西冷戦終結"], ["計画経済から市場経済への急速な転換は、何、経済を混乱させ、生産力は落ち込むが、近年は徐々に回復する傾向にある。", "社会"], ["ロシア、ウクライナなどには何系で何教の正教を信仰する人が多いが、中央アジアを中心に何系何教徒も多数居住している。", "スラブ系, キリスト教, トルコ系イスラーム教徒"], ["農業地域は、気候帯に沿ってほぼ何状に分布し、北極海沿岸では何、ヨーロッパ＝ロシアでは何、混合農業が発達し、ウクライナから西シベリアにかけての何地帯には何農業地域が分布している。", "帯状, トナカイの遊牧, 酪農, チェルノーゼム, 小麦"], ["ソ連時代には何工業が中心で、コンビナート方式の工業地域が資源産地に多数立地していたが、資本や技術の不足により何（先端技術）などでは先進諸国に後れをとっている。", "重化学工業, ハイテク産業"],["ロシアと周辺諸国の大半は、何と何からなる", "安定陸塊と古期造山帯"],["太平洋沿岸やカフカス地域では、何や火山の活動もみられる", "地震"],["黒海北岸から東にのびる穀倉地帯の土壌は肥沃な何か", "チェルノーゼム"],["ロシアに接する海域は、何を除いて、冬の期間, 流氷や結氷によって閉ざされる", "黒海沿岸"],["永久凍土は、何地帯のみでなく何地帯にも分布している。", "ツンドラ地帯, タイガ地帯"]];break;;
-    case "アングロアメリカ" :item =[["アングロアメリカとは、主にどこの国の人々が開拓した地域を指すか？","イギリス人"],["アングロアメリカの地形の話で、カナダ楯状地はどこからどこにかけて広がっているか？","五大湖からラブラドル半島"],["カナダ楯状地に多く分布している資源は何か？","鉄鉱石"],["東部のアパラチア山脈は何造山帯に属しているか？","古期造山帯"],["西部のロッキー山脈やシエラネバダ山脈は何造山帯に属しているか？","新期造山帯"],["アメリカ合衆国の太平洋側にあるカリフォルニア州付近は何という境界にあたるか？","ずれる境界"],["その境界にある、よく地震が発生する断層の名前は？","サンアンドレアス断層"],["ハワイ諸島は何によって生じた火山か？","ホットスポット"],["氷河によって削られた、深く入り組んだ湾を何というか？", "フィヨルド"],["アラスカやカナダの太平洋岸で、氷河が発達していた理由として、何の影響を挙げているか？","偏西風"],["五大湖は、何によって形成されたか？","大陸氷河"],["北アメリカ大陸東部、大西洋に面する山脈は？", "アパラチア山脈"],["北アメリカ大陸西部、太平洋に面する山脈は？", "ロッキー山脈"]];break;;
-    case "アングロアメリカ2" :item =[["アメリカ合衆国の大西洋岸からメキシコ湾岸にかけて広がっている地形は？","海岸平野"],["安定陸塊に分類されるカナダ楯状地の特徴は？","鉄鉱石の埋蔵に恵まれる"],["古期造山帯に分類されるアパラチア山脈の特徴は？","石炭の埋蔵に恵まれる、丘陵性山地"],["新期造山帯に分類されるロッキー山脈、シエラネバダ山脈などの特徴は？","高峻な山脈が南北に連なる"],["アメリカ合衆国のほぼ中央部を通る、湿潤気候と乾燥気候の境界線は？","西経100度"],["西経100度線より東側の、プレーリーと呼ばれる地域に広がる気候は？","湿潤気候 (Df, Cfa など)"],["西経100度線より西側の、グレートプレーンズと呼ばれる地域に広がる気候は？","乾燥気候 (BS, BW)"],["グレートプレーンズで、年降水量500mmを境に東側と西側で行われている農業は？","東は企業的牧畜、西は企業的穀物農業"],["アメリカ合衆国本土で最も低緯度に位置する、熱帯に属する地域は？","フロリダ半島"],["フロリダ半島やメキシコ湾岸で発生する熱帯低気圧は？","ハリケーン"],["カナダから五大湖周辺で発生する、吹雪を伴う冷たい風は？","ブリザード"],["カナダから五大湖にかけての気候区分は？","Df（冷帯湿潤気候）"],["アメリカ合衆国の東半分の気候区分は？","Cfa（温暖湿潤気候）"],["アメリカ合衆国の西半分のうち、グレートベースンなどの気候区分は？","BW（砂漠気候）"],["アメリカ合衆国の西海岸側の、サンフランシスコなどの気候区分は？","Cs（地中海性気候）"],["アラスカがCfb（西岸海洋性気候）になっている要因は？","偏西風"],["アメリカ合衆国とカナダとの国境は、おおよそ何度か？","北緯49度"]];break;;
-    case "アングロアメリカ3" :item =[["アメリカ合衆国の建国と発展の原動力となったのは、主にどこの地域からの移民か？","ヨーロッパ"],["15世紀のコロンプスのアメリカ大陸到達に始まり、主にどの国々がアメリカに入植したか？","イギリス、フランス、スペイン"],["イギリス領だった東部13州が、独立を果たすのは西暦何年か？","1783年"],["初期の開拓の中心となった、イギリス系白人を何と呼ぶか？","WASP (White Anglo-Saxon Protestant)"],["17世紀以降、プランテーション労働力として、主にどこから人々が移住させられたか？","アフリカ"],["近年、アメリカ合衆国への移民が増加しているのは、主にどの地域の人々か？","ヒスパニック、アジア系"],["ヨーロッパ系移住者は、主にアメリカのどこに植民地を建設したか？","大西洋岸"],["フランスは主にアメリカのどこを植民地化したか？","ミシシッピ川流域"],["スペインは主にアメリカのどこを植民地化したか？","フロリダ半島と西部"],["ルイジアナは何語起源の地名か？","フランス語"],["サンフランシスコは何語起源の地名か？","スペイン語"],["現在のアメリカ合衆国の人口は約何人か？","約3.4億人"],["アメリカ合衆国の人口のうち、多数派を占めるのは何系の人々か？","ヨーロッパ系白人"],["少数派民族集団（マイノリティ）には、どのような人々がいるか？","アフリカ系黒人、ヒスパニック、アジア系、先住民"],["2021年における、アメリカ合衆国への移民の出身国第1位は？","メキシコ"]];break;;
-    case "アングロアメリカ4" :item =[["今でも1年間に何人近い移民を受け入れているか？","100万人"],["ヨーロッパ系白人は、アメリカ合衆国のどの地域で割合が高いか？","全域、特に北部や中西部"],["ハワイ州では、何系の人々の割合が高いか？","アジア系"],["アメリカ合衆国の広大な土地を所有する自作農が中心だった農業は、何によって無償で農地を得られたか？","ホームステッド法"],["アフリカ系黒人は、奴隷解放後もどこで暮らしていたか？","南東部のコットンベルト"],["中南米からの移住者であるヒスパニックは、主にどこの国境に近い地域に多く居住しているか？","メキシコ"],["フロリダ半島に多い、出身国の系統は？","キューバ系"],["ニューヨークに多い、出身国の系統は？","プエルトリコ系"],["太平洋側には、主にどこの国からの移民が多いか？","中国系、韓国系、東南アジア系、日系"],["1960年代に何という法律が成立し、移民法が改正されたか？","公民権法"],["アメリカ合衆国の大都市では、人種・民族・所得などによって何が進んでいるか？","住み分け（セグリゲーション）"],["一般に、インナーシティにはどのような人々が集中し、何を形成しているか？","黒人、ヒスパニック、スラム"],["新しく流入してきた移民は、何を形成することが多いか？","民族ごとの集団"],["異なる文化が共存しているアメリカ合衆国の社会を、何と呼ぶか？", "サラダボウル論"],["公民権法が施行されたのは西暦何年？","1960年代"]];break;;
-    case "アングロアメリカ5" :item =[["アメリカ合衆国の大都市で、低所得層、郊外に中高所得層という構図を打破するために、何が起きているか？","ジェントリフィケーション"],["ジェントリフィケーションの有名な例は？","ニューヨークのハーレム"],["アメリカ合衆国は何と呼ばれているほど、農業が発達しているか？","世界の食料倉庫"],["アメリカ合衆国の農業地域区分で、年降水量500mmのラインが重要な意味を持つ理由は？","湿潤な東側では畑作、酪農、混合農業、園芸農業、乾燥した西側では牧畜"],["年降水量500mmの等雨量線付近のプレーリーからグレートプレーンズにかけては、何が分布しているか？","肥沃な黒色土（プレーリー土）"],["降水量が少ないグレートプレーンズでは、地下水を汲み上げ散水用のパイプを使って自動的に灌漑を行う方式は？","センターピボット方式"],["穀物の集荷・運搬・販売は何と呼ばれているか？","穀物メジャー"],["酪農地帯（デーリーベルト）は、主にどこの周辺に分布しているか？","五大湖沿岸"],["五大湖沿岸が酪農に適している理由は？","やや冷涼 (Df) で、氷食により土壌がやせている"],["コーンベルトでは、何が栽培され、何と何の飼育に利用されているか？", "トウモロコシ、大豆、肉牛"],["主な農産物の総生産量に占めるアメリカ合衆国の割合で、最も高いものは？","トウモロコシ"],["小麦の生産で、アメリカ合衆国は何位？","3位"],["アメリカ合衆国で、綿花の生産が盛んな地域は？","南部"],["アメリカ合衆国の農業の特徴は？","企業的な大規模経営、機械化、高い労働生産性"],["アメリカ合衆国の農業地域区分で、企業的穀物農業が行われている地域は？","春小麦地帯、冬小麦地帯"]];break;;
-    case "アングロアメリカ6" :item =[["酪農地帯（デーリーベルト）で生産されるものは？","牛乳、チーズ、バターなどの乳製品"],["コーンベルトの中心となる作物は？","トウモロコシ、大豆"],["コーンベルトの農業の特徴は？","肉牛飼育（フィードロット）、養豚、商業的混合農業地域"],["春小麦地帯の主な立地条件は？","カナダにまたがるやや冷涼な地域"],["春小麦地帯の集散地は？","ミネアポリス"],["冬小麦地帯の主な立地条件は？","カンザス州を中心とする温暖なプレーリー"],["冬小麦地帯の集散地は？","カンザスシティ"],["コットンベルトの主な立地条件は？","温暖な南東部に立地"],["コットンベルトで、かつて行われていた農業は？","黒人奴隷を使用したプランテーション"],["コットンベルトで、現在問題となっていることは？","連作障害や土壌侵食"],["園芸農業が盛んな地域は？","大西洋岸のメガロポリス近郊"],["企業的牧畜が盛んな地域は？","年降水量500mm未満のグレートプレーンズ"],["地中海式農業が盛んな地域は？","太平洋岸の地中海性気候地域"],["地中海式農業で、灌漑設備が整えられている地域は？","シエラネバダ山系の融雪水を利用"],["地中海式農業で、大規模な機械化農業が行われている地域は？","カリフォルニア州"],["地中海式農業で、収穫は主に誰に依存しているか？","メキシコ（ヒスパニック）系の労働者"],["アメリカ合衆国の主な農産物の上位５州（2022年）で小麦の生産量が一位の州は？","カンザス"],["アメリカ合衆国の主な農産物の上位５州（2022年）でトウモロコシの生産量が一位の州は？","アイオワ"]];break;;
-    case "アングロアメリカ7" :item =[["アメリカ合衆国の1次エネルギーの自給率は？","105.9% (2020年)"],["技術革新によって採掘が可能になった資源は？","シェールガス、シェールオイル"],["シェールガスやシェールオイルとは？","地中の頁岩に閉じ込められている天然ガスや原油"],["エネルギー自給率も以前よりだいぶ上昇している、アメリカ合衆国の経済を潤しつつあるものはなに？", "エネルギー、鉱産資源"],["石油の生産量はどの国が多い？","ロシア、サウジアラビア"],["石油はどこで産出される？","メキシコ湾岸、テキサス、アラスカ、カリフォルニア"],["石炭の生産量が多いのはどこの国？","中国"],["石炭はどこで産出される？","アパラチア炭田、西部のロッキー炭田"],["天然ガスの生産量が多いのは？","ロシア"],["天然ガスはどこで産出される？","メキシコ湾岸（メサビ）"],["鉄鉱石はどこで産出される？", "安定陸塊の五大湖沿岸"],["銅はどこで産出される？","西部の新期造山帯地域"],["20世紀にアメリカ合衆国は何として発展してきた？","世界最大の工業国"],["アメリカ合衆国で工業化が進展し、世界の経済をリードする存在となった地域は？","北東部のメガロポリスや五大湖沿岸"],["1950年代～1960年代にかけて、何が飛躍的な発展を遂げた？","鉄鋼、石油化学、自動車など重工業"],["1970年代はどこの国の工業化が進んだ？","日本"],["アメリカ合衆国の産業構造の転換を図る必要があった要因は？","技術革新が遅れ、賃金水準も高かったので、安くて優秀な日本やヨーロッパの製品に押され始めた"],["停滞する北東部や五大湖沿岸の古くからの工業地域（スノーベルト）ではなく、どこが発展した？","南部や西部のサンベルト"],["サンベルトで発展した産業は？","エレクトロニクスや航空宇宙産業"],["アメリカ合衆国の地域別工業生産額の変化で、1965年から2020年にかけて最も生産額の割合が増加した地域は？","南部"]];break;;
-    case "アングロアメリカ8" :item =[["日本やヨーロッパの発展により、五大湖沿岸や東部の工業地域が停滞したのはわかるんだけど、どうして先端技術産業はどこに進出する必要があったの？", "サンベルト"],["先端技術産業にとって、サンベルトに進出するメリットは？","鉄鋼業などと異なり、資源立地の必要性はあまりない。南部には石油や天然ガスが豊富。広く安い用地、豊富で安い労働力（アフリカ系黒人やヒスパニックなど）、温暖で快適な気候が存在する。州政府などの行政による優遇措置もあった。"],["カリフォルニア州の何と呼ばれる地域が、アメリカ合衆国の経済の活力源となっている？","シリコンヴァレー"],["シリコンヴァレーの発展に寄与したものは？","コンピュータ、インターネットの開発"],["ニューイングランド地方の特徴は？","産業革命の発祥地で、最も古くからの工業地域。近年はボストンを中心にエレクトロニクスなど先端産業が発達（エレクトロニクスハイウェイ）。"],["アメリカ合衆国最大の都市ニューヨークの特徴は？","シリコンアレーやフィラデルフィア、ボルティモアなど大消費地をひかえ、各種工業が発達。臨海部には輸入鉄鉱を利用した製鉄所（スパローポイント）も立地。"],["中部大西洋岸の特徴は？","臨海部に輸入鉄鉱を利用した製鉄所（スパローポイント）も立地。"],["五大湖沿岸の特徴は？","五大湖周辺で産出する鉄鉱石（メサビ鉄山）とアパラチアの石炭を五大湖の水運で結びつけ、鉄鋼（ピッツバーグ）・自動車（デトロイト）などの重工業が発達。"],["南部地域では、何が発達している？","当初は、綿繰都市での綿工業やTVAによる原子力・アルミニウム工業程度しか発達していなかったが、現在は石油化学・航空宇宙産業（ヒューストン）、エレクトロニクス（ダラス～フォートワースにかけてのシリコンプレーン）などが発達。"],["太平洋岸の特徴は？","コロンビア川、コロラド川流域の開発による電力を利用して、シアトルやロサンゼルスには航空機工業が発達。サンフランシスコ郊外には、シリコンヴァレーと呼ばれる先端産業の集積地。"]];break;;
-    case "アングロアメリカ9" :item =[["1990年代の情報通信技術革命を何というか？","ICT"],["ICTの中心となったものは何か？","コンピューター"],["コンピューターのCPUなどで世界基準となっている国はどこか？","アメリカ合衆国"],["アメリカ合衆国で、IT関連産業が世界市場に占めるシェアはどうなっているか？","大きい"],["アメリカ合衆国が再びパワーを取り戻した理由の一つとして、何が挙げられるか？","ICT"],["アメリカ合衆国で問題となっている、安価な製品を供給している地域はどこか？(3つ)","NIES、ASEAN、中国"],["アメリカ合衆国で、多くの企業が生産拠点を海外に移すことで何が起きているか？","産業の空洞化"],["2008年末の世界同時不況は何によって引き起こされたか？","世界金融危機"],["アメリカ合衆国が目指している「メイドイン〇〇の復活」とは？","メイドインアメリカ"],["ホームステッド法は何年に制定されたか？","19世紀"],["ホームステッド法で、開拓に従事した者に供与すると決められた土地の広さは？","約64ha"],["アグリビジネスとは何か？","農産物の集荷、貯蔵、運搬、販売などを独占的に行っている"],["穀物メジャーとは何か？","小麦などの穀物の流通を担っている多国籍企業"],["多文化主義とは何か？","それぞれの民族の文化を尊重しながら、調和していこうという考え方"],["アメリカ合衆国の総人口約3.4億人のうち、約60%を占めるのは何系か？","ヨーロッパ系白人"],["アフリカ系黒人は主にアメリカ合衆国のどの地域に居住しているか？","南東部"],["ヒスパニックは主にアメリカ合衆国のどの地域に居住しているか？","南西部"],["アメリカ合衆国は、世界の何ランキングで1位か？(3つ)","農業国、工業国、エネルギー資源の産出国"],["アメリカ合衆国で問題となっている産業は何か？","空洞化"]];break;;
-    case "アングロアメリカ10" :item =[["カナダは、世界で何番目に広い国土を持つ国か？", "2番目"], ["カナダの大部分は何帯に属しているか？", "Df（冷帯）"], ["カナダの人口は約何万人か？", "約3,800万人"], ["カナダの先住民といえば何か？", "イヌイット"], ["カナダで最初に入植したのはどこの国の人々か？", "フランス人"], ["17世紀にフランスが植民地を建設したのはどこか？", "ケベック"], ["18世紀にカナダはどこの国の領土になったか？", "イギリス"], ["カナダの公用語は何か？(2つ)", "英語とフランス語"], ["カナダで、近年設立された準州の名前は？", "ヌナブト準州"], ["ヌナブト準州は何を意味するか？", "私たちの土地"], ["ケベック州で多数を占めるのは何系住民か？", "フランス系住民"], ["ケベック州で高まっている動きは何か？", "分離独立"], ["カナダの二大都市はどこか？(2つ)", "トロントとモントリオール"], ["モントリオールは何州にあるか？", "ケベック州"], ["カナダの首都はどこか？", "オタワ"], ["オタワは何年に首都になったか？", "2021年"], ["カナダが輸出できる資源は何か？","石油、天然ガス、ウラン"], ["カナダは何の自給率が高いか？","農産物や資源などの一次産品"],["1994年にアメリカ合衆国、メキシコと結成したのは何？","NAFTA（北米自由貿易協定）"], ["現在のNAFTAは何という名称か？","USMCA"]];break;;
-    case "アングロアメリカ11" :item =[["アメリカ合衆国の主な貿易相手国で、輸出1位はどこか？(2022年)", "カナダ"], ["アメリカ合衆国の主な貿易相手国で、輸入1位はどこか？(2022年)", "中国"], ["カナダの主な貿易相手国で、輸出1位はどこか？(2022年)", "アメリカ"], ["カナダの主な貿易相手国で、輸入1位はどこか？(2022年)", "アメリカ"], ["メキシコの主な貿易相手国で、輸出1位はどこか？(2022年)", "アメリカ"], ["メキシコの主な貿易相手国で、輸入1位はどこか？(2022年)", "アメリカ"], ["アメリカ合衆国の主要輸出品目1位は何か？(2021年)", "機械類"], ["アメリカ合衆国の主要輸入品目1位は何か？(2021年)", "機械類"], ["カナダの主要輸出品目1位は何か？(2021年)", "原油"], ["カナダの主要輸入品目1位は何か？(2021年)", "機械類"], ["メキシコの主要輸出品目1位は何か？(2021年)", "機械類"], ["メキシコの主要輸入品目1位は何か？(2021年)", "機械類"], ["カナダの総人口は約何万人？", "約3,800万人"],["カナダで分離独立の動きがある州はどこか？", "ケベック州"], ["カナダ、アメリカ合衆国、メキシコの間で結成している協定は何か？", "USMCA（旧NAFTA）"]];break;;
-    case "ラテンアメリカ" :item =[ ["西部内陸に多いのは何系白人か？", "ヨーロッパ系白人"], ["西部内陸に追いやられたのは誰か？", "アメリカインディアン"], ["南東部に多いのは誰か？", "黒人"], ["黒人はかつて何のために連れてこられたか？", "奴隷労働力"], ["南東部の何で、黒人の割合が高いか？", "コットンベルト"], ["メキシコと国境を接する南西部の州に多いのは誰か？", "ヒスパニック"], ["フロリダ州に多いのは何系か？", "キューバ系"], ["フロリダ半島は何に近いか？", "キューバ"], ["何年にアメリカ合衆国とキューバの国交回復という歴史的事件が起こったか？", "2015年"], ["ミシガン州を含む五大湖地方は、何が広がることで、冷涼な気候でも何が発達しているか？", "やせ地、酪農"],["アメリカ合衆国とカナダでよく出題される事柄は何に関する問題が多いか？","USMCA"]];break;;
-    case "ラテンアメリカ2" :item =[["ラテンアメリカとは、メキシコ以南の何大陸を指すか？", "アメリカ大陸"], ["メキシコから南の地域を何と呼ぶか？", "南アメリカ"], ["西インド諸島は、何と何の間にあるか？", "北アメリカと南アメリカ"], ["中央アメリカと西インド諸島をまとめて何と呼ぶか？", "カリブ諸国"], ["中央アメリカは何の一部であるか？", "新期造山帯"], ["南米はかつて何大陸と一緒に一つの巨大な大陸を形成していたか？", "アフリカ、インド、オーストラリアなど"], ["その巨大な大陸の名前は何か？", "ゴンドワナランド"], ["南米の大部分は何であるか？", "安定陸塊"], ["ブラジル高原や北部の何などが安定陸塊か？", "ギアナ高地"], ["ブラジル高原の標高は高いところで何m、大半は何mか？", "1,000m, 300~500m"], ["ギアナ高地は何に囲まれたテーブルマウンテンがたくさんあるか？", "断崖絶壁"], ["太平洋側から何が沈み込んでいるので、大陸の西側は何になっているか？", "海洋プレート、新期造山帯"], ["新期造山帯に属する何山脈が南北に連なっているか。", "アンデス山脈"], ["南米は全体として何が低いので、多くの河川は大西洋側に流れているか？", "西高東低"], ["アマゾン川の河口は何川と合流しているか、地図で確認すべきことは何か？","オリノコ川、ラプラタ川、位置関係"], ["ラプラタ川の河口は何で、チリ南部には何があるか？", "エスチュアリー、フィヨルド"],["南米の太平洋岸沿いの海洋部分は何によって色が濃いか？", "海溝"], ["海溝は何の下に沈み込んでいて、何がアンデス山脈に沿って分布しているか？", "大陸プレート, 海溝"], ["南米の太平洋岸には何、何などが大陸に沿って分布しているか？", "ペルー海溝、チリ海溝"], ["チリ沖の地震で発生した津波はどこに大きな被害を与えたことがあるか？", "日本, 三陸海岸"],["エクアドルは何語で「赤道」のこと？", "スペイン語"],];
-    case "ラテンアメリカ3" :item =[["ラテンアメリカで面積割合がとても大きい気候は何か？", "A気候"], ["赤道付近のアマゾン川流域は何が分布し、何が広がっているか？", "Af, 熱帯雨林のセルバ"], ["熱帯雨林では、多種類の何が何を形成しているか？", "常緑広葉樹、密林"], ["アマゾン川流域で育生している木の例を2つ答えよ", "ヤシ類、ゴム、マングローブ"], ["北半球側に分布している熱帯草原を何というか？", "リャノ"], ["南半球側に分布している熱帯草原を何というか？", "カンポ"], ["ブラジルの熱帯雨林地域では何を栽培しているか？", "キャッサバ"], ["ブラジルでは、輸出用の商品作物を栽培する何を何というか？", "大農園、プランテーション農業"], ["サバナ地域では、何の飼育頭数は世界一か？", "牛"], ["ブラジルは何を除いて大部分が何になるけど、その南側の何は何であるか？", "南部、熱帯、アルゼンチンの首都ブエノスアイレス"], ["アルゼンチンのブエノスアイレスは、東京とほぼ同緯度だが、大陸の何にあるから、東京と同じ何になるか？", "東岸、Cfa(温暖湿潤気候)"], ["ラプラタ川流域のCfa~BSの地域には、何と呼ばれる草原が広がっていて、肥沃な何土(何土と呼ばれるプレーリー土の一種)が分布しているんだ。", "パンパ、黒色、パンパ"], ["パンパでは、何や何などが大規模に行われている。", "混合農業, 企業的牧畜"], ["アルゼンチンは何で数少ない小麦の輸出地域", "南米"], ["チリ中部はなんという気候か？", "Cs(地中海性気候)"], ["チリ南部は何の影響を年中受ける何か？", "偏西風、Cfb(西岸海洋性気候)"], ["BW(砂漠気候)が分布する緯度20~30度付近の東西幅が狭く、海洋の影響を受けるから砂漠があまり発達していない大陸はどこか？", "ラテンアメリカ"], ["海岸部からチリ北部にかけての砂漠は何か？", "海岸砂漠(アタカマ砂漠)"], ["アルゼンチン南部のパタゴニアにも何があるか？", "砂漠(地形性砂漠)"], ["ペルー、ボリビアにいたる地域を何と呼ぶか？", "中央アンデス"], ["中央アンデスで栄えた文明は何か？", "インディオの文明(インカ文明)"], ["ペルー、チリ北部の海岸沿いには何が広がっているか？", "砂漠"], ["ペルー海流の影響で、何だけでなく、何も少ない気候だ。", "降水量, 気温"], ["アンデスの山岳地帯はいつの入植者も少なかったため、何が伝統的な生活を送っているか？", "ヨーロッパから, インディオ"]];break;;
-    case "ラテンアメリカ4" :item =[["ラテンアメリカで大土地所有制による経営を何といいますか？", "プランテーション"],["特定農産物に依存する経済を何といいますか？", "モノカルチャー経済"],["モノカルチャー経済は、主に誰が持ち込んだ大土地所有制によって生まれましたか？", "スペイン人やポルトガル人"],["独立後、メキシコで何が解体されましたか？", "アシエンダ"],["ブラジルでは、何が解体され、農業の多角化が行われましたか？", "大農園"],["1970年代以降、日本のODAによる協力で、ブラジルで大規模な何に変化しましたか？", "大豆畑"],["1990年代以降、アメリカ合衆国の穀物メジャーは何を輸出していますか？", "大豆"],["サトウキビは世界の何%を生産していますか？", "約40％"],["牛の飼育頭数で、アメリカ合衆国に次いで世界第2位の国はどこですか？", "ブラジル"],["メキシコ湾岸で何が開発されていますか？", "石油"],["メキシコは何に加盟していませんか？", "OPEC"],["メキシコは何と何を結成しましたか？", "カナダとUSMCA"],["ブラジルとメキシコは何が豊富ですか？", "鉄鉱石"],["1990年代からは何政策を採ったため、輸出指向型工業への転換に成功しましたか？", "経済開放政策"],["サンパウロ、リオデジャネイロ、ベロオリゾンテなどの大都市はどこに集中していますか？", "南東部"],["近年、ラテンアメリカ有数の原油生産国になっているのはどこですか？", "リオデジャネイロ沖など"],["1995年に設立された何に注目すべきですか？", "MERCOSUR(南米南部共同市場)"],["MERCOSURに加盟している国はどこですか？", "ブラジル、アルゼンチン、ウルグアイ、パラグアイ"],["メキシコの主要輸出品は何ですか？", "機械類・自動車・自動車部品・原油・野菜・果物"],["ブラジルの主要輸出品は何ですか？", "鉄鉱石・大豆・原油・肉類・機械類"]];break;;
-    case "ラテンアメリカ5" :item =[["アマゾン地方の開発が本格的に始まったのはいつですか？", "1960年代以降"],["ブラジルの首都をリオデジャネイロからどこに移転する計画がありましたか？", "ブラジリア"],["アマゾン川流域に指定された自由貿易地域は何ですか？", "マナオス"],["アマゾン横断道路は何と呼ばれていますか？", "トランスアマゾニアンハイウェイ"],["ラテンアメリカで、スペイン、ポルトガルの植民地支配を受けたため、共通して強い影響を受けている事柄は何ですか？", "言語(スペイン語, ポルトガル語), 宗教(カトリック)など"],["大土地所有制が残存し、特定の農産物などに依存する経済を何といいますか?", "モノカルチャー経済"],["メキシコ、ブラジルなどは、工業化の進展により何と呼ばれるようになりましたか？", "NIES"],["ブラジルでは大土地所有制の農牧場を何と呼びますか？", "ファゼンダ"],["アンデス諸国では大土地所有制の農牧場を何と呼びますか？", "アシエンダ"],["メキシコシティの大気汚染の原因は何ですか？", "プライメートシティ, 工場の排煙, 自動車の排ガスなど"],["メキシコシティの標高は何mですか？", "2,309m"],["メキシコの主な公用語は何ですか？", "スペイン語"],["キューバの主要輸出品は何ですか？", "サトウキビのプランテーション"],["ジャマイカの主要輸出品は何ですか？", "コーヒー栽培(ブルーマウンテン)"],["パナマの特色は何ですか？", "便宜置籍船国。パナマ運河。"],["ベネズエラの特色は何ですか？", "OPEC加盟の産油国。"],["ペルーの特色は何ですか？", "世界的な漁獲高。フィッシュミール、銅を輸出。"],["ボリビアの首都ラパスの標高は何m以上ですか？", "3,600m以上"],["チリの特色は何ですか？", "銅の産出は世界最大。OECD加盟国。"],["面積・人口(約2.2億人)がラテンアメリカの中で最大で、かつてはコーヒーのモノカルチャーであったが、近年、大規模な海底油田が開発され産油国になったのはどこですか？", "ブラジル"],["住民の大部分がヨーロッパ系白人で、ブエノスアイレスなどヨーロッパ風の都市を建設。パンパでは肥沃な黒色土に恵まれるため企業的穀物農業(小麦)や企業的牧畜(牛・羊)を行ったのはどこですか？", "アルゼンチン"]];break;;
-    case "オセアニア" :item =[["オセアニアは何と何を含めた地域を指すか","オーストラリア大陸とニュージーランド、その他の太平洋の島々"],["Oceaniaとは何か","オセアニアを英語で表現したもの"],["オーストラリア大陸の東岸に南北に走る山脈は何か","グレートディバイディング山脈"],["オーストラリアの北東部の海岸に広がる世界最大のサンゴ礁群は何か","グレートバリアリーフ"],["ニュージーランドは何に属するか","大部分が新期造山帯"],["フィヨルドランドがあるのはどこか","ニュージーランドの南島南西岸"],["ミクロネシアとはどういう意味か","小さい島々"],["メラネシアとはどういう意味か","黒い島々"],["ポリネシアとはどういう意味か","多い島々"],["ミクロネシアの島国のうち、りん鉱石を産出する国はどこか","ナウル"],["パプアニューギニアは何を産出するか","銅"],["フランス領で、ニッケルを産出するところはどこか","ニューカレドニア"],["フランス領ポリネシアに含まれる島はどこか","タヒチなど"]];break;;
-    case "オセアニア2" :item =[["オセアニアには独立国がいくつあるか", "16"], ["オセアニアの地域人口は約何人か", "約4,400万人"], ["オセアニアの人口の約70%を占める2か国はどこか", "オーストラリアとニュージーランド"], ["オーストラリアのクリスマスは何月か", "12~1月"], ["オーストラリア大陸のほぼ中央部を通る線を何というか", "南回帰線"], ["オーストラリアで、乾燥気候(B)の割合が高いことから何大陸と呼ばれているか", "乾燥大陸"], ["オーストラリアの内陸になるほど降水量はどうなるか", "少なくなる"], ["オーストラリア大陸の北部は、最も低緯度にあることから何気候か", "熱帯気候"], ["オーストラリアの東岸に分布する気候は", "Cfa(温暖湿潤気候)"], ["オーストラリアの南西岸に分布する気候は", "Cs(地中海性気候)"], ["オーストラリアの南東部に位置し、二大都市が立地しているのは何と何か", "シドニーとメルボルン"], ["ニュージーランドの大部分は何気候に属しているか", "西岸海洋性気候(Cfb)"], ["オセアニアの島嶼部は主に何気候に属しているか", "熱帯気候"]];break;;
-    case "オセアニア3" :item =[["オーストラリアの先住民を何と呼ぶか", "アボリジニー"], ["18世紀末からオーストラリアに入植してきたのは誰か", "イギリス人をはじめとするヨーロッパ系の人々"], ["ゴールドラッシュに代表されるものは何か", "鉱産資源の発見"], ["有色人種の移民を制限する政策を何というか", "白豪主義"], ["1970年代にオーストラリアは何に加盟したか", "EC(現EU)"], ["白豪主義が撤廃されたのは何年代か", "1970年代"], ["移民の出身地の文化を尊重していこうという政策を何というか", "多文化主義"], ["2000年のシドニーオリンピックの最終聖火ランナーは誰か", "アボリジニーの選手"], ["ニュージーランドの先住民を何と呼ぶか", "マオリ"], ["ニュージーランドの人口は約何万人か", "約510万人"],["ニュージーランドの総人口の1割以上は何系住民か", "マオリ系"],["ニュージーランドの公用語は何か", "英語とマオリ語"],["オーストラリアもニュージーランドも主な産業は何か", "農業"],["オーストラリアの主な上位輸出品は何か", "石炭、鉄鉱石、液化天然ガス"],["ニュージーランドの輸出品は何か", "酪農品、肉類、木材、野菜・果実など"]];break;;
-    case "オセアニア4" :item =[["1人当たりGNIが高いのはどこか", "オーストラリア"], ["オーストラリアとニュージーランドは何に加盟しているか", "OECD"], ["オーストラリアで、牧羊はどこを中心に行われているか", "グレートアーテジアン盆地やマリー・ダーリング盆地"], ["グレートアーテジアン盆地は何に恵まれているか", "被圧地下水"], ["被圧地下水を利用して何が行われているか", "掘り抜き井戸を利用した地下水汲み上げ"], ["羊や牛の飲み水に、地下水が適していない理由は何か", "地下水の塩分濃度が高いため"], ["良質な羊毛がとれる羊の品種は何か", "メリノ種"], ["マリー・ダーリング盆地を流れる川は何か", "マリー川やダーリング川"], ["マリー川やダーリング川の水は何に利用されているか", "灌漑"], ["オーストラリアは何の生産・輸出国として重要か", "小麦"], ["乳牛飼育を中心とする酪農はどこで発達しているか", "南東部の大都市（シドニー、メルボルン）周辺"], ["フィードロットが行われているのはどこか", "北東部"], ["北東部(Am、Cw)には何があるか", "プランテーション農業として発達したサトウキビ栽培地域"], ["ニュージーランドの農業はどのような気候環境か", "全土が温暖湿潤なCfb(西岸海洋性気候)"], ["ニュージーランドで盛んな家畜は何か", "牧羊"], ["ニュージーランドで、より湿潤な北島に多い家畜は何か", "乳牛"]];break;;
-    case "オセアニア5" :item =[["オーストラリアで、石炭や鉄鉱石の産出が盛んな地域はどこか", "東部の古期造山帯地域"], ["オーストラリアで、ボーキサイトの産出が盛んな地域はどこか", "北部の熱帯地域"], ["鉄鉱石の採掘が盛んな、オーストラリアの代表的な鉱山はどこか", "マウントホエールバック(マウントニューマン)"], ["オーストラリアで、世界最大級の輸出量を誇る鉱産資源は何か", "石炭と鉄鉱石"], ["ニュージーランドは、日本と何が似ているか", "新期造山帯に属する"], ["ニュージーランドで盛んな工業は何か", "アルミニウム工業"], ["ニュージーランドでアルミニウム工業が発達している理由は何か", "水力発電が盛ん"], ["ニュージーランドの水力発電の割合は", "54.3%"], ["ニュージーランドの地熱発電の割合は", "18.9％"], ["ニュージーランドの火力発電の割合は", "18.5%"], ["ナウルで産出されていたものは何か", "りん鉱石"], ["パプアニューギニアの特産品は", "銅、原油などの鉱産資源や林産資源が豊富。"], ["フィジーの特産品は", "先住のメラネシア系住民とインド系との対立。サトウキビ。"], ["ニューカレドニア(フランス領)の特産品は", "ニッケルなど鉱産資源が豊富。"], ["フランス領ポリネシアの特産品は", "タヒチ島は観光業が発展。"]];break;;
-    case "日本" :item =[["日本列島は何の「せばまる境界」付近に形成された弧状列島か", "プレート"], ["日本列島は何によって生じた火山や褶曲山脈などの集まりか", "環太平洋造山帯"], ["日本は、世界の4枚のプレートがひしめきあう場所にあるため、どのような地域か", "地震や火山活動も非常に活発で自然災害も多い"], ["日本は、温泉による観光・保養地も多く発達しているが、何にも利用されているか", "地熱発電"], ["日本の国土の大部分は何プレートの上にあるか", "北アメリカプレートとユーラシアプレート"], ["フォッサマグナとは何か", "二つのプレートの境界"], ["フォッサマグナより東の地域と西の地域を分けるものは何か", "東北日本と西南日本"], ["西南日本を外帯と内帯に分けているものは何か", "諏訪湖付近で糸魚川・静岡構造線と交わる中央構造線(メディアンライン)"], ["外帯の山地は、内帯に比べてどうなっているか", "丘陵や高原状の緩やかな山地が多い"]];break;;
-    case "日本2" :item =[["日本の国土は、山地の占める割合がどうなっているか", "高い(約60%)"], ["日本の国土で、山地に丘陵を加えると何%になるか", "70%"], ["系統地理分野で勉強した、扇状地、三角州や(洪積)台地のことを何と呼ぶか", "地形"], ["ケッペンの気候区分では、日本の大部分は何になるか", "温暖湿潤気候(Cfa)"], ["ケッペンの気候区分で、北海道は何になるか", "亜寒帯湿潤気候(Df)"], ["ユーラシア大陸の東岸に位置していて、北端が北緯45度、南端が北緯20度である日本は何の影響を受けるか", "夏は南東季節風、冬は北西季節風"], ["熱帯地域とは違って、日本では何が明瞭か", "四季の変化"], ["東日本では、秋に何による雨が多いか", "秋雨(秋霖)"], ["太平洋側と日本海側では、冬の天候に大きな違いがみられるが、何と何の影響が大きいか", "東北、北陸、山陰の日本海側では、シベリア高気圧(シベリア気団)からの季節風"], ["日本海側で、冬に多量の降水や降雪をもたらすのはなぜか", "日本海上で水蒸気を供給され(暖流の対馬海流の影響)"], ["太平洋側が山越えした乾燥風が吹き込むので、晴天が多くなるのはいつか", "冬"], ["フォッサマグナの付近は、大陸プレートどうしの境界で、特に何が大きいか", "糸魚川=静岡構造線付近は隆起量が大きく、西側には「日本アルプス」(飛騨山脈、木曽山脈、赤石山脈)と呼ばれる3,000m級の山々が南北に連なっている"], ["日本は、何に属しているから、とても山がちか", "新期造山帯"], ["壮年期の険しい山が多いのはなぜか", "降水量が多いから、河川の侵食、運搬、堆積作用も活発"]];break;;
-    case "日本3" :item =[["日本の代表的な気圧配置図で、冬に特徴的な気圧配置は何か？","西高東低"],["主に吹く風の方向で冬は何色で示されているか？","青"],["梅雨前線が停滞するのは、主に何気団と何気団の間か？","オホーツク海気団と小笠原気団"],["夏に、北太平洋（小笠原）高気圧の北上により、何をもたらすか？","高温となり晴天"],["秋に、秋雨（秋霖）前線の停滞や何が近づき、長雨や大雨をもたらすか？","台風"],["シベリア高気圧（シベリア気団）が発達し、低温で乾燥した何が日本列島に吹き込むか？","北西季節風"],["都市型災害とは何か？","都市化の進展によって従来あまり利用されていなかった後背湿地や河口付近の低湿地などの開発も進んだことによって起こる災害"],["舗装化によって地面を人工物で覆うと、何が起こりやすくなるか？","集中豪雨"],["日本は、何と呼ばれる環太平洋造山帯に属する弧状列島か？","火山や地震が多い"],["日本は、何という4つのプレートの境界付近に位置しているか？","ユーラシアプレート、北アメリカプレート、太平洋プレート、フィリピン海プレート"],["日本の大部分は何気候に属し、北海道は何気候に属しているか？","Cfa、Df"],["夏のオホーツク海高気圧が強いと、北海道から東北地方の太平洋側では冷涼・湿潤な何が吹くか？","やませ"]];break;;
-    case "日本4" :item =[["日本の人口ピラミッドは、明治の初めには何型だったか？", "富士山型"], ["第1次ベビーブームは何年か？", "1947年～1949年"], ["第2次ベビーブームは何年か？", "1971年～1974年"], ["2023年の合計特殊出生率はいくつか？", "1.20"], ["2005年には何がマイナスになったか？", "自然増減率"], ["2040年には、日本の人口の約何分の1が高齢者になると予測されているか？", "3分の1"], ["1950年代後半から1960年代の高度経済成長期に、人口が流入したのは主にどこの三大都市圏か？", "東京、大阪、名古屋"], ["1970年代の石油危機以降、都市から地方への人口移動は何現象と呼ばれるか？", "Uターン現象"], ["2015年～2020年には、人口が増加したのは8都県だが、それはどこか？", "沖縄・東京・埼玉・愛知・神奈川・福岡・滋賀・千葉"], ["2022年～2023年に人口増加率が上位の都道府県はどこか？", "東京"], ["都心部の昼間人口比率（昼間人口/夜間人口×100）は、何に注意して見るべきか？", "とても高い"]];break;;
-    case "日本5" :item =[ ["住民基本台帳人口による上位20市と東京23区で最も人口が多いのはどこか？", "東京23区"], ["図9で、過疎地域の全国に占める割合で最も大きいのは何か？", "市町村数"], ["都道府県別の人口増加率で、0.0～1.0の範囲を示している色は何色か？", "水色"], ["ベビーブームとは何か？", "一時的な出生数の急増現象"], ["Uターン現象とは何か？", "大都市から地方への人口移動現象"], ["日本の総人口は約何億人か？", "約1.2億人"], ["2023年の合計特殊出生率はいくらか？", "1.20"], ["2021年の老年人口率は何％か？", "28.9%"], ["1950年代後半～1960年代の高度経済成長期に、人口集中が進んだのは主にどこか？", "三大都市圏"], ["近年、何によって都心回帰が生じているか？", "不況による地価の下落"]];break;;
-    case "日本6" :item =[["日本の農地の内、農業に適した平野の割合は約何%か？","12%"],["家族労働中心で、零細経営の農家が多い。農業従事者一人当たりの農地面積は欧米と比べてどうか？","狭い"],["日本の農業従事者一人当たりの農地面積は約何haか？","2.0ha"],["日本の農業は、他の産業より労働生産性が高いか低いか？","低い"],["1962年と2020年の米の1人当たり年間消費量を比べると、どう変化しているか？","減少"],["1970年頃から、米に関してどのような政策が行われたか？","生産調整"],["1995年、米の輸入に関して何が始まったか？","部分自由化（ミニマムアクセス）"],["1999年、米の輸入に関して何が行われたか？","関税化"],["1995年に施行された、食料の流通に関する新しい法律は何か？","新食糧法"],["輸入が自由化されると、何が下がっていくと予想されるか？","食料自給率"],["表日本の2021年の穀類の自給率はおよそ何%か？","29％"],["2021年の日本の野菜の自給率はおよそ何%か？","80％"],["日本より、肉類の自給率が低い国はどこ？","オランダ"]];break;;
-    case "日本7" :item =[["1991年に輸入自由化が行われたものは何か？","牛肉とオレンジ類"],["日本の食料自給率の特徴は？","先進国の中で最も低い水準"],["日本は何を大量に輸入しているため、食料の輸入大国と言われているか？","飼料"],["TPPとは何か、正式名称で答えよ","環太平洋経済連携協定"],["農業産出額の割合が最も高い地域はどこか？","北海道"],["東北地方の米の産出額割合はいくらか？","26.7%"],["関東・東山地方の野菜の産出額割合はいくらか？","29.7%"],["沖縄地方の畜産の産出額割合はいくらか？","45.6％"],["日本の森林の約何％が人工林か？","約40％"],["日本は木材の約何％を輸入に頼っているか？","約60％"],["2021年のエビの主な輸入先はどこか？（上位3つ）","インド、ベトナム、インドネシア"], ["2021年のマグロの主な輸入元はどこか？（上位3つ）","台湾、中国、韓国"],["日本はエネルギー資源について、自給率は高いか？","低い"],["1970年代の石油危機以後、日本は何の利用に積極的に取り組んでいるか？","原子力発電"],["コージェネレーションシステムとは何か？","電力を供給するとともに、発生する排熱も有効に利用するシステム"],["重油やLNGを燃料として発電する方法は？","火力発電"]];break;;
-    case "日本8" :item =[["第二次世界大戦前、日本は発展途上国レベルの工業化だったが、主な工業製品は何だったか？","繊維品"],["第二次世界大戦後、急速に工業化が進み、1950年代後半から1960年代にかけての高度経済成長期には、何などの重化学工業が基幹産業になっていったか？（３つ以上）","鉄鋼、石油化学、造船"],["1970年代の石油危機以降、資源を大量に消費するタイプの産業は何業種となったか？","不況業種"],["1980年代後半から、何の影響（輸出が不利になる）により生産費が上昇したか？","円高"],["コストダウンを図る目的で、どこへ生産拠点が移動していったか？（３つ以上）","アジアNIES、ASEAN、中国"],["アメリカ合衆国など先進国との間で何が生じたため、日本企業は何をするようになったか？","貿易摩擦、現地に日本企業を設立"],["製造業における大規模事業所と中小規模事業所の割合は？","大規模1.6%、中小98.4%"],["製造業における大企業の割合は？","51.1％"],["1930年の日本の工業製品の出荷額で最も割合が大きいものは何か？","繊維"],["2020年の日本の工業製品の出荷額で最も割合が大きいものは何か？","輸送機械"],["1970年から2022年にかけて、日本の自動車の輸出と現地生産はどのように変化したか？","輸出はほぼ横ばい、現地生産は増加"],["1980年の3大工業地帯の工業出荷額の全国比（%）は合計でいくらか？","43.3"],["2020年の京浜工業地帯の工業出荷額は全国の何%か？","7.6"],["2020年の主要工業地域で、工業出荷額が一番多い地域は？","京葉"]];break;;
 
 
-  }}
+}item1 = item;}
 
-
-  Future initAudioService() async {
-    final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playback,
-      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.mixWithOthers,
-      avAudioSessionMode: AVAudioSessionMode.defaultMode,
-      avAudioSessionRouteSharingPolicy:
-      AVAudioSessionRouteSharingPolicy.defaultPolicy,
-      avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
-      androidAudioAttributes: AndroidAudioAttributes(
-        contentType: AndroidAudioContentType.music,
-        flags: AndroidAudioFlags.none,
-        usage: AndroidAudioUsage.media,
-      ),
-      androidAudioFocusGainType: AndroidAudioFocusGainType.gainTransientMayDuck,
-      androidWillPauseWhenDucked: true,
-    ));
-  }
-  Future<void> _handleInterruptions(AudioSession audioSession) async {
-    bool playInterrupted = false;
-    audioSession.becomingNoisyEventStream.listen((_) {
-    });
-    _player.playingStream.listen((playing) {
-      playInterrupted = false;
-      if (playing) {
-        audioSession.setActive(true);
-      }
-    });
-    audioSession.interruptionEventStream.listen((event) async {
-      if (event.begin) {
-        switch (event.type) {
-          case AudioInterruptionType.duck:
-            if (audioSession.androidAudioAttributes!.usage ==
-                AndroidAudioUsage.game) {
-              _player.setVolume(_player.volume / 1.5);
-            }
-            playInterrupted = false;
-            break;
-          case AudioInterruptionType.pause:
-          case AudioInterruptionType.unknown:
-            initAudioService();
-            break;
-        }
-      } else {
-        switch (event.type) {
-          case AudioInterruptionType.duck:
-            _player.setVolume(min(1.0, _player.volume * 2));
-            playInterrupted = false;
-            break;
-          case AudioInterruptionType.pause:
-            if (playInterrupted) _player.play();
-            playInterrupted = false;
-            break;
-          case AudioInterruptionType.unknown:
-            playInterrupted = false;
-            break;
-        }
-      }
-    });
-  }
-  Future<void> initializeService1() async {
-    final service = FlutterBackgroundService();
-    await service.configure(
-      androidConfiguration: AndroidConfiguration(
-        onStart: onStart1,
-        autoStart: false,
-        isForegroundMode: false,
-        notificationChannelId: 'my_foreground',
-        initialNotificationTitle: 'AWESOME SERVICE',
-        initialNotificationContent: 'Initializing',
-        foregroundServiceNotificationId: 888,
-      ),
-      iosConfiguration: IosConfiguration(
-        autoStart: false,
-        onForeground: onStart1,
-      ),);
-    service.startService();
-  }
-  @pragma('vm:entry-point')
-  void onStart1(ServiceInstance service) async {
-    service.stopSelf();
-  }
-
-  Future<void> _handleInterruptions1(AudioSession audioSession) async {
-    audioSession.setActive(false);
-  }
-  Future initAudioService11() async {
-    final session = await AudioSession.instance;
-    session.setActive(false);
-    AudioSession.instance.then((audioSession) async {await audioSession.configure(AudioSessionConfiguration.speech());_handleInterruptions1(audioSession);});
-    _player.dispose();_player.stop();
-  }
 
 }
 
@@ -1445,6 +1144,205 @@ void itemSet (){
 
 
 
+class V1Q4Result extends StatefulWidget {
+  V1Q4Result(this.item,this.correct,this.misstake,this.name);
+  List item; int correct;int misstake;String name;
+
+  @override
+  State<V1Q4Result> createState() => _V1Q4ResultState();
+}
+
+class _V1Q4ResultState extends State<V1Q4Result> {
+
+  FlutterTts flutterTts = FlutterTts();
+
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    flutterTts.pause();
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  NativeAd? _nativeAd;
+
+  //アプリの広告ユニットIDを入れる
+  //今回の場合Androidのネイティブテスト広告ID
+  final String _adUnitId = "ca-app-pub-3940256099942544/2247696110";
+
+  void _loadNativeAd() {
+    NativeAd(
+      adUnitId: _adUnitId,
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            //広告が読み込まれたことを通知
+            _nativeAd = ad as NativeAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          print('failed');
+          print(error);
+          ad.dispose();
+          _nativeAd = null;
+        },
+      ),
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium,
+        mainBackgroundColor: Colors.white,
+        cornerRadius: 10.0,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: const Color(0xFFECE9F3),
+          backgroundColor: Colors.black,
+          style: NativeTemplateFontStyle.monospace,
+          size: 16.0,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: const Color(0xFFECE9F3),
+          style: NativeTemplateFontStyle.italic,
+          size: 16.0,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.green,
+          backgroundColor: Colors.black,
+          style: NativeTemplateFontStyle.bold,
+          size: 16.0,
+        ),
+        tertiaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: const Color(0xFFECE9F3),
+          style: NativeTemplateFontStyle.normal,
+          size: 16.0,
+        ),
+      ),
+    ).load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(onWillPop: () async => false,
+        child: Scaffold(backgroundColor: Colors.white,
+          appBar: AppBar(backgroundColor: Colors.white,
+            title: Text(
+              widget.name, style: TextStyle(color: Colors.black, fontSize: 15),
+              textAlign: TextAlign.center,),
+            iconTheme: IconThemeData(color: Colors.black),
+            centerTitle: true,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(icon: Icon(
+                Icons.highlight_off, color: Colors.blueGrey, size: 30,),
+                onPressed: () {Navigator.pop(context); Navigator.pop(context);},)
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Container(
+                    child: widget.name == "漢文単語" || widget.name == "古文"
+                        ? Container()
+                        :
+                    IconButton(icon: Icon(
+                      Icons.volume_up, color: Colors.blueGrey, size: 30,),
+                      onPressed: () {
+                        _speak();
+                      },)),
+                Container(margin: EdgeInsets.all(10),
+                  child: ListView.builder(
+                    shrinkWrap: true, physics: NeverScrollableScrollPhysics(),
+                    itemCount: widget.item.length, itemBuilder: (context, index) {
+                    return Card(
+                      elevation: 0, color: Colors.grey[200], child: ListTile(
+                      title: Text(widget.item[index][0], style: TextStyle(
+                          color: Colors.blueGrey[900],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15), textAlign: TextAlign.center),
+                      onTap: () {
+                        report(widget.name);
+                        showDialog(context: context, builder: (context) =>
+                            AlertDialog(
+                                title: Column(children: [
+                                  Text(widget.item[index][1], style: TextStyle(
+                                      color: Colors.blueGrey[900],
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15),
+                                      textAlign: TextAlign.center),
+                                  // Container(margin:EdgeInsets.only(top:200),child: _nativeAd != null ? ConstrainedBox(constraints: const BoxConstraints(minWidth: 100, minHeight: 100, maxWidth: 100, maxHeight: 100,),
+                                  //     child: AdWidget(ad: _nativeAd!),)
+                                  //       : const Column(mainAxisAlignment: MainAxisAlignment.center,
+                                  //     children: [Text('ネイティブ広告を読み込み中'), SizedBox(height: 15), CircularProgressIndicator(color: Colors.black,),],),),
+                                ],)
+                            )); //_loadNativeAd();
+                      },
+                    ),);
+                  },),),
+              ],
+            ),
+          ),));
+  }
+
+  Future<void> _speak() async {
+    flutterTts.setLanguage("ja-JP");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setVolume(1.0);
+    for (int i = 0; i < widget.item.length; i++) {
+      if (widget.name == "英単語") {
+        flutterTts.setLanguage("en-US");
+        await flutterTts.speak(widget.item[i][0] + "  ");
+        flutterTts.setLanguage("ja-JP");
+        await flutterTts.speak(widget.item[i][1]);
+      } else {
+        if (widget.name == "漢文単語") {
+          await flutterTts.speak(widget.item[i][1]);
+        } else {
+          if (widget.name == "漢字") {
+            await flutterTts.speak(widget.item[i][1]);
+          } else {
+            await flutterTts.speak(widget.item[i][0] + " // ////");
+            await flutterTts.speak(widget.item[i][1]);
+          }
+        }
+      }
+    }
+  }
+
+
+  Future<void> report(text) async {
+    var ran = randomString(4);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var ID = prefs.getString("ID") ?? "";
+    DateTime now = DateTime.now();
+    DateFormat outputFormat = DateFormat('yyyy年MM月dd日');
+    var date = outputFormat.format(now);
+    DocumentReference ref = FirebaseFirestore.instance.collection('レポート')
+        .doc(date);
+    ref.update({
+      "ResultAll": FieldValue.arrayUnion(
+          [ran + ":V:" + text + ID.substring(0, 3)]),
+    });
+  }
+
+  String randomString(int length) {
+    const _randomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const _charsLength = _randomChars.length;
+    final rand = new Random();
+    final codeUnits = new List.generate(
+      length, (index) {
+      final n = rand.nextInt(_charsLength);
+      return _randomChars.codeUnitAt(n);
+    },);
+    return new String.fromCharCodes(codeUnits);
+  }
+
+
+}
 
 
 

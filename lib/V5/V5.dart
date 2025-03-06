@@ -1,13 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:card_swiper/card_swiper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart' as ja;
+import 'package:line_icons/line_icons.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../AdManager.dart';
 import 'V5Range.dart';
 import 'V5Review.dart';
 import 'V5first.dart';
@@ -39,7 +45,9 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
   final _player = ja.AudioPlayer(handleInterruptions: false, androidApplyAudioAttributes: false, handleAudioSessionActivation: false,);
 
   List<List<dynamic>>  item = [];
-
+  AppOpenAdManager appOpenAdManager = AppOpenAdManager();
+  InterstitialAdManager interstitialAdManager = InterstitialAdManager();
+  var boo = true;var countAd = 0;
 
    bool isPlaying = true;
    late AnimationController controller;
@@ -56,6 +64,8 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
     Future.delayed(Duration(seconds: 3), () {ankertco = 0;firstco = 1;});
     co = item.length;
    super.initState();V5First();first();
+    interstitialAd();
+    appOpenAdManager.loadAd();
     // initAudioService();
     // AudioSession.instance.then((audioSession) async {
     //   await audioSession.configure(AudioSessionConfiguration.speech());
@@ -74,16 +84,16 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
           // ]))),
           Row(children: [Expanded(child: Container()),],),
         Column(children: [
-           Container(margin: EdgeInsets.only(top: 20,left: 30),width: double.infinity, child:item[index][3]! == "英単語"? Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:Icon(Icons.format_color_text_outlined,color: Colors.white,size: 50,)):
-           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0),  child:item[index][3]! == "漢字"?Icon(Icons.edit_outlined,color: Colors.white,size: 50,):
-           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0),  child:item[index][3]! == "古文"?Icon(Icons.receipt_long,color: Colors.white,size: 50,):
-           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:item[index][3]! == "世界史"?Icon(Icons.language_outlined,color: Colors.white,size: 50,):
-           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:item[index][3]! == "漢文単語"?Icon(Icons.edit_note,color: Colors.white,size: 50,):
-           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:item[index][3]! == "生物"?Icon(Icons.coronavirus_outlined,color: Colors.white,size: 50,):
-           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:Icon(Icons.history_edu,color: Colors.white,size: 50,))//日本史
+           Container(margin: EdgeInsets.only(top: 20,left: 30),width: double.infinity, child:item[index][3]! == "英単語"? Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:Icon(LineIcons.font,color: Colors.white,size: 50,)):
+           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0),  child:item[index][3]! == "漢字"?Icon(LineIcons.pen,color: Colors.white,size: 50,):
+           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0),  child:item[index][3]! == "古文"?Icon(LineIcons.torah,color: Colors.white,size: 50,):
+           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:item[index][3]! == "世界史"?Icon( LineIcons.globe,color: Colors.white,size: 50,):
+           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:item[index][3]! == "漢文単語"?Icon(LineIcons.fileInvoice,color: Colors.white,size: 50,):
+           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:item[index][3]! == "生物"?Icon(LineIcons.bug, color: Colors.white,size: 50,):
+           Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0), child:Icon(LineIcons.map,color: Colors.white,size: 50,))//日本史
            )))))),
           Row(children: [Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 0,left:30), child:Text(item[index][3],style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20),),),
-            Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 3,left:0),child:TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyText2,
+            Container(alignment: Alignment.centerLeft,margin: EdgeInsets.only(top: 3,left:0),child:TextButton(child: RichText(text: TextSpan(style: Theme.of(context).textTheme.bodyMedium,
                 children:  [
                   TextSpan(text: A.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
                   TextSpan(text: " 秒", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -109,8 +119,11 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
          // Container(child:Icon(Icons.format_color_text_outlined,color: Colors.white,size: 30,),),
          // Container(margin: EdgeInsets.only(top:0,), child:Text('英単語',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 10),),),
          Container(margin:EdgeInsets.only(top: 0),child:YesB == false ?IconButton(icon:  Icon(Icons.thumb_up,color: Colors.white,size: 30,), onPressed: () {setState(() {
+           countAd =  countAd + 1;
+           if (countAd == 4){if (boo == true){}else{interstitialAd();};}
+           if (countAd == 5){if (boo == true){}else{showInterstitialAd();};countAd = 0;}
            if(item01B.contains(item[index][0]) == false){item01B.add(item[index][0]);setDate01B();}
-           print(item.length);Yes();YesB = true;});},):
+           Yes();YesB = true;});},):
          IconButton(icon:  Icon(Icons.thumb_up,color: Colors.green,size: 30,), onPressed: () {setState(() {Yes2();YesB = false;});},)),
          Container(margin: EdgeInsets.only(top:0,), child:Text('覚えた',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 10),),),
 
@@ -125,7 +138,7 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
 
          Container(margin:EdgeInsets.only(top: 20),child:DeleteB == false ?IconButton(icon:  Icon(Icons.highlight_off,color: Colors.white,size: 30,), onPressed: () {setState(() {delete();DeleteB = true;});},):
          IconButton(icon:  Icon(Icons.highlight_off,color: Colors.purpleAccent,size: 30,), onPressed: () {setState(() {delete2();DeleteB = false;});},)),
-         Container(margin: EdgeInsets.only(top:0,bottom: 80), child:Text('まだ\n必要ない',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 10),textAlign: TextAlign.center,),),
+         Container(margin: EdgeInsets.only(top:0,bottom: 120), child:Text('まだ\n必要ない',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 10),textAlign: TextAlign.center,),),
       ]))
 
       ]) );
@@ -137,20 +150,25 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
     preferredSize:  Size.fromHeight(60.0),
     child: AppBar(backgroundColor:Colors.black.withOpacity(0.7),
       actions: [Row(children: [
-      Container(height:90,width:100,child: Column(children: [IconButton(icon:Icon(Icons.compare_arrows,color: Colors.white,size: 30,), onPressed: () { Navigator.of(context).push(MaterialPageRoute(builder: (context) => V5Range())).then((value) => first()); },),
+      Container(width:100,child: Column(children: [IconButton(icon:Icon(Icons.compare_arrows,color: Colors.white,), onPressed: () { Navigator.of(context).push(MaterialPageRoute(builder: (context) => V5Range())).then((value) => first()); },),
         //  Container(child:Text('範囲',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 10),),),
         ],)),
-      Container(height:90,width:50, child:Column(children: [ IconButton(icon:Icon(Icons.access_time_outlined,color: Colors.white,size: 30,), onPressed: () { Navigator.of(context).push(MaterialPageRoute(builder: (context) => V5Review())); },),
+      Container(width:50, child:Column(children: [ IconButton(icon:Icon(Icons.access_time_outlined,color: Colors.white,), onPressed: () { Navigator.of(context).push(MaterialPageRoute(builder: (context) => V5Review())); },),
        //   Container( child:Text('足跡',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 10),),),
-        ],)),
-      ],)],
-    ),
-    ),
+        ],)),],)],),),
       body: Swiper(itemBuilder: (context, index) => pageWidget(index), itemCount: item.length, scrollDirection: Axis.vertical,
-        onIndexChanged:(index) {flutterTts.stop();YesB = false;NoB = false;SaveB = false;DeleteB = false;itemco = index;ankertco = ankertco + 1;print(ankertco); print(firstco);if(firstco == 1){ if(ankertco == 10){ankertco = 0;ankert(); };}set ();},
+        onIndexChanged:(index) {flutterTts.stop();YesB = false;NoB = false;SaveB = false;DeleteB = false;itemco = index;ankertco = ankertco + 1;;if(firstco == 1){ if(ankertco == 10){ankertco = 0;ankert(); };}
+        set();},
       ),);}
 
+  void Connect() async{
+    final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      showDialog(context: context, builder: (context) => AlertDialog(title:Container(child: Column(children: [
+        Container(child:  Text("インターネットに接続されていません。",style: TextStyle(color: Colors.blueGrey[800],fontWeight: FontWeight.bold,fontSize: 15), textAlign: TextAlign.center)),
+      ],),)  ));} else{set ();}
 
+  }
    Future<void> V5First() async {
      SharedPreferences prefs = await SharedPreferences.getInstance();
      var first = prefs.getString("V5first") ?? "";
@@ -168,7 +186,7 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
 
   void set (){setState(() async {
      SharedPreferences prefs = await SharedPreferences.getInstance();
-
+     boo = prefs.getBool("有料判定1")?? true;
      if (item.length != 0){
        A =  prefs.getDouble("CountTime" + item[itemco][3])?? 3.0;
         color = Colors.red;
@@ -181,17 +199,42 @@ class _V5State extends State<V5>with TickerProviderStateMixin , WidgetsBindingOb
 
 
         if(widget.co == 0){ text = item[itemco][0];text2 = item[itemco][1];}else{text = item[itemco][1];text2 = item[itemco][0];}
-        _speak();//Future.delayed(Duration(seconds:A.toInt()), () {setState(() {color = Colors.white;});});
+       // _speak();//Future.delayed(Duration(seconds:A.toInt()), () {setState(() {color = Colors.white;});});
      }else{}
   });}
 
-  Future<void> _speak() async {
-    if (item[0][3] == "英単語" && widget.co ==0){await flutterTts.setLanguage("en-US");} else{flutterTts.setLanguage("ja-JP");}
-    await flutterTts.setSpeechRate(0.5);
-    await flutterTts.setPitch(1.0);
-    await flutterTts.setVolume(1.0);
-    if (item[0][3] == "漢字" ||item[0][3] == "漢文単語"||item[0][3] == "世界史"||item[0][3] == "日本史"||item[0][3] == "生物" ){ await flutterTts.speak("");} else{await flutterTts.speak(text);}
-  }
+  // Future<void> _speak() async {
+  //   if (item[0][3] == "英単語" && widget.co ==0){await flutterTts.setLanguage("en-US");}else{}
+  //   // else{
+  //   //  flutterTts.setLanguage("ja-JP");
+  //   //   //flutterTts.setLanguage("");
+  //   // }
+  //   await flutterTts.setSpeechRate(0.5);
+  //   await flutterTts.setPitch(1.0);
+  //   await flutterTts.setVolume(1.0);
+  //   if (item[0][3] == "英単語" ){await flutterTts.speak(text);}else{}
+  //
+  //   //if (item[0][3] == "漢字" ||item[0][3] == "漢文単語"||item[0][3] == "世界史"||item[0][3] == "日本史"||item[0][3] == "生物" ){await flutterTts.speak("");} else{await flutterTts.speak(text);}
+  // }
+
+  InterstitialAd? _interstitialAd;
+  bool _isAdLoaded = false;
+  void interstitialAd() {
+    if (ID != "FAP3jZy3pSTEmqJQN1ow"){
+    InterstitialAd.load(adUnitId: Platform.isAndroid ? 'ca-app-pub-4716152724901069/2563672557' : 'ca-app-pub-4716152724901069/7560014210',
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {_interstitialAd = ad;_isAdLoaded = true;},
+        onAdFailedToLoad: (error) {
+          print('Interstitial ad failed to load: $error');},),);}}
+
+  void showInterstitialAd() {
+    if (_isAdLoaded) {_interstitialAd?.fullScreenContentCallback;_interstitialAd?.show();
+    } else {print('Interstitial ad is not yet loaded.');}}
+  @override
+  FullScreenAdLoadErrorCallback get onAdFailedToLoad => throw UnimplementedError();
+  @override
+  GenericAdEventCallback<InterstitialAd> get onAdLoaded => throw UnimplementedError();
 
 Future<void> first () async {item = [];
   DateFormat outputFormat = DateFormat('yyyy年MM月dd日');
@@ -783,7 +826,7 @@ Future<void> first () async {item = [];
     ["イスラム教の唯一神をなんという?","アッラー",1,"世界史"],["610年頃イスラム教の布教活動を始めたクライシュ族出身の商人は?","ムハンマド",1,"世界史"],["622年にムハンマドが信者を連れて移住したの場所は?","メディナ",1,"世界史"],["暗殺された第4代カリフは?","アリー",1,"世界史"],["ムアーウィヤがカリフとなり成立したイスラム王朝は?","ウマイヤ朝",1,"世界史"],["アリーとその子孫だけをカリフと認める一派を何という?","シーア派",1,"世界史"],["ウマイヤ朝の都は?","ダマスクス",1,"世界史"],["イスラム諸王朝における人頭税のことを何という?","ジズヤ",1,"世界史"],["代々のカリフを認めるイスラム教の多数を占める一派を何という?","スンナ派",1,"世界史"],
     ["イスラムにおける地租的な税のことを何という?","ハラージュ",1,"世界史"],["732年にウマイヤ朝がフランク王国に侵入し、敗れた戦いは?","トゥール・ポワティエ間の戦い",1,"世界史"],["750年成立しアラブ人の特権を廃してイスラーム法にもとづいて統治しイスラーム帝国と呼ばれる王朝は?","アッバース朝",1,"世界史"],["アッバース朝全盛期の頃の第5代カリフは?","ハールーン=アッラシード",1,"世界史"],["アッバース朝の主都は?","バグダード",1,"世界史"],["756年にイベリア半島に成立した王朝は?","後ウマイヤ朝",1,"世界史"],["ファーティマ朝が969年にエジプトを征服し建設した新首都は?","カイロ",1,"世界史"],["10世紀初めにチュニジアに成立したシーア派の王朝は?","ファーティマ朝",1,"世界史"],["962年に成立し北インドに侵入したトルコ系王朝は?","ガズナ朝",1,"世界史"],["10世紀半ばに中央アジアに成立した初のトルコ系イスラーム王朝は?","カラ=ハン朝",1,"世界史"],
     ["1038年に中央アジアに成立したトルコ系の王朝は?","セルジューク朝",1,"世界史"],["セルジューク朝が1055年に滅ぼした王朝は?","ブワイフ朝",1,"世界史"],["ブワイフ朝が創始した、軍人の俸給額に応じて分与地の徴税権を付与した制度は?","イクター制",1,"世界史"],["セルジューク朝がブワイフ朝を倒したことにより手に入れた称号は?","スルタン",1,"世界史"],["モロッコで1056年に成立したベルベル人の王朝は?","ムラービト朝",1,"世界史"],["イル=ハン国最盛期の人物でイスラーム教の国教化を行った人物は?","ガザン=ハン",1,"世界史"],["イベリア半島のナスル朝のグラナダのスペイン・イスラーム文化を代表する建築物は?","アルハンブラ宮殿",1,"世界史"],["エジプトで1169年にアイユーブ朝を建てた人物は?","サラディン",1,"世界史"],["1148年ごろに成立し北インドに侵入したイラン系王朝は?","ゴール朝",1,"世界史"],
-    ["エジプトで1250年に成立した王朝は?","マルムーク朝",1,"世界史"],["モロッコで、ムラービト朝を滅ぼし、イベリア半島に進出した王朝は?","ムワッヒド朝",1,"世界史"],["イスラームの礼拝堂のことを何という?","モスク",1,"世界史"],["13世紀に成立したインド初のイスラーム王朝は?","奴隷王朝",1,"世界史"],["「医学典範」の著者でアリストテレス研究の哲学者でもある人物は?","イブン=シーナー",1,"世界史"],["「世界史序説」で歴史発展の法則性を説いた人物は?","イブン=ハルドゥーン",1,"世界史"],["11世紀のペルシアの詩人で「ルバイヤート」などの作品がある人物は?","ウマル=ハイヤーム",1,"世界史"],["モロッコの旅行家で中国まで旅行し「三大陸周遊記」を著した人物は?","イブン=バットゥータ",1,"世界史"],
+    ["エジプトで1250年に成立した王朝は?","マムルーク朝",1,"世界史"],["モロッコで、ムラービト朝を滅ぼし、イベリア半島に進出した王朝は?","ムワッヒド朝",1,"世界史"],["イスラームの礼拝堂のことを何という?","モスク",1,"世界史"],["13世紀に成立したインド初のイスラーム王朝は?","奴隷王朝",1,"世界史"],["「医学典範」の著者でアリストテレス研究の哲学者でもある人物は?","イブン=シーナー",1,"世界史"],["「世界史序説」で歴史発展の法則性を説いた人物は?","イブン=ハルドゥーン",1,"世界史"],["11世紀のペルシアの詩人で「ルバイヤート」などの作品がある人物は?","ウマル=ハイヤーム",1,"世界史"],["モロッコの旅行家で中国まで旅行し「三大陸周遊記」を著した人物は?","イブン=バットゥータ",1,"世界史"],
     ["5世紀前半にフン人を統合して大帝国を築いた人物は?","アッティラ王",1,"世界史"],["ゲルマン人の大移動の原因となった西進してきたのはアジア系の民族は何人?","フン人",1,"世界史"],["ゲルマン諸族が415年にイベリア半島に建設した国は?","西ゴート王国",1,"世界史"],["ゲルマン諸族が429年に北アフリカに建設した国は?","ヴァンダル王国",1,"世界史"],["493年にテオドリックがイタリアに建設した国は?","東ゴート王国",1,"世界史"],["原始のゲルマン人が重要問題を決めていた成年男性自由人の集会を何という?","民会",1,"世界史"],["ゲルマン諸族が東ゴート王国の故地に北イタリアに建設した国は?","ランゴバルド王国",1,"世界史"],["西ローマ帝国を滅ぼした傭兵隊長は?","オドアケル",1,"世界史"],["732年にウマイヤ朝がフランク王国に侵入し、敗れた戦い?","トゥール・ポワティエ間の戦い",1,"世界史"],["フランク王国の初代の王は?","クローヴィス",1,"世界史"],
     ["732年ウマイヤ朝のイスラーム軍をトゥール・ポワティエ間の戦いで破ったフランク王国の人物は?","カール・マルテル",1,"世界史"],["クローヴィス がフランク王国にて創始した最初の王朝を何という?","メロヴィング朝",1,"世界史"],["カール・マルテルの子のピピン3世が作った王朝は?","カロリング朝",1,"世界史"],["フランク王国の王クローヴィスはアリウス派から何に改宗した?","アタナシウス派",1,"世界史"],["ピピン3世のカロリング朝が教皇にラヴェンナ地方を寄進したことが起源となっているものは?","教皇領",1,"世界史"],["ピピン3世の子で、アヴァール人やイスラーム教徒を撃退し、西ヨーロッパの主要部を統一した人物は?","カール大帝",1,"世界史"],["800年にカール大帝に帝冠を与えた教皇は?","レオ3世",1,"世界史"],["843年、フランク王国を分裂することを定めた条約は?","ヴェルダン条約",1,"世界史"],["ロシアにて862年にノウマン人の一派のルーシが建国したのは?","ノヴゴロド国",1,"世界史"],["870年のフランク王国の領土の再画定を定めた条約は?","メルセン条約",1,"世界史"],
     ["ロシアにて882年にノヴゴロト国の一派が南下して建国したのは?","キエフ公国",1,"世界史"],["キエフ公国の最盛期の王で、ギリシア正教に改宗した人物は?","ウラディミル1世",1,"世界史"],["911年にロロが率いる一派が北イタリアに建国したのは?","ノルマンディー公国",1,"世界史"],["962年オットー1世がマジャール人を退け東フランクで成立させた国家は?","神聖ローマ帝国",1,"世界史"],["イングランドで、1066年にノルマンディー公ウィリアムがアングロ=サクソン人を征服し建国されたのは?","ノルマン朝",1,"世界史"],["西ヨーロッパの10~11世紀の封建制度の起源となったものの一つで、ローマ末期の制度は?","恩貸地制度",1,"世界史"],["1077年に神聖ローマ皇帝ハインリヒ4世が聖職叙任権の争いで敗れ、ローマ教皇グレゴリウス7世に謝罪した事件を何という?","カノッサの屈辱",1,"世界史"],["西ヨーロッパの10~11世紀の封建制度の起源となったものの一つで、ゲルマン人の制度は?","従土制",1,"世界史"],["グレゴリウス7世の出身の修道院を何という?","クリュニー修道院",1,"世界史"],["西ヨーロッパの封建制度の経済的基礎となる荘園制度で、君主から保証された所領内で裁判や課税について国王の関与を拒否する権利を何という?","不輸不入権",1,"世界史"],["イギリスのジョン王を破門するなどし、教皇の権力の絶頂に到達した時の教皇は?","インノケンティウス3世",1,"世界史"],
@@ -1040,7 +1083,7 @@ item.shuffle();}
 
 var itemG = prefs.getStringList("V5生物") ??["1","1","1","1"] ;
 if(itemG[0] == "1"){item.addAll([
-["細胞を発見した人物は？","フック",0,"生物"],["「生物としての構造と機能の最小単位は細胞である」というのは何説?","細胞説",0,"生物"],["細胞説を唱えた人物は?(2人)","シュワン\nシュライデン",0,"生物"],["細胞膜とそれに囲まれた部分を何という?","原形質",0,"生物"],["人の体はおよそ何個の細胞で出来ている?","60兆個",0,"生物"],["原形質の内、核以外の部分を何という?","細胞質",0,"生物"],["細胞小器官の間を満たしている液状の部分を何という?","細胞質基質",0,"生物"],["細胞膜の仕事は?","細胞内部の状態を維持する\n細胞内に情報を伝える",0,"生物"],["細胞内に見られる構造体の総称を何という?","細胞小器官",0,"生物"],["植物や細菌の細胞の細胞膜の外側をおおう強い構造体は?","細胞壁",0,"生物"],
+["細胞を発見した人物は？","フック",0,"生物"],["「生物としての構造と機能の最小単位は細胞である」というのは何説?","細胞説",0,"生物"],["細胞説を唱えた人物は?(2人)","シュワン\nシュライデン",0,"生物"],["細胞膜とそれに囲まれた部分を何という?","原形質",0,"生物"],["人の体はおよそ何個の細胞で出来ている?","37兆個",0,"生物"],["原形質の内、核以外の部分を何という?","細胞質",0,"生物"],["細胞小器官の間を満たしている液状の部分を何という?","細胞質基質",0,"生物"],["細胞膜の仕事は?","細胞内部の状態を維持する\n細胞内に情報を伝える",0,"生物"],["細胞内に見られる構造体の総称を何という?","細胞小器官",0,"生物"],["植物や細菌の細胞の細胞膜の外側をおおう強い構造体は?","細胞壁",0,"生物"],
 ["細胞壁は何で出来ている?","セルロース",0,"生物"],["細胞壁の仕事は?","細胞の保護\n生体の形の維持",0,"生物"],["核の中にある遺伝子をもつ本体となる物質は?","DNA",0,"生物"],["細胞内で呼吸を行う細胞小器官は?","ミトコンドリア",0,"生物"],["核膜に空いてある穴を何という?","核膜孔",0,"生物"],["タンパク質の翻訳後に修飾や仕分け、脂質の合成を行う細胞小器官は?","ゴルジ体",0,"生物"],["紡錘糸の形成を行う細胞小器官は?","中心体",0,"生物"],["光合成を行う細胞小器官は?","葉緑体",0,"生物"],["植物細胞や動物細胞などの細胞質が流れるように動く現象を何という?","原形質流動",0,"生物"],["浸透圧の調整を行う細胞小器官は?","液胞",0,"生物"],
 ["核を持たない細胞を何という?","原核細胞",0,"生物"],["核を持つ細胞を何という?","真核細胞",0,"生物"],["原核細胞の例を答えよ(２つ)","乳酸菌\n好熱菌",0,"生物"],["植物細胞しか持たない細胞の構造は?(3つ)","細胞壁\n葉緑体\n液胞",0,"生物"],["葉緑体に含まれる色素は?","クロロフィル",0,"生物"],["原核生物の染色体はどこにある?","細胞質中",0,"生物"],["1個の細胞だけからできている生物の総称は?","単細胞生物",0,"生物"],["リボソームの仕事は?","タンパク質合成",0,"生物"],["複数の細胞だけからできている生物の総称は?","多細胞生物",0,"生物"],
 ["葉緑体にある膜を何という?","チラコイド膜",0,"生物"],["リボソームで合成されたタンパク質がどこへ行く?","小胞体",0,"生物"],["小胞体にあるタンパク質はどこへ行く?","ゴルジ体",0,"生物"],["クロロフィルは葉緑体のどこにある?","チラコイド膜",0,"生物"],["色素体を5つ答えよ","葉緑体・エチオプラスト・プロプラスチド・黄色体・白色体",0,"生物"],["人の細胞はおよそ何種類ある?","200種類",0,"生物"],["DNAからたんぱく質の情報を受け取り、細胞質へと運ぶのは?","RNA",0,"生物"],
@@ -1064,7 +1107,7 @@ if(itemG[1] == "1"){item.addAll([
   ["たった一つの細胞である卵から親の形を作り上げる過程を何という?","発生",0,"生物"],["受精卵で極体が生じる側を何という?","動物極",0,"生物"],["発生の初期に見られる受精卵の体細胞分裂を何という?","卵割",0,"生物"],["受精卵が二細胞期から胞胚期まで卵割を繰り返して生じた細胞を何という?","割球",0,"生物"],["胚がほぼ同じ大きさの割球に分かれる事を何という?","等割",0,"生物"],["胚が大小の割球に分かれる事を何という?","不等割",0,"生物"],["黄卵が少なく、卵内にほぼ均一に分布している卵を何という?","等黄卵",0,"生物"],["卵黄が一方の極にかたよって分布している卵を何という?","端黄卵",0,"生物"],["卵割によって多くの割球が生じ、クワの実状となった胚を何という?","桑実胚",0,"生物"],
   ["胚の内部に生じた空所を何という?","卵割腔",0,"生物"],["胞胚期の卵割腔を何という?","胞胚腔",0,"生物"],["胚の外側の細胞の一部が内側に取り込まれる現象を何という?","陥入",0,"生物"],["陥入した細胞層と生じた空所を何という?","原腸",0,"生物"],["原腸胚の原腸の入り口を何という?","原口",0,"生物"],["陥入を始めた胚を何という?","原腸胚",0,"生物"],["胚から成体に至る中間の時期で、成体と異なる形態をとるものを何という?","幼生",0,"生物"],["両生類の胚で原口から動物極に向かって伸びる溝を何という?","神経溝",0,"生物"],
   ["神経溝の一部が盛り上がると何ができる?","神経版",0,"生物"],["外胚葉から出来る組織や器官は?","表皮・脳・脊髄・感覚器官",0,"生物"],["中胚葉から出来る組織や器官は?","血管・筋肉・心臓・腎臓",0,"生物"],["内胚葉から出来る組織や器官は?","食道・肺・胃・小腸・大腸・膵臓・肝臓",0,"生物"],["卵の各部分の将来分化する器官や組織が、発生の初期から決められている卵を何という?","モザイク卵",0,"生物"],["割球のいくつかを分離しても、おのおのがまた完全な胚になるよう調整されている卵を何という?","調整卵",0,"生物"],["胚のどの部分が将来どんな組織や器官になるかを胚の〇〇という","予定運命",0,"生物"],["胚の予定運命図を作ったのは誰?","フォークト",0,"生物"],
-  ["生物種が持つ特有の形や性質を何という?","形質",0,"生物"],["形質が子孫に伝えられる現象を何という?","遺伝",0,"生物"],["子孫の形質が同じになる系を何という?","純系",0,"生物"],["一つの花の中で受粉することを何という?","自家受粉",0,"生物"],["同時に発現することのない対になった形質を何という?","対立形質",0,"生物"],["形質の遺伝子が2本の染色体のどちらか一方にあるだけでも発現するのは◯◯形質","有性形質",0,"生物"],["形質の遺伝子が対になった染色体の両方にある場合にのみ発現するのは◯◯形質","劣性形質",0,"生物"],["優性の形質のみが現れ、劣性の形質が現れない現象を何という?","優性の法則",0,"生物"],["発現する形質のことを〇〇型","表現型",0,"生物"],
+  ["生物種が持つ特有の形や性質を何という?","形質",0,"生物"],["形質が子孫に伝えられる現象を何という?","遺伝",0,"生物"],["子孫の形質が同じになる系を何という?","純系",0,"生物"],["一つの花の中で受粉することを何という?","自家受粉",0,"生物"],["同時に発現することのない対になった形質を何という?","対立形質",0,"生物"],["形質の遺伝子が2本の染色体のどちらか一方にあるだけでも発現するのは◯◯形質","有性形質",0,"生物"],["形質の遺伝子が対になった染色体の両方にある場合にのみ発現するのは◯◯形質","劣性形質",0,"生物"],["顕性の形質のみが現れ、潜性の形質が現れない現象を何という?","顕性の法則",0,"生物"],["発現する形質のことを〇〇型","表現型",0,"生物"],
     ["形質の元になる遺伝子の組み合わせのことを〇〇型","遺伝子型",0,"生物"],["Aaのように異なる遺伝子が対になっている状態を何接合体という?","ヘテロ接合体",0,"生物"],["AAのように同じ遺伝子で構成される状態を何接合体という?","ホモ接合体",0,"生物"],["ある個体の遺伝子型を調べるために、潜性のホモ接合体と戻し交雑を行うことを何という?","検定交雑",0,"生物"],["対立遺伝子に優劣がない場合を何という?","不完全優性",0,"生物"],["両親の形質の中間を示す雑種を何という?","中間雑種",0,"生物"],["その遺伝子を持つ個体を死に至らしめる遺伝子のことを何という?","致死遺伝子",0,"生物"],["遺伝子が染色体に存在するのを発見したのは誰?","サットン",0,"生物"],["ほかの遺伝子のはたらきを抑制する遺伝子を何という?","抑制遺伝子",0,"生物"],
     ["一定の条件が満たされたときに表現形が現れるような遺伝子を何という?","条件遺伝子",0,"生物"],["2種類の遺伝子がお互い補い合って1つの表現型を現する遺伝子を何という?","補足遺伝子",0,"生物"],["メンデルの３つの法則は?","分離の法則・独立の法則・優性の法則",0,"生物"],["性を決める特別な染色体を何という?","性染色体",0,"生物"],["ヒトの常染色体の数は?","44本",0,"生物"],["ヒトの性染色体の数は?","2本",0,"生物"],["ヒトの雄の性染色体の組み合わせは?","XY",0,"生物"],["ヒトの雌の性染色体の組み合わせは","XX",0,"生物"],["ヒトは雄ヘテロ型、雌ヘテロ型のどちらか?","雄ヘテロ",0,"生物"],
     ["2対以上の対立遺伝子が同ーの相同染色体に存在することを何という?","連鎖",0,"生物"],["遺伝子の組み換えが起きる割合を何という?","組み換え価",0,"生物"],["組み換え価は一般的に何％を超えない?","50%",0,"生物"],
@@ -1075,7 +1118,7 @@ if(itemG[1] == "1"){item.addAll([
 if(itemG[2] == "1"){item.addAll([
   ["低濃度溶液の溶媒が高濃度溶液の方に拡散しようとする現象を何という?","浸透現象",0,"生物"],["根が水を吸って茎を通して水をおしあげる圧力を何という?","根圧",0,"生物"],["水分子がお互いに引き合う力を何という?","凝集力",0,"生物"],["葉の気孔から水が出ることを何という?","蒸散",0,"生物"],["種子を作る植物を何という?","種子植物",0,"生物"],["胚珠が果実のもとになる子房に覆われ、守られている植物を何という?","被子植物",0,"生物"],["めしべの柱頭に花粉がつく事を何という?","受粉",0,"生物"],["最初に生えてくる葉っぱの枚数が2枚の植物を何という?","双子葉類",0,"生物"],["最初に生えてくる葉っぱの枚数が1枚の植物を何という?","単子葉類",0,"生物"],["被子植物の例は?","タンポポ/りんご",0,"生物"],["裸子植物の例は?","松/イチョウ/スギ",0,"生物"],["単子植物の例は?","トウモロコシ/チューリップ/ユリ",0,"生物"],["双子葉類の例は?","アブラナ/ひまわり",0,"生物"],
   ["植物の光合成においてこれ以上光を強くしても光合成の量が増えなくなる点を何という?","光飽和",0,"生物"],["植物の光合成と呼吸作用の大きさが等しくなるときの光の強さを何という?","補償点",0,"生物"],["光飽和点が高い植物を何という?","陽葉植物",0,"生物"],["光飽和点が低い植物を何という?","陰葉植物",0,"生物"],["植物の葉で光を十分に受ける位置にある葉を何という?","陽葉",0,"生物"],["植物の葉で光が当たらない位置にある葉を何という?","陰葉",0,"生物"],["陽性植物の例は?","アカマツ/ハマアカザ/ススキ",0,"生物"],["陰性植物の例は?","シュンラン/カンアオイ/ミズヒキ ",0,"生物"],
-  ["植物の細胞膜を構成するセルロースの単量体を何という?","β-グルコース",0,"生物"],["インドール酢酸をアルファベットで答えよ","IAA",0,"生物"],["植物が発芽して枯れるまで植物の成長を制御している植物ホルモンは?","オーキシン",0,"生物"],["幼葉鞘の先端を切り取り寒天の上におき、屈性を調べたのは誰?","ウェント",0,"生物"],["マカラスムギの幼葉鞘に雲母を差し込んで屈性を調べたのは誰?","ポイセン＝イェンセン",0,"生物"],["クサヨシの幼葉鞘を使って屈性を調べたのは誰?","ダーウィン",0,"生物"],["光や接触などの刺激に対応して、植物が曲がるように成長することを何という?","屈性",0,"生物"],["植物が外界からの刺激を受けると、その刺激源の方向に関係なく、一定の方向に屈曲する性質を何という?","傾性",0,"生物"],["頂芽の成長が優先される一方で、側芽の成長が抑制される現を何という?","頂芽優勢",0,"生物"],["植物の細胞分裂を促進するホルモンは?","サイトカイニン",0,"生物"],
+  ["植物の細胞膜を構成するセルロースの単量体を何という?","β-グルコース",0,"生物"],["インドール酢酸をアルファベットで答えよ","IAA",0,"生物"],["植物が発芽して枯れるまで植物の成長を制御している植物ホルモンは?","オーキシン",0,"生物"],["幼葉鞘の先端を切り取り寒天の上におき、屈性を調べたのは誰?","ウェント",0,"生物"],["マカラスムギの幼葉鞘に雲母を差し込んで屈性を調べたのは誰?","ポイセン＝イェンセン",0,"生物"],["クサヨシの幼葉鞘を使って屈性を調べたのは誰?","ダーウィン",0,"生物"],["光や接触などの刺激に対応して、植物が曲がるように成長することを何という?","屈性",0,"生物"],["植物が外界からの刺激を受けると、その刺激源の方向に関係なく、一定の方向に屈曲する性質を何という?","傾性",0,"生物"],["頂芽の成長が優先される一方で、側芽の成長が抑制される現象を何という?","頂芽優勢",0,"生物"],["植物の細胞分裂を促進するホルモンは?","サイトカイニン",0,"生物"],
   ["植物体内において、植物ホルモンであるオーキシンの移動に方向性があることを何という?","極性移動",0,"生物"],["種子以外から発生する根を何という?","不定根",0,"生物"],["茎の成長を促進するホルモンは?","ジベレリン",0,"生物"],["茎が伸びず、草丈が著しく低い性質を持つ植物を何という?","わい性植物",0,"生物"],["細胞内の膨圧の変化によって起こる可逆的な運動を何という?","膨圧運動",0,"生物"],["果実が成長し柔らかくなるのに関わるホルモンは?","エチレン",0,"生物"],["落葉や落果を促進するホルモンは?","エチレン・アブシジン酸",0,"生物"],["落葉や落果を抑制するホルモンは?","オーキシン",0,"生物"],["刺激が来た方向へ植物が屈曲することを◯の屈性という","正の屈性",0,"生物"],["刺激が来た方向と逆の方向へ植物が屈曲することを◯の屈性という","負の屈性",0,"生物"],["植物の屈性の例を答えよ(3つ)","重力屈性・光屈性・接触屈性",0,"生物"],
   ["発芽するのに光が必要な種子を何という?","光発芽種子",0,"生物"],["赤色光の波長はどれくらい?","660nm",0,"生物"],["遅赤色光の波長はどれくらい?","730nm",0,"生物"],["ジベレリンが合成する酵素は?","アミラーゼ",0,"生物"],["アミラーゼの仕事は?","デンプンの分解",0,"生物"],["アミラーゼの基質は何?","デンプン",0,"生物"],["アミラーゼの働きが良くなる温度はどれくらい?","40度",0,"生物"],["サイトカイニンはいつ発見された?","1957年",0,"生物"],
   ["成長すると葉になる芽を何という?","葉芽",0,"生物"],["成長すると花になる芽を何という?","花芽",0,"生物"],["明期が短くなると花芽をつける植物を何という?","短日植物",0,"生物"],["明期が長くなると花芽をつける植物を何という?","長日植物",0,"生物"],["植物が日長に反応する性質を何という?","光周性",0,"生物"],["日長と関係なく花芽をつける植物を何という?","中性植物",0,"生物"],["植物が花芽を形成するために必要とする最大または最小限の暗期の長さを何という?","限界暗期",0,"生物"],["植物に人工的に照明して暗期を短くすることを何という?","長日処理",0,"生物"],

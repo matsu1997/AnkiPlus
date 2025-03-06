@@ -38,16 +38,16 @@ first();
                 Container(margin :EdgeInsets.only(top:30,bottom: 0),child:SelectableText(ID,style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 15))),
               ]),
               Container(margin:EdgeInsets.only(top:40),color: Colors.white,width: double.infinity,alignment: Alignment.center,child:Text("再ログイン用パスワードを設定",style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 15),textAlign: TextAlign.center,)),
-              Container(padding:EdgeInsets.all(20),color: Colors.white,width: double.infinity,alignment: Alignment.center,child:Text("パスワードが無い場合、再ログイン時のIDやパスワードの問い合わせを受け付ける事ができません",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.bold,fontSize: 10),textAlign: TextAlign.center,)),
+              Container(padding:EdgeInsets.only(left: 40,right: 40,top:20,bottom: 20),color: Colors.white,width: double.infinity,alignment: Alignment.center,child:Text("パスワードが無い場合、再ログイン時のIDやパスワードの問い合わせを受け付ける事ができません",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.bold,fontSize: 10),textAlign: TextAlign.center,)),
               Container(width: double.infinity, margin: EdgeInsets.only(top: 5, bottom: 5, left: 70, right: 70),
                             child: TextFormField(decoration: InputDecoration(labelText: 'password',),
                               onChanged: (String value) {setState(() {pass = value;});},),),
               Container(margin :EdgeInsets.only(top:20),width:100,child: ElevatedButton(
-                child: Text('登録'), style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white, shape: const StadiumBorder(),),
+                child: Text('登録'), style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white, shape: const StadiumBorder(),),
                 onPressed: () {Edite();},)),
           Container(margin :EdgeInsets.only(top:100),child:Text("アカウントを削除しますか？",style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 15))),
         Container(margin :EdgeInsets.only(top:20),width:100,child: ElevatedButton(
-                child: Text('はい'), style: ElevatedButton.styleFrom(backgroundColor: Colors.orangeAccent, foregroundColor: Colors.white, shape: const StadiumBorder(),),
+                child: Text('はい'), style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white, shape: const StadiumBorder(),),
                 onPressed: () {delete();},)),
             ])));}
   void first () async {

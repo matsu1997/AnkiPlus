@@ -1,18 +1,25 @@
 
+import 'dart:io';
+
+import 'package:anki/%E3%81%9D%E3%81%AE%E4%BB%96/Support.dart';
 import 'package:anki/%E3%81%9D%E3%81%AE%E4%BB%96/account.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../Coin.dart';
 import '../Create/CreateV1.dart';
-import '../V2/V2.dart';
+import '../V5/V5.dart';
+import '../その他/LOVE.dart';
+import '../アカウント/FirstQ.dart';
 import '../アカウント/SignUp.dart';
 import 'V1V2.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'V2/V2.dart';
+
 class V1 extends StatefulWidget {
 
   @override
@@ -20,16 +27,18 @@ class V1 extends StatefulWidget {
 }
 
 class _V1State extends State<V1> {
-  var item = ["自作","復習","英単語", "漢字", "古文", "漢文単語", "世界史", "日本史", "地理", "生物", "物理", "化学",]; //Icons.history
-  var item1 = [ Icons.create_new_folder,Icons.history,Icons.format_color_text_outlined, Icons.edit_outlined,Icons.receipt_long,Icons.edit_note, Icons.language_outlined, Icons.history_edu, Icons.pin_drop_outlined, Icons.coronavirus_outlined, Icons.rocket_launch_outlined, Icons.science_outlined,];
+  // var item = ["自作","復習","","英単語", "漢字", "古文", "漢文単語", "世界史", "日本史", "地理", "生物", "物理", "化学",]; //Icons.history
+  // var item1 = [ Icons.create_new_folder,Icons.history,Icons.e_mobiledata,Icons.format_color_text_outlined, Icons.edit_outlined,Icons.receipt_long,Icons.edit_note, Icons.language_outlined, Icons.history_edu, Icons.pin_drop_outlined, Icons.coronavirus_outlined, Icons.rocket_launch_outlined, Icons.science_outlined,];
+  var item = ["英単語", "英熟語",  "漢字", "古文", "漢文単語", "世界史", "日本史", "地理","生物","short","復習",]; //Icons.history
+  var item1 = [LineIcons.font,LineIcons.info, LineIcons.pen,LineIcons.torah,LineIcons.fileInvoice, LineIcons.globe, LineIcons.map,LineIcons.mapMarker, LineIcons.bug, Icons.timeline_sharp,LineIcons.history];
   final _pageController = PageController(viewportFraction: 0.877);final flnp = FlutterLocalNotificationsPlugin();
   double currentPage = 0;
   var ID  = "";
 
-  void initState() {DateTime now = DateTime.now();DateFormat outputFormat = DateFormat('yyyy年MM月dd日'); var date = outputFormat.format(now);print(date);
 
+  void initState() {
   _pageController.addListener(() {setState(() {currentPage = _pageController.page!.toDouble();});});
-    super.initState();_scheduleDaily8AMNotification();
+    super.initState();
     sign();
   }
 
@@ -37,80 +46,37 @@ class _V1State extends State<V1> {
   Widget build(BuildContext context) {
     return Scaffold(backgroundColor: Colors.white,
       appBar: AppBar(backgroundColor: Colors.white,
-        title:  Text("", style: TextStyle(color: Colors.blueGrey[900], fontWeight: FontWeight.bold,fontSize: 15), textAlign: TextAlign.center,),
+        title:  Text("", style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold,fontSize: 15), textAlign: TextAlign.center,),
         centerTitle: true,elevation: 0,
-          leading:IconButton(onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => Account()),);}, icon: Icon(Icons.person_3_outlined,color: Colors.black87,)),
-          actions: <Widget>[IconButton(onPressed: () {start();}, icon: Icon(Icons.info_outline,color: Colors.black87,))],
+           actions: <Widget>[
+            Row(children: [
+              IconButton(onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => Coin()),);}, icon: Icon(LineIcons.coins,color:Colors.blueGrey[300],)),
+              IconButton(onPressed: () {start();}, icon: Icon(Icons.info_outline,color: Colors.blueGrey[300],)),
+              IconButton(onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => Support()),);}, icon: Icon(Icons.mail_outline,color: Colors.blueGrey[300],)),
+              IconButton(onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => Account()),);}, icon: Icon(Icons.person_3_outlined,color:Colors.blueGrey[300],))
+            ],)],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-          //  Container(color: Colors.white,width: double.infinity, height: 60),
-             Container(child: Container(margin: EdgeInsets.only(top: 0.0), color: Colors.white,
-                child: Column(children: <Widget>[
-                  Container(margin: EdgeInsets.only(top: 10.0), height: 200,
-                    child: PageView(physics: BouncingScrollPhysics(), controller: _pageController, scrollDirection: Axis.horizontal,
-                      children: [
-                        // GestureDetector(onTap: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateV1(ID)));
-                        // }, child:Container(margin: EdgeInsets.only(right: 15), width: 350, height: 250, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),  border: Border.all(color: Colors.grey),),
-                        //     child:Column(children: [
-                        //       Expanded(child:Container(width: 350, height: 150, child: Image.asset("images/happy.png"))),
-                        //       Container(margin:EdgeInsets.all(5),child:Text("問題を作成してみよう!", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15,),)),
-                        //       Container(margin:EdgeInsets.only(top:5,bottom: 10),child:Text("覚えたい事を単語帳にしよう", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10,),textAlign: TextAlign.center,))],)),
-                        // ),
-                        Container(margin: EdgeInsets.only(right: 15), width: 350, height: 250, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),  border: Border.all(color: Colors.grey.shade300),),
-                            child:Column(children: [
-                              Expanded(child:Container(width: 350, height: 150, child: Image.asset("images/happy.png"))),
-                              Container(margin:EdgeInsets.all(5),child:Text("アップデート情報", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15,),textAlign: TextAlign.center,)),
-                              Container(margin:EdgeInsets.only(top:5,bottom: 10),child:Text("表示秒数を小数点を使えるようになりました。", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10,),textAlign: TextAlign.center,))],)),
-
-                        Container(margin: EdgeInsets.only(right: 15), width: 350, height: 250, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),  border: Border.all(color: Colors.grey.shade300),),
-                            child:Column(children: [
-                              Expanded(child:Container(width: 350, height: 150, child: Image.asset("images/attention.png"))),
-                              Container(margin:EdgeInsets.all(5),child:Text("英単語・漢字・古文・漢文単語・世界史・日本史・生物を学習可能です。", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15,),textAlign: TextAlign.center,)),
-                              Container(margin:EdgeInsets.only(top:5,bottom: 10),child:Text("その他は問題作成中です。少々お待ちください", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10,),textAlign: TextAlign.center,))],)),
-
-                        Container(margin: EdgeInsets.only(right: 15), width: 350, height: 250,
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),  border: Border.all(color: Colors.grey.shade300),),
-                            child:Column(children: [
-                              Expanded(child:Container(width: 350, height: 150, child: Image.asset("images/focus.png"))),
-                              Container(margin:EdgeInsets.all(5),child:Text("集中力が落ちてきたあなたへ", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15,),)),
-                              Container(margin:EdgeInsets.only(top:5,bottom: 10),child:Text("水を飲む・軽い運動・瞑想・昼寝をご検討ください", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10,),textAlign: TextAlign.center))],)),
-                        Container(margin: EdgeInsets.only(right: 15), width: 350, height: 250,
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),  border: Border.all(color: Colors.grey.shade300),),
-                            child:Column(children: [
-                              Expanded(child:Container(width: 350, height: 150, child: Image.asset("images/idea.png"))),
-                              Container(margin:EdgeInsets.all(5),child:Text("やる気を出すには？", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15,),)),
-                              Container(margin:EdgeInsets.only(top:5,bottom: 10),child:Text("背筋を伸ばす・軽い運動(腹筋20回など)・ルーティン作成\nコーヒー・勉強をしないデメリットを書きまくる", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10,),textAlign: TextAlign.center,))],)),
-                        Container(margin: EdgeInsets.only(right: 15), width: 350, height: 250,
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),  border: Border.all(color: Colors.grey.shade300),),
-                            child:Column(children: [
-                              Expanded(child:Container(width: 350, height: 150, child: Image.asset("images/study.png"))),
-                              Container(margin:EdgeInsets.all(5),child:Text("効率の良い勉強法は？", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 15,),)),
-                              Container(margin:EdgeInsets.only(top:5,bottom: 10),child:Text("検索練習・教えるつもり勉強・インターリービング・記憶の宮殿\nネットで検索してみては？", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10,),textAlign: TextAlign.center,))],)),
-                      ],),),
-                  Container(width: double.infinity, alignment: Alignment.center, padding: EdgeInsets.only(top:10),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(4, (index) {
-                          return Container(margin: EdgeInsets.only(right: 10), alignment: Alignment.center, height: 9, width: 9,
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: currentPage == index ? Colors.black : Colors.black12,),);},),),),
-                ]))),
+        child: Column(children: [
             Container(margin: EdgeInsets.only(top: 0, bottom: 30),
-                child: GridView.count(padding: EdgeInsets.all(20.0),
-                    crossAxisCount: 3, crossAxisSpacing: 10.0, mainAxisSpacing: 0.0, childAspectRatio: 1, shrinkWrap: true,physics: NeverScrollableScrollPhysics(),
+                child: GridView.count(padding: EdgeInsets.only(left: 20.0,right:  20.0),
+                    crossAxisCount: 2, crossAxisSpacing: 10.0, mainAxisSpacing: 10.0, childAspectRatio: 1.5, shrinkWrap: true,physics: NeverScrollableScrollPhysics(),
                     children: List.generate(item.length, (index) {
                       return GestureDetector(
-                          onTap: () {if (item[index] == "英単語" || item[index] == "漢字" || item[index] == "古文"|| item[index] == "漢文単語"||item[index] == "世界史"|| item[index] == "日本史"|| item[index] == "生物"){Navigator.of(context).push(MaterialPageRoute(builder: (context) => V1V2(item[index])),);}else{
-                            if (item[index] == "自作" ){Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateV1(ID)));}else{};
+                          onTap: () {if (item[index] == "英単語" ||item[index] == "英熟語" || item[index] == "漢字" || item[index] == "古文"|| item[index] == "漢文単語"||item[index] == "世界史"|| item[index] == "日本史"|| item[index] == "地理"||item[index] == "生物"){Navigator.of(context).push(MaterialPageRoute(builder: (context) => V1V2(item[index])),);}else{
+                            if (item[index] == "short" ){Navigator.of(context).push(MaterialPageRoute(builder: (context) => V5()));}else{};
                             if (item[index] == "復習" ){Navigator.of(context).push(MaterialPageRoute(builder: (context) => V2()));}else{};
+                            if (item[index] == "褒め" ){Navigator.of(context).push(MaterialPageRoute(builder: (context) => LOVE()));}else{};
                           }},
-                          child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), ),
+                          child: Container(alignment: Alignment.center,decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), ),
                             child: Column(children: <Widget>[
-                                Container(alignment: Alignment.bottomCenter,child:item[index] == "英単語"|| item[index] == "漢字" || item[index] == "古文"||item[index] == "漢文単語"|| item[index] == "世界史"|| item[index] == "日本史" || item[index] == "生物" ?Container(child: Icon(item1[index], color: Colors.blue, size: 60,)):
-                                Container(alignment: Alignment.bottomCenter,child:item[index] == "自作"?Container(child: Icon(item1[index], color: Colors.orange, size: 60,)):
-                                Container(alignment: Alignment.bottomCenter,child:item[index] == "復習"?Container(child: Icon(item1[index], color: Colors.green, size: 60,)):
-                                Container(alignment: Alignment.bottomCenter,child:Container(child: Icon(item1[index], color: Colors.grey, size: 60,)))))),
-                               Container(margin: EdgeInsets.all(0),alignment: Alignment.center, child: Text(item[index], style: TextStyle(color: Colors.blueGrey[800], fontWeight: FontWeight.bold, fontSize: 10,),)),
+                                Expanded(child:Container(alignment: Alignment.bottomCenter,child:item[index] == "英単語"||item[index] == "英熟語"|| item[index] == "漢字" || item[index] == "古文"||item[index] == "漢文単語"|| item[index] == "世界史"|| item[index] == "日本史" || item[index] == "地理"||item[index] == "生物" ?Container(child: Icon(item1[index], color: Colors.black, size: 70,)):
+                                Container(alignment: Alignment.bottomCenter,child:item[index] == "short"?Container(child: Icon(item1[index], color: Colors.black, size: 70,)):
+                                Container(alignment: Alignment.bottomCenter,child:item[index] == "復習"?Container(child: Icon(item1[index], color: Colors.black,  size: 70,)):
+                             //   Container(alignment: Alignment.bottomCenter,child:item[index] == "褒め"?Container(child: Icon(item1[index], color: Colors.black,  size: 70,)):
+                                Container(alignment: Alignment.bottomCenter,child:item[index] == ""?Container(child: Icon(item1[index], color: Colors.white, size: 70,)):
+                                Container(alignment: Alignment.bottomCenter,child:Container(child: Icon(item1[index], color: Colors.black, size: 70,)))))))),
+                               Container(margin: EdgeInsets.only(top:0), child: Text(item[index], style: TextStyle(color: Colors.blueGrey[800],  fontSize: 15,),)),
 
                             ]),));
                     }))),
@@ -122,40 +88,74 @@ class _V1State extends State<V1> {
       builder: (context) {return Container(height: 700,
           child: SingleChildScrollView(
               child: Column(children: <Widget>[
-                Container(margin :EdgeInsets.only(top:30,bottom: 0,right: 20),width: 150,height: 150, child:Image(image: AssetImage("images/first.png"),),),
+                Container(margin :EdgeInsets.only(top:30,bottom: 0,right: 20),width: 150,height: 150, child:Image(image: AssetImage("images/name.PNG"),),
+                ),
                 Container(width:double.infinity,margin :EdgeInsets.only(top: 30),child:Text("即答出来なきゃ覚えてない",style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 22),textAlign: TextAlign.center,)),
-                Container(width:double.infinity,margin :EdgeInsets.only(top: 10,bottom:50,left: 10,right: 10),child:Text("このアプリは暗記を目的に作りました\n問題の表示から数秒で解答が表示されます\n即答出来るまで繰り返し表示されます\n復習は「覚えるまで掛かった回数による難易度別」や「忘却曲線による問題」などあります\n答えに表示されるのが全ての答えでは無い場合があります。あくまで学習の第一歩としてご利用頂けたらと思います。",style: TextStyle(color: Colors.blueGrey,fontWeight: FontWeight.bold,fontSize: 15,height: 3),textAlign: TextAlign.center,)),
+                Container(width:double.infinity,margin :EdgeInsets.only(top: 10,bottom:50,left: 20,right: 20),child:Text("暗記機能は即答×繰り返しのアウトプット重視で覚えるのを目的にしています。答えに表示されるのが全ての答えでは無い場合があります。あくまで学習の第一歩としてご利用頂けたらと思います。\nタイマー機能には勉強のサポートとしてAI先生や問題自動生成機能があります。ぜひご活用ください。",style: TextStyle(color: Colors.grey[700],fontWeight: FontWeight.bold,fontSize: 15,height: 3),textAlign: TextAlign.center,)),
 
               ])));});}
   void sign() async {
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     ID = prefs.getString("ID") ?? "";
-    if (ID == "") {Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUp()));}else{}
-  }
+   // var test = prefs.getInt("テスト結果1") ?? 0;
+    if (ID == "") {Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUp()));}else{
+     // if (test == 0) {Navigator.of(context).push(MaterialPageRoute(builder: (context) =>  FirstQ()));}else{
+        FirebaseFirestore.instance.collection('users').doc(ID).collection('判定').doc("有料").get().then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot.exists) {
+          FirebaseFirestore.instance.collection('users').where("ID",isEqualTo: ID).get().then((QuerySnapshot snapshot) {
+            snapshot.docs.forEach((doc) {
+
+              List cc = doc.data().toString().contains('問題集2') ? doc.get('問題集2') : [];
+              if(cc.length == 0){
+                FirebaseFirestore.instance.collection('users').doc(ID).update({"問題集2":[]});
+              }
+
+              var bb = doc["有料"]; if (DateTime.now().millisecondsSinceEpoch < bb.millisecondsSinceEpoch) {
+              prefs.setBool("有料判定1", true);
+            }else{prefs.setBool("有料判定1", false);}
+
+             });});}else {
+          Timestamp priceDate = Timestamp.fromDate(DateTime.now().add(Duration(days:-1)));
+          FirebaseFirestore.instance.collection('users').doc(ID).update({"有料":priceDate});
+          FirebaseFirestore.instance.collection('users').doc(ID).collection('判定').doc("有料").set({"有料":priceDate});
+          prefs.setBool("有料判定1", false);
+        }
+      });message ();}
+       var aa = prefs.getString("広告非表示宣伝")??"";
+       if (aa == ""){;prefs.setString("広告非表示宣伝","aa");Navigator.of(context).push(MaterialPageRoute(builder: (context) => Coin()));}
+        }
 
 
-  _nextInstanceOf8AM() {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate =
-    tz.TZDateTime(tz.local, now.year, now.month, now.day, 8);
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+   Future<void> message () async {
+     var map = {};var id = "";SharedPreferences prefs = await SharedPreferences.getInstance();
+     FirebaseFirestore.instance.collection('管理').where("管理" ,isEqualTo: "通知").get().then((QuerySnapshot snapshot) {
+       snapshot.docs.forEach((doc) {setState(() {map = doc["メッセージ"]; id = map["ID"];var aa = prefs.getString(id)??"";
+        if (aa == ""){ prefs.setString(id, "value");
+       showDialog(context: context, builder: (context) => AlertDialog(title:Container(child: Column(children: [
+         Container(child:  Text("皆さんへのメッセージ",style: TextStyle(color: Colors.blueGrey[800],fontWeight: FontWeight.bold,fontSize: 15), textAlign: TextAlign.center)),
+         Container(margin :EdgeInsets.only(top:10),child:  Text(map["メッセージ"],style: TextStyle(color: Colors.blueGrey[900],fontWeight: FontWeight.bold,fontSize: 15), textAlign: TextAlign.center)),
+         Container(child: map["レビューONOFF"] == true ?Container(
+       child: Container(margin :EdgeInsets.only(top:10),width:100,child: ElevatedButton(
+        child: Text('レビュー'), style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white, shape: const StadiumBorder(),),
+        onPressed: () {_requestReview();},)),
+    ):Container())   ],),)  )); }  });;});});
+   }
+
+  Future<void> _requestReview() async {
+    // final InAppReview inAppReview = InAppReview.instance;
+    // if (await inAppReview.isAvailable()) {inAppReview.requestReview();}
+    if(Platform.isAndroid) {
+      final url = Uri.parse('https://play.google.com/store/apps/details?id=com.anki.anki.anki&hl=ja-JP');
+      launchUrl(url);
+    } else if(Platform.isIOS) {
+      final url = Uri.parse('https://apps.apple.com/jp/app/ankiplus/id6450143151');
+      launchUrl(url);
     }
-    return scheduledDate;
   }
-  Future<void> _scheduleDaily8AMNotification() async {
-    await flnp.zonedSchedule(1343663, 'AnkiPlus', 'おはようございます!ちょこっと解いてみてはいかが？', _nextInstanceOf8AM(),
-      const NotificationDetails(
-        android: AndroidNotificationDetails('AnkiPlus', 'おはようございます!ちょこっと解いてみてはいかが？', channelDescription: 'Face photo notification',
-        ),
-        iOS: DarwinNotificationDetails(badgeNumber: 1,),
-      ),
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      androidAllowWhileIdle: true,
-    );
-  }
+
+
+
 
 }
 
